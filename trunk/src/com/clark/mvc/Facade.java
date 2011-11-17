@@ -18,7 +18,7 @@ public class Facade {
      * 
      * @return Facade 自身的单例。
      */
-    static Facade mvc() {
+    static Facade getInstance() {
         return Holder.instance;
     }
 
@@ -84,7 +84,7 @@ public class Facade {
             throw new IllegalArgumentException(
                     "notificationName mustn't be empty!");
         }
-        mvc().notify(new Notification(notificationName, body, type));
+        getInstance().notify(new Notification(notificationName, body, type));
     }
 
     /**

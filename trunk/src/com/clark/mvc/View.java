@@ -74,7 +74,7 @@ public class View {
             return;
         }
 
-        Facade notifier = Facade.mvc();
+        Facade notifier = Facade.getInstance();
         Class clazz = object.getClass();
         Method[] declaredMethods = clazz.getDeclaredMethods();
         String errorString = "There is no mediator method in ["
@@ -149,7 +149,7 @@ public class View {
         }
 
         if (views.containsKey(object)) {
-            Facade notifier = Facade.mvc();
+            Facade notifier = Facade.getInstance();
             Set<FunctionHolder> set = views.get(object);
             if (set != null && set.size() > 0) {
                 for (FunctionHolder holder : set) {

@@ -1,7 +1,5 @@
 package com.clark.mvc;
 
-import static com.clark.mvc.Facade.mvc;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
@@ -65,7 +63,7 @@ public class Controller {
                                 }
                             }
                         };
-                        mvc().register(name, function);
+                        Facade.getInstance().register(name, function);
                         hashMap.put(clazz, new FunctionHolder(name, function));
                         found = true;
                     }
@@ -98,7 +96,7 @@ public class Controller {
 
         if (hashMap.containsKey(clazz)) {
             FunctionHolder functionHolder = hashMap.get(clazz);
-            mvc().remove(functionHolder.name, functionHolder.function);
+            Facade.getInstance().remove(functionHolder.name, functionHolder.function);
             hashMap.remove(clazz);
             System.out.println("remove command: [" + clazz.getCanonicalName()
                     + "]");
