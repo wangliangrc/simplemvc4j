@@ -18,7 +18,7 @@ public class Facade {
      * 
      * @return Facade 自身的单例。
      */
-    public static Facade mvc() {
+    static Facade mvc() {
         return Holder.instance;
     }
 
@@ -74,7 +74,7 @@ public class Facade {
      * @param type
      *            通知类型。
      */
-    public void sendNotification(String notificationName, Object body,
+    public static void sendNotification(String notificationName, Object body,
             String type) {
         if (notificationName == null) {
             throw new NullPointerException();
@@ -84,7 +84,7 @@ public class Facade {
             throw new IllegalArgumentException(
                     "notificationName mustn't be empty!");
         }
-        notify(new Notification(notificationName, body, type));
+        mvc().notify(new Notification(notificationName, body, type));
     }
 
     /**
@@ -97,7 +97,7 @@ public class Facade {
      * @param body
      *            通知包含消息体。
      */
-    public void sendNotification(String notificationName, Object body) {
+    public static void sendNotification(String notificationName, Object body) {
         sendNotification(notificationName, body, null);
     }
 
@@ -109,7 +109,7 @@ public class Facade {
      * @param notificationName
      *            通知名称。不能为 null。
      */
-    public void sendNotification(String notificationName) {
+    public static void sendNotification(String notificationName) {
         sendNotification(notificationName, null);
     }
 
@@ -118,7 +118,7 @@ public class Facade {
      * 
      * @return {@link View} 单例。
      */
-    public View view() {
+    public static View view() {
         return View.getInstance();
     }
 
@@ -127,7 +127,7 @@ public class Facade {
      * 
      * @return {@link Controller} 单例。
      */
-    public Controller controller() {
+    public static Controller controller() {
         return Controller.getInstance();
     }
 
@@ -136,7 +136,7 @@ public class Facade {
      * 
      * @return {@link Model} 单例。
      */
-    public Model model() {
+    public static Model model() {
         return Model.getInstance();
     }
 }
