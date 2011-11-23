@@ -1,6 +1,6 @@
-package com.clark.lang;
+package com.clark.io;
 
-import static com.clark.lang.Functions.isSystemWindows;
+import static com.clark.func.Functions.isSystemWindows;
 
 import java.io.Serializable;
 

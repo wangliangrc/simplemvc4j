@@ -1,7 +1,7 @@
 package com.clark.lang;
 
-import static com.clark.lang.Functions.EMPTY_STRING_ARRAY;
-import static com.clark.lang.Functions.INNER_CLASS_SEPARATOR_CHAR;
+import static com.clark.func.Functions.EMPTY_STRING_ARRAY;
+import static com.clark.func.Functions.INNER_CLASS_SEPARATOR_CHAR;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;

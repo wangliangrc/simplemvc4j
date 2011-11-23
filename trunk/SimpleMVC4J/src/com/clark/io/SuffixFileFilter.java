@@ -1,4 +1,4 @@
-package com.clark.lang;
+package com.clark.io;
 
 import java.io.File;
 import java.io.Serializable;
@@ -6,14 +6,15 @@ import java.util.List;
 
 
 /**
- * Filters filenames for a certain prefix.
+ * Filters files based on the suffix (what the filename ends with). This is used
+ * in retrieving all the files of a particular type.
  * <p>
- * For example, to print all files and directories in the current directory
- * whose name starts with <code>Test</code>:
+ * For example, to retrieve and print all <code>*.java</code> files in the
+ * current directory:
  * 
  * <pre>
  * File dir = new File(&quot;.&quot;);
- * String[] files = dir.list(new PrefixFileFilter(&quot;Test&quot;));
+ * String[] files = dir.list(new SuffixFileFilter(&quot;.java&quot;));
  * for (int i = 0; i &lt; files.length; i++) {
  *     System.out.println(files[i]);
  * }
@@ -27,144 +28,142 @@ import java.util.List;
  * @author Federico Barbieri
  * @author Serge Knystautas
  * @author Peter Donald
- * @see FileFilterUtils#prefixFileFilter(String)
- * @see FileFilterUtils#prefixFileFilter(String, IOCase)
+ * @see FileFilterUtils#suffixFileFilter(String)
+ * @see FileFilterUtils#suffixFileFilter(String, IOCase)
  */
-public class PrefixFileFilter extends AbstractFileFilter implements
+public class SuffixFileFilter extends AbstractFileFilter implements
         Serializable {
 
-    private static final long serialVersionUID = 730924861034753134L;
-
-    /** The filename prefixes to search for */
-    private final String[] prefixes;
+    /** The filename suffixes to search for */
+    private final String[] suffixes;
 
     /** Whether the comparison is case sensitive. */
     private final IOCase caseSensitivity;
 
     /**
-     * Constructs a new Prefix file filter for a single prefix.
+     * Constructs a new Suffix file filter for a single extension.
      * 
-     * @param prefix
-     *            the prefix to allow, must not be null
+     * @param suffix
+     *            the suffix to allow, must not be null
      * @throws IllegalArgumentException
-     *             if the prefix is null
+     *             if the suffix is null
      */
-    public PrefixFileFilter(String prefix) {
-        this(prefix, IOCase.SENSITIVE);
+    public SuffixFileFilter(String suffix) {
+        this(suffix, IOCase.SENSITIVE);
     }
 
     /**
-     * Constructs a new Prefix file filter for a single prefix specifying
+     * Constructs a new Suffix file filter for a single extension specifying
      * case-sensitivity.
      * 
-     * @param prefix
-     *            the prefix to allow, must not be null
+     * @param suffix
+     *            the suffix to allow, must not be null
      * @param caseSensitivity
      *            how to handle case sensitivity, null means case-sensitive
      * @throws IllegalArgumentException
-     *             if the prefix is null
+     *             if the suffix is null
      * @since Commons IO 1.4
      */
-    public PrefixFileFilter(String prefix, IOCase caseSensitivity) {
-        if (prefix == null) {
-            throw new IllegalArgumentException("The prefix must not be null");
+    public SuffixFileFilter(String suffix, IOCase caseSensitivity) {
+        if (suffix == null) {
+            throw new IllegalArgumentException("The suffix must not be null");
         }
-        this.prefixes = new String[] { prefix };
+        this.suffixes = new String[] { suffix };
         this.caseSensitivity = (caseSensitivity == null ? IOCase.SENSITIVE
                 : caseSensitivity);
     }
 
     /**
-     * Constructs a new Prefix file filter for any of an array of prefixes.
+     * Constructs a new Suffix file filter for an array of suffixs.
      * <p>
      * The array is not cloned, so could be changed after constructing the
      * instance. This would be inadvisable however.
      * 
-     * @param prefixes
-     *            the prefixes to allow, must not be null
+     * @param suffixes
+     *            the suffixes to allow, must not be null
      * @throws IllegalArgumentException
-     *             if the prefix array is null
+     *             if the suffix array is null
      */
-    public PrefixFileFilter(String[] prefixes) {
-        this(prefixes, IOCase.SENSITIVE);
+    public SuffixFileFilter(String[] suffixes) {
+        this(suffixes, IOCase.SENSITIVE);
     }
 
     /**
-     * Constructs a new Prefix file filter for any of an array of prefixes
-     * specifying case-sensitivity.
+     * Constructs a new Suffix file filter for an array of suffixs specifying
+     * case-sensitivity.
      * <p>
      * The array is not cloned, so could be changed after constructing the
      * instance. This would be inadvisable however.
      * 
-     * @param prefixes
-     *            the prefixes to allow, must not be null
+     * @param suffixes
+     *            the suffixes to allow, must not be null
      * @param caseSensitivity
      *            how to handle case sensitivity, null means case-sensitive
      * @throws IllegalArgumentException
-     *             if the prefix is null
+     *             if the suffix array is null
      * @since Commons IO 1.4
      */
-    public PrefixFileFilter(String[] prefixes, IOCase caseSensitivity) {
-        if (prefixes == null) {
+    public SuffixFileFilter(String[] suffixes, IOCase caseSensitivity) {
+        if (suffixes == null) {
             throw new IllegalArgumentException(
-                    "The array of prefixes must not be null");
+                    "The array of suffixes must not be null");
         }
-        this.prefixes = new String[prefixes.length];
-        System.arraycopy(prefixes, 0, this.prefixes, 0, prefixes.length);
+        this.suffixes = new String[suffixes.length];
+        System.arraycopy(suffixes, 0, this.suffixes, 0, suffixes.length);
         this.caseSensitivity = (caseSensitivity == null ? IOCase.SENSITIVE
                 : caseSensitivity);
     }
 
     /**
-     * Constructs a new Prefix file filter for a list of prefixes.
+     * Constructs a new Suffix file filter for a list of suffixes.
      * 
-     * @param prefixes
-     *            the prefixes to allow, must not be null
+     * @param suffixes
+     *            the suffixes to allow, must not be null
      * @throws IllegalArgumentException
-     *             if the prefix list is null
+     *             if the suffix list is null
      * @throws ClassCastException
      *             if the list does not contain Strings
      */
-    public PrefixFileFilter(List<String> prefixes) {
-        this(prefixes, IOCase.SENSITIVE);
+    public SuffixFileFilter(List<String> suffixes) {
+        this(suffixes, IOCase.SENSITIVE);
     }
 
     /**
-     * Constructs a new Prefix file filter for a list of prefixes specifying
+     * Constructs a new Suffix file filter for a list of suffixes specifying
      * case-sensitivity.
      * 
-     * @param prefixes
-     *            the prefixes to allow, must not be null
+     * @param suffixes
+     *            the suffixes to allow, must not be null
      * @param caseSensitivity
      *            how to handle case sensitivity, null means case-sensitive
      * @throws IllegalArgumentException
-     *             if the prefix list is null
+     *             if the suffix list is null
      * @throws ClassCastException
      *             if the list does not contain Strings
      * @since Commons IO 1.4
      */
-    public PrefixFileFilter(List<String> prefixes, IOCase caseSensitivity) {
-        if (prefixes == null) {
+    public SuffixFileFilter(List<String> suffixes, IOCase caseSensitivity) {
+        if (suffixes == null) {
             throw new IllegalArgumentException(
-                    "The list of prefixes must not be null");
+                    "The list of suffixes must not be null");
         }
-        this.prefixes = prefixes.toArray(new String[prefixes.size()]);
+        this.suffixes = suffixes.toArray(new String[suffixes.size()]);
         this.caseSensitivity = (caseSensitivity == null ? IOCase.SENSITIVE
                 : caseSensitivity);
     }
 
     /**
-     * Checks to see if the filename starts with the prefix.
+     * Checks to see if the filename ends with the suffix.
      * 
      * @param file
      *            the File to check
-     * @return true if the filename starts with one of our prefixes
+     * @return true if the filename ends with one of our suffixes
      */
     @Override
     public boolean accept(File file) {
         String name = file.getName();
-        for (String prefix : this.prefixes) {
-            if (caseSensitivity.checkStartsWith(name, prefix)) {
+        for (String suffix : this.suffixes) {
+            if (caseSensitivity.checkEndsWith(name, suffix)) {
                 return true;
             }
         }
@@ -172,18 +171,18 @@ public class PrefixFileFilter extends AbstractFileFilter implements
     }
 
     /**
-     * Checks to see if the filename starts with the prefix.
+     * Checks to see if the filename ends with the suffix.
      * 
      * @param file
      *            the File directory
      * @param name
      *            the filename
-     * @return true if the filename starts with one of our prefixes
+     * @return true if the filename ends with one of our suffixes
      */
     @Override
     public boolean accept(File file, String name) {
-        for (String prefix : prefixes) {
-            if (caseSensitivity.checkStartsWith(name, prefix)) {
+        for (String suffix : this.suffixes) {
+            if (caseSensitivity.checkEndsWith(name, suffix)) {
                 return true;
             }
         }
@@ -200,12 +199,12 @@ public class PrefixFileFilter extends AbstractFileFilter implements
         StringBuilder buffer = new StringBuilder();
         buffer.append(super.toString());
         buffer.append("(");
-        if (prefixes != null) {
-            for (int i = 0; i < prefixes.length; i++) {
+        if (suffixes != null) {
+            for (int i = 0; i < suffixes.length; i++) {
                 if (i > 0) {
                     buffer.append(",");
                 }
-                buffer.append(prefixes[i]);
+                buffer.append(suffixes[i]);
             }
         }
         buffer.append(")");

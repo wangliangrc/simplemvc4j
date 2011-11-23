@@ -1,6 +1,6 @@
 package com.clark.lang;
 
-import static com.clark.lang.Functions.objectEquals;
+import static com.clark.func.Functions.objectEquals;
 
 import java.io.Serializable;
 

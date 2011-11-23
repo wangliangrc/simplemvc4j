@@ -1,6 +1,6 @@
-package com.clark.lang;
+package com.clark.io;
 
-import static com.clark.lang.Functions.isFileNewer;
+import static com.clark.func.Functions.isFileNewer;
 
 import java.io.File;
 import java.io.Serializable;

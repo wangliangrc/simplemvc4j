@@ -1,10 +1,12 @@
-package com.clark.lang;
+package com.clark.io;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import com.clark.func.Functions;
 
 /**
  * An Iterator over the lines in a <code>Reader</code>.

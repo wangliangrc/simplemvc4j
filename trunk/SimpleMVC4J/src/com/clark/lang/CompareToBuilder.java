@@ -1,6 +1,6 @@
 package com.clark.lang;
 
-import static com.clark.lang.Functions.contains;
+import static com.clark.func.Functions.contains;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;

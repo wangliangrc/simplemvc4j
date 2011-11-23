@@ -1,6 +1,6 @@
 package com.clark.lang;
 
-import static com.clark.lang.Functions.asserts;
+import static com.clark.func.Functions.asserts;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

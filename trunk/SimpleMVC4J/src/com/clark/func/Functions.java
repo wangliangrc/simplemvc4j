@@ -1,4 +1,4 @@
-package com.clark.lang;
+package com.clark.func;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -79,6 +79,31 @@ import java.util.zip.Checksum;
 
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.commons.io.output.StringBuilderWriter;
+
+import com.clark.io.AgeFileFilter;
+import com.clark.io.AndFileFilter;
+import com.clark.io.DelegateFileFilter;
+import com.clark.io.DirectoryFileFilter;
+import com.clark.io.FalseFileFilter;
+import com.clark.io.FileExistsException;
+import com.clark.io.FileFileFilter;
+import com.clark.io.IOCase;
+import com.clark.io.IOFileFilter;
+import com.clark.io.LineIterator;
+import com.clark.io.MagicNumberFileFilter;
+import com.clark.io.NameFileFilter;
+import com.clark.io.NotFileFilter;
+import com.clark.io.OrFileFilter;
+import com.clark.io.PrefixFileFilter;
+import com.clark.io.SizeFileFilter;
+import com.clark.io.SuffixFileFilter;
+import com.clark.io.TrueFileFilter;
+import com.clark.lang.CloneFailedException;
+import com.clark.lang.EqualsBuilder;
+import com.clark.lang.FastDateFormat;
+import com.clark.lang.SerializationException;
+import com.clark.lang.ToStringBuilder;
+import com.clark.lang.ToStringStyle;
 
 public final class Functions {
 
@@ -29160,7 +29185,7 @@ public final class Functions {
      * 
      * @return true if the system is Windows
      */
-    static boolean isSystemWindows() {
+    public static boolean isSystemWindows() {
         return SYSTEM_SEPARATOR == WINDOWS_SEPARATOR;
     }
 

@@ -1,6 +1,6 @@
 package com.clark.lang;
 
-import static com.clark.lang.Functions.formatDurationHMS;
+import static com.clark.func.Functions.formatDurationHMS;
 
 /**
  * <p>

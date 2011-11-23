@@ -1,6 +1,6 @@
-package com.clark.lang;
+package com.clark.io;
 
-import static com.clark.lang.Functions.wildcardMatch;
+import static com.clark.func.Functions.wildcardMatch;
 
 import java.io.File;
 import java.io.Serializable;

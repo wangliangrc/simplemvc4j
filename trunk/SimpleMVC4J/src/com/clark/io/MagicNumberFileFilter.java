@@ -1,6 +1,6 @@
-package com.clark.lang;
+package com.clark.io;
 
-import static com.clark.lang.Functions.closeQuietly;
+import static com.clark.func.Functions.closeQuietly;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,7 +1,7 @@
 package com.clark.lang;
 
-import static com.clark.lang.Functions.LINE_SEPARATOR;
-import static com.clark.lang.Functions.identityToString;
+import static com.clark.func.Functions.LINE_SEPARATOR;
+import static com.clark.func.Functions.identityToString;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;

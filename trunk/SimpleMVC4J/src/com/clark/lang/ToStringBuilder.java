@@ -1,6 +1,6 @@
 package com.clark.lang;
 
-import static com.clark.lang.Functions.identityToString;
+import static com.clark.func.Functions.identityToString;
 
 public class ToStringBuilder implements Builder<String> {
 
