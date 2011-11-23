@@ -1,15 +1,32 @@
 package com.clark.lang;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
+import java.io.Closeable;
+import java.io.EOFException;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -25,6 +42,12 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.Socket;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -46,8 +69,16 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.Stack;
+import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
+import java.util.zip.CRC32;
+import java.util.zip.CheckedInputStream;
+import java.util.zip.Checksum;
+
+import org.apache.commons.io.output.NullOutputStream;
+import org.apache.commons.io.output.StringBuilderWriter;
 
 public final class Functions {
 
@@ -27879,7 +27910,8 @@ public final class Functions {
                 years -= 1;
             }
 
-            if (!DurationToken.containsTokenWithValue(tokens, DATE_y) && years != 0) {
+            if (!DurationToken.containsTokenWithValue(tokens, DATE_y)
+                    && years != 0) {
                 while (years != 0) {
                     months += 12 * years;
                     years = 0;
@@ -27952,8 +27984,8 @@ public final class Functions {
             seconds = 0;
         }
 
-        return formatPeriodTime(tokens, years, months, days, hours, minutes, seconds,
-                milliseconds, padWithZeros);
+        return formatPeriodTime(tokens, years, months, days, hours, minutes,
+                seconds, milliseconds, padWithZeros);
     }
 
     // -----------------------------------------------------------------------
@@ -27982,9 +28014,9 @@ public final class Functions {
      *            whether to pad
      * @return the formatted string
      */
-    static String formatPeriodTime(DurationToken[] tokens, int years, int months, int days,
-            int hours, int minutes, int seconds, int milliseconds,
-            boolean padWithZeros) {
+    static String formatPeriodTime(DurationToken[] tokens, int years,
+            int months, int days, int hours, int minutes, int seconds,
+            int milliseconds, boolean padWithZeros) {
         StringBuffer buffer = new StringBuffer();
         boolean lastOutputSeconds = false;
         int sz = tokens.length;
@@ -28061,7 +28093,8 @@ public final class Functions {
      */
     static DurationToken[] lexx(String format) {
         char[] array = format.toCharArray();
-        ArrayList<DurationToken> list = new ArrayList<DurationToken>(array.length);
+        ArrayList<DurationToken> list = new ArrayList<DurationToken>(
+                array.length);
 
         boolean inLiteral = false;
         StringBuffer buffer = null;
@@ -28143,7 +28176,8 @@ public final class Functions {
          *            to look for
          * @return boolean <code>true</code> if contained
          */
-        static boolean containsTokenWithValue(DurationToken[] tokens, Object value) {
+        static boolean containsTokenWithValue(DurationToken[] tokens,
+                Object value) {
             int sz = tokens.length;
             for (int i = 0; i < sz; i++) {
                 if (tokens[i].getValue() == value) {
@@ -28253,6 +28287,7306 @@ public final class Functions {
         @Override
         public String toString() {
             return repeat(this.value.toString(), this.count);
+        }
+    }
+
+    // ///////////////////////////////////////////
+    //
+    // ExceptionUtils
+    //
+    // ///////////////////////////////////////////
+
+    /**
+     * <p>
+     * Used when printing stack frames to denote the start of a wrapped
+     * exception.
+     * </p>
+     * 
+     * <p>
+     * Package private for accessibility by test suite.
+     * </p>
+     */
+    static final String WRAPPED_MARKER = " [wrapped] ";
+
+    /**
+     * <p>
+     * The names of methods commonly used to access a wrapped exception.
+     * </p>
+     */
+    // TODO: Remove in Lang 4.0
+    private static final String[] CAUSE_METHOD_NAMES = { "getCause",
+            "getNextException", "getTargetException", "getException",
+            "getSourceException", "getRootCause", "getCausedByException",
+            "getNested", "getLinkedException", "getNestedException",
+            "getLinkedCause", "getThrowable", };
+
+    /**
+     * <p>
+     * Introspects the <code>Throwable</code> to obtain the root cause.
+     * </p>
+     * 
+     * <p>
+     * This method walks through the exception chain to the last element, "root"
+     * of the tree, using {@link #getCause(Throwable)}, and returns that
+     * exception.
+     * </p>
+     * 
+     * <p>
+     * From version 2.2, this method handles recursive cause structures that
+     * might otherwise cause infinite loops. If the throwable parameter has a
+     * cause of itself, then null will be returned. If the throwable parameter
+     * cause chain loops, the last element in the chain before the loop is
+     * returned.
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to get the root cause for, may be null
+     * @return the root cause of the <code>Throwable</code>, <code>null</code>
+     *         if none found or null throwable input
+     */
+    public static Throwable getRootCause(Throwable throwable) {
+        List<Throwable> list = getThrowableList(throwable);
+        return (list.size() < 2 ? null : (Throwable) list.get(list.size() - 1));
+    }
+
+    /**
+     * <p>
+     * Finds a <code>Throwable</code> by method name.
+     * </p>
+     * 
+     * @param throwable
+     *            the exception to examine
+     * @param methodName
+     *            the name of the method to find and invoke
+     * @return the wrapped exception, or <code>null</code> if not found
+     */
+    // TODO: Remove in Lang 4.0
+    private static Throwable getCauseUsingMethodName(Throwable throwable,
+            String methodName) {
+        Method method = null;
+        try {
+            method = throwable.getClass().getMethod(methodName, (Class[]) null);
+        } catch (NoSuchMethodException ignored) {
+            // exception ignored
+        } catch (SecurityException ignored) {
+            // exception ignored
+        }
+
+        if (method != null
+                && Throwable.class.isAssignableFrom(method.getReturnType())) {
+            try {
+                return (Throwable) method.invoke(throwable, EMPTY_OBJECT_ARRAY);
+            } catch (IllegalAccessException ignored) {
+                // exception ignored
+            } catch (IllegalArgumentException ignored) {
+                // exception ignored
+            } catch (InvocationTargetException ignored) {
+                // exception ignored
+            }
+        }
+        return null;
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * <p>
+     * Counts the number of <code>Throwable</code> objects in the exception
+     * chain.
+     * </p>
+     * 
+     * <p>
+     * A throwable without cause will return <code>1</code>. A throwable with
+     * one cause will return <code>2</code> and so on. A <code>null</code>
+     * throwable will return <code>0</code>.
+     * </p>
+     * 
+     * <p>
+     * From version 2.2, this method handles recursive cause structures that
+     * might otherwise cause infinite loops. The cause chain is processed until
+     * the end is reached, or until the next item in the chain is already in the
+     * result set.
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to inspect, may be null
+     * @return the count of throwables, zero if null input
+     */
+    public static int getThrowableCount(Throwable throwable) {
+        return getThrowableList(throwable).size();
+    }
+
+    /**
+     * <p>
+     * Returns the list of <code>Throwable</code> objects in the exception
+     * chain.
+     * </p>
+     * 
+     * <p>
+     * A throwable without cause will return an array containing one element -
+     * the input throwable. A throwable with one cause will return an array
+     * containing two elements. - the input throwable and the cause throwable. A
+     * <code>null</code> throwable will return an array of size zero.
+     * </p>
+     * 
+     * <p>
+     * From version 2.2, this method handles recursive cause structures that
+     * might otherwise cause infinite loops. The cause chain is processed until
+     * the end is reached, or until the next item in the chain is already in the
+     * result set.
+     * </p>
+     * 
+     * @see #getThrowableList(Throwable)
+     * @param throwable
+     *            the throwable to inspect, may be null
+     * @return the array of throwables, never null
+     */
+    public static Throwable[] getThrowables(Throwable throwable) {
+        List<Throwable> list = getThrowableList(throwable);
+        return list.toArray(new Throwable[list.size()]);
+    }
+
+    /**
+     * <p>
+     * Returns the list of <code>Throwable</code> objects in the exception
+     * chain.
+     * </p>
+     * 
+     * <p>
+     * A throwable without cause will return a list containing one element - the
+     * input throwable. A throwable with one cause will return a list containing
+     * two elements. - the input throwable and the cause throwable. A
+     * <code>null</code> throwable will return a list of size zero.
+     * </p>
+     * 
+     * <p>
+     * This method handles recursive cause structures that might otherwise cause
+     * infinite loops. The cause chain is processed until the end is reached, or
+     * until the next item in the chain is already in the result set.
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to inspect, may be null
+     * @return the list of throwables, never null
+     * @since Commons Lang 2.2
+     */
+    public static List<Throwable> getThrowableList(Throwable throwable) {
+        List<Throwable> list = new ArrayList<Throwable>();
+        while (throwable != null && list.contains(throwable) == false) {
+            list.add(throwable);
+            throwable = getCause(throwable);
+        }
+        return list;
+    }
+
+    /**
+     * <p>
+     * Returns the default names used when searching for the cause of an
+     * exception.
+     * </p>
+     * 
+     * <p>
+     * This may be modified and used in the overloaded getCause(Throwable,
+     * String[]) method.
+     * </p>
+     * 
+     * @return cloned array of the default method names
+     * @since 3.0
+     * @deprecated This feature will be removed in Lang 4.0
+     */
+    @Deprecated
+    public static String[] getDefaultCauseMethodNames() {
+        return clone(CAUSE_METHOD_NAMES);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * <p>
+     * Introspects the <code>Throwable</code> to obtain the cause.
+     * </p>
+     * 
+     * <p>
+     * The method searches for methods with specific names that return a
+     * <code>Throwable</code> object. This will pick up most wrapping
+     * exceptions, including those from JDK 1.4.
+     * 
+     * <p>
+     * The default list searched for are:
+     * </p>
+     * <ul>
+     * <li><code>getCause()</code></li>
+     * <li><code>getNextException()</code></li>
+     * <li><code>getTargetException()</code></li>
+     * <li><code>getException()</code></li>
+     * <li><code>getSourceException()</code></li>
+     * <li><code>getRootCause()</code></li>
+     * <li><code>getCausedByException()</code></li>
+     * <li><code>getNested()</code></li>
+     * </ul>
+     * 
+     * <p>
+     * In the absence of any such method, the object is inspected for a
+     * <code>detail</code> field assignable to a <code>Throwable</code>.
+     * </p>
+     * 
+     * <p>
+     * If none of the above is found, returns <code>null</code>.
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to introspect for a cause, may be null
+     * @return the cause of the <code>Throwable</code>, <code>null</code> if
+     *         none found or null throwable input
+     * @since 1.0
+     * @deprecated This feature will be removed in Lang 4.0
+     */
+    @Deprecated
+    public static Throwable getCause(Throwable throwable) {
+        return getCause(throwable, CAUSE_METHOD_NAMES);
+    }
+
+    /**
+     * <p>
+     * Introspects the <code>Throwable</code> to obtain the cause.
+     * </p>
+     * 
+     * <ol>
+     * <li>Try known exception types.</li>
+     * <li>Try the supplied array of method names.</li>
+     * <li>Try the field 'detail'.</li>
+     * </ol>
+     * 
+     * <p>
+     * A <code>null</code> set of method names means use the default set. A
+     * <code>null</code> in the set of method names will be ignored.
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to introspect for a cause, may be null
+     * @param methodNames
+     *            the method names, null treated as default set
+     * @return the cause of the <code>Throwable</code>, <code>null</code> if
+     *         none found or null throwable input
+     * @since 1.0
+     * @deprecated This feature will be removed in Lang 4.0
+     */
+    @Deprecated
+    public static Throwable getCause(Throwable throwable, String[] methodNames) {
+        if (throwable == null) {
+            return null;
+        }
+
+        if (methodNames == null) {
+            methodNames = CAUSE_METHOD_NAMES;
+        }
+
+        for (int i = 0; i < methodNames.length; i++) {
+            String methodName = methodNames[i];
+            if (methodName != null) {
+                Throwable cause = getCauseUsingMethodName(throwable, methodName);
+                if (cause != null) {
+                    return cause;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * <p>
+     * Returns the (zero based) index of the first <code>Throwable</code> that
+     * matches the specified class (exactly) in the exception chain. Subclasses
+     * of the specified class do not match - see
+     * {@link #indexOfType(Throwable, Class)} for the opposite.
+     * </p>
+     * 
+     * <p>
+     * A <code>null</code> throwable returns <code>-1</code>. A
+     * <code>null</code> type returns <code>-1</code>. No match in the chain
+     * returns <code>-1</code>.
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to inspect, may be null
+     * @param clazz
+     *            the class to search for, subclasses do not match, null returns
+     *            -1
+     * @return the index into the throwable chain, -1 if no match or null input
+     */
+    public static int indexOfThrowable(Throwable throwable, Class<?> clazz) {
+        return indexOf(throwable, clazz, 0, false);
+    }
+
+    /**
+     * <p>
+     * Returns the (zero based) index of the first <code>Throwable</code> that
+     * matches the specified type in the exception chain from a specified index.
+     * Subclasses of the specified class do not match - see
+     * {@link #indexOfType(Throwable, Class, int)} for the opposite.
+     * </p>
+     * 
+     * <p>
+     * A <code>null</code> throwable returns <code>-1</code>. A
+     * <code>null</code> type returns <code>-1</code>. No match in the chain
+     * returns <code>-1</code>. A negative start index is treated as zero. A
+     * start index greater than the number of throwables returns <code>-1</code>
+     * .
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to inspect, may be null
+     * @param clazz
+     *            the class to search for, subclasses do not match, null returns
+     *            -1
+     * @param fromIndex
+     *            the (zero based) index of the starting position, negative
+     *            treated as zero, larger than chain size returns -1
+     * @return the index into the throwable chain, -1 if no match or null input
+     */
+    public static int indexOfThrowable(Throwable throwable, Class<?> clazz,
+            int fromIndex) {
+        return indexOf(throwable, clazz, fromIndex, false);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * <p>
+     * Returns the (zero based) index of the first <code>Throwable</code> that
+     * matches the specified class or subclass in the exception chain.
+     * Subclasses of the specified class do match - see
+     * {@link #indexOfThrowable(Throwable, Class)} for the opposite.
+     * </p>
+     * 
+     * <p>
+     * A <code>null</code> throwable returns <code>-1</code>. A
+     * <code>null</code> type returns <code>-1</code>. No match in the chain
+     * returns <code>-1</code>.
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to inspect, may be null
+     * @param type
+     *            the type to search for, subclasses match, null returns -1
+     * @return the index into the throwable chain, -1 if no match or null input
+     * @since 2.1
+     */
+    public static int indexOfType(Throwable throwable, Class<?> type) {
+        return indexOf(throwable, type, 0, true);
+    }
+
+    /**
+     * <p>
+     * Returns the (zero based) index of the first <code>Throwable</code> that
+     * matches the specified type in the exception chain from a specified index.
+     * Subclasses of the specified class do match - see
+     * {@link #indexOfThrowable(Throwable, Class)} for the opposite.
+     * </p>
+     * 
+     * <p>
+     * A <code>null</code> throwable returns <code>-1</code>. A
+     * <code>null</code> type returns <code>-1</code>. No match in the chain
+     * returns <code>-1</code>. A negative start index is treated as zero. A
+     * start index greater than the number of throwables returns <code>-1</code>
+     * .
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to inspect, may be null
+     * @param type
+     *            the type to search for, subclasses match, null returns -1
+     * @param fromIndex
+     *            the (zero based) index of the starting position, negative
+     *            treated as zero, larger than chain size returns -1
+     * @return the index into the throwable chain, -1 if no match or null input
+     * @since 2.1
+     */
+    public static int indexOfType(Throwable throwable, Class<?> type,
+            int fromIndex) {
+        return indexOf(throwable, type, fromIndex, true);
+    }
+
+    /**
+     * <p>
+     * Worker method for the <code>indexOfType</code> methods.
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to inspect, may be null
+     * @param type
+     *            the type to search for, subclasses match, null returns -1
+     * @param fromIndex
+     *            the (zero based) index of the starting position, negative
+     *            treated as zero, larger than chain size returns -1
+     * @param subclass
+     *            if <code>true</code>, compares with
+     *            {@link Class#isAssignableFrom(Class)}, otherwise compares
+     *            using references
+     * @return index of the <code>type</code> within throwables nested withing
+     *         the specified <code>throwable</code>
+     */
+    private static int indexOf(Throwable throwable, Class<?> type,
+            int fromIndex, boolean subclass) {
+        if (throwable == null || type == null) {
+            return -1;
+        }
+        if (fromIndex < 0) {
+            fromIndex = 0;
+        }
+        Throwable[] throwables = getThrowables(throwable);
+        if (fromIndex >= throwables.length) {
+            return -1;
+        }
+        if (subclass) {
+            for (int i = fromIndex; i < throwables.length; i++) {
+                if (type.isAssignableFrom(throwables[i].getClass())) {
+                    return i;
+                }
+            }
+        } else {
+            for (int i = fromIndex; i < throwables.length; i++) {
+                if (type.equals(throwables[i].getClass())) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * <p>
+     * Prints a compact stack trace for the root cause of a throwable to
+     * <code>System.err</code>.
+     * </p>
+     * 
+     * <p>
+     * The compact stack trace starts with the root cause and prints stack
+     * frames up to the place where it was caught and wrapped. Then it prints
+     * the wrapped exception and continues with stack frames until the wrapper
+     * exception is caught and wrapped again, etc.
+     * </p>
+     * 
+     * <p>
+     * The output of this method is consistent across JDK versions. Note that
+     * this is the opposite order to the JDK1.4 display.
+     * </p>
+     * 
+     * <p>
+     * The method is equivalent to <code>printStackTrace</code> for throwables
+     * that don't have nested causes.
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to output
+     * @since 2.0
+     */
+    public static void printRootCauseStackTrace(Throwable throwable) {
+        printRootCauseStackTrace(throwable, System.err);
+    }
+
+    /**
+     * <p>
+     * Prints a compact stack trace for the root cause of a throwable.
+     * </p>
+     * 
+     * <p>
+     * The compact stack trace starts with the root cause and prints stack
+     * frames up to the place where it was caught and wrapped. Then it prints
+     * the wrapped exception and continues with stack frames until the wrapper
+     * exception is caught and wrapped again, etc.
+     * </p>
+     * 
+     * <p>
+     * The output of this method is consistent across JDK versions. Note that
+     * this is the opposite order to the JDK1.4 display.
+     * </p>
+     * 
+     * <p>
+     * The method is equivalent to <code>printStackTrace</code> for throwables
+     * that don't have nested causes.
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to output, may be null
+     * @param stream
+     *            the stream to output to, may not be null
+     * @throws IllegalArgumentException
+     *             if the stream is <code>null</code>
+     * @since 2.0
+     */
+    public static void printRootCauseStackTrace(Throwable throwable,
+            PrintStream stream) {
+        if (throwable == null) {
+            return;
+        }
+        if (stream == null) {
+            throw new IllegalArgumentException(
+                    "The PrintStream must not be null");
+        }
+        String trace[] = getRootCauseStackTrace(throwable);
+        for (int i = 0; i < trace.length; i++) {
+            stream.println(trace[i]);
+        }
+        stream.flush();
+    }
+
+    /**
+     * <p>
+     * Prints a compact stack trace for the root cause of a throwable.
+     * </p>
+     * 
+     * <p>
+     * The compact stack trace starts with the root cause and prints stack
+     * frames up to the place where it was caught and wrapped. Then it prints
+     * the wrapped exception and continues with stack frames until the wrapper
+     * exception is caught and wrapped again, etc.
+     * </p>
+     * 
+     * <p>
+     * The output of this method is consistent across JDK versions. Note that
+     * this is the opposite order to the JDK1.4 display.
+     * </p>
+     * 
+     * <p>
+     * The method is equivalent to <code>printStackTrace</code> for throwables
+     * that don't have nested causes.
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to output, may be null
+     * @param writer
+     *            the writer to output to, may not be null
+     * @throws IllegalArgumentException
+     *             if the writer is <code>null</code>
+     * @since 2.0
+     */
+    public static void printRootCauseStackTrace(Throwable throwable,
+            PrintWriter writer) {
+        if (throwable == null) {
+            return;
+        }
+        if (writer == null) {
+            throw new IllegalArgumentException(
+                    "The PrintWriter must not be null");
+        }
+        String trace[] = getRootCauseStackTrace(throwable);
+        for (int i = 0; i < trace.length; i++) {
+            writer.println(trace[i]);
+        }
+        writer.flush();
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * <p>
+     * Creates a compact stack trace for the root cause of the supplied
+     * <code>Throwable</code>.
+     * </p>
+     * 
+     * <p>
+     * The output of this method is consistent across JDK versions. It consists
+     * of the root exception followed by each of its wrapping exceptions
+     * separated by '[wrapped]'. Note that this is the opposite order to the
+     * JDK1.4 display.
+     * </p>
+     * 
+     * @param throwable
+     *            the throwable to examine, may be null
+     * @return an array of stack trace frames, never null
+     * @since 2.0
+     */
+    public static String[] getRootCauseStackTrace(Throwable throwable) {
+        if (throwable == null) {
+            return EMPTY_STRING_ARRAY;
+        }
+        Throwable throwables[] = getThrowables(throwable);
+        int count = throwables.length;
+        List<String> frames = new ArrayList<String>();
+        List<String> nextTrace = getStackFrameList(throwables[count - 1]);
+        for (int i = count; --i >= 0;) {
+            List<String> trace = nextTrace;
+            if (i != 0) {
+                nextTrace = getStackFrameList(throwables[i - 1]);
+                removeCommonFrames(trace, nextTrace);
+            }
+            if (i == count - 1) {
+                frames.add(throwables[i].toString());
+            } else {
+                frames.add(WRAPPED_MARKER + throwables[i].toString());
+            }
+            for (int j = 0; j < trace.size(); j++) {
+                frames.add(trace.get(j));
+            }
+        }
+        return frames.toArray(new String[0]);
+    }
+
+    /**
+     * <p>
+     * Removes common frames from the cause trace given the two stack traces.
+     * </p>
+     * 
+     * @param causeFrames
+     *            stack trace of a cause throwable
+     * @param wrapperFrames
+     *            stack trace of a wrapper throwable
+     * @throws IllegalArgumentException
+     *             if either argument is null
+     * @since 2.0
+     */
+    public static void removeCommonFrames(List<String> causeFrames,
+            List<String> wrapperFrames) {
+        if (causeFrames == null || wrapperFrames == null) {
+            throw new IllegalArgumentException("The List must not be null");
+        }
+        int causeFrameIndex = causeFrames.size() - 1;
+        int wrapperFrameIndex = wrapperFrames.size() - 1;
+        while (causeFrameIndex >= 0 && wrapperFrameIndex >= 0) {
+            // Remove the frame from the cause trace if it is the same
+            // as in the wrapper trace
+            String causeFrame = causeFrames.get(causeFrameIndex);
+            String wrapperFrame = wrapperFrames.get(wrapperFrameIndex);
+            if (causeFrame.equals(wrapperFrame)) {
+                causeFrames.remove(causeFrameIndex);
+            }
+            causeFrameIndex--;
+            wrapperFrameIndex--;
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * <p>
+     * Gets the stack trace from a Throwable as a String.
+     * </p>
+     * 
+     * <p>
+     * The result of this method vary by JDK version as this method uses
+     * {@link Throwable#printStackTrace(java.io.PrintWriter)}. On JDK1.3 and
+     * earlier, the cause exception will not be shown unless the specified
+     * throwable alters printStackTrace.
+     * </p>
+     * 
+     * @param throwable
+     *            the <code>Throwable</code> to be examined
+     * @return the stack trace as generated by the exception's
+     *         <code>printStackTrace(PrintWriter)</code> method
+     */
+    public static String getStackTrace(Throwable throwable) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw, true);
+        throwable.printStackTrace(pw);
+        return sw.getBuffer().toString();
+    }
+
+    /**
+     * <p>
+     * Captures the stack trace associated with the specified
+     * <code>Throwable</code> object, decomposing it into a list of stack
+     * frames.
+     * </p>
+     * 
+     * <p>
+     * The result of this method vary by JDK version as this method uses
+     * {@link Throwable#printStackTrace(java.io.PrintWriter)}. On JDK1.3 and
+     * earlier, the cause exception will not be shown unless the specified
+     * throwable alters printStackTrace.
+     * </p>
+     * 
+     * @param throwable
+     *            the <code>Throwable</code> to examine, may be null
+     * @return an array of strings describing each stack frame, never null
+     */
+    public static String[] getStackFrames(Throwable throwable) {
+        if (throwable == null) {
+            return EMPTY_STRING_ARRAY;
+        }
+        return getStackFrames(getStackTrace(throwable));
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * <p>
+     * Returns an array where each element is a line from the argument.
+     * </p>
+     * 
+     * <p>
+     * The end of line is determined by the value of
+     * {@link SystemUtils#LINE_SEPARATOR}.
+     * </p>
+     * 
+     * @param stackTrace
+     *            a stack trace String
+     * @return an array where each element is a line from the argument
+     */
+    static String[] getStackFrames(String stackTrace) {
+        String linebreak = LINE_SEPARATOR;
+        StringTokenizer frames = new StringTokenizer(stackTrace, linebreak);
+        List<String> list = new ArrayList<String>();
+        while (frames.hasMoreTokens()) {
+            list.add(frames.nextToken());
+        }
+        return list.toArray(new String[list.size()]);
+    }
+
+    /**
+     * <p>
+     * Produces a <code>List</code> of stack frames - the message is not
+     * included. Only the trace of the specified exception is returned, any
+     * caused by trace is stripped.
+     * </p>
+     * 
+     * <p>
+     * This works in most cases - it will only fail if the exception message
+     * contains a line that starts with:
+     * <code>&quot;&nbsp;&nbsp;&nbsp;at&quot;.</code>
+     * </p>
+     * 
+     * @param t
+     *            is any throwable
+     * @return List of stack frames
+     */
+    static List<String> getStackFrameList(Throwable t) {
+        String stackTrace = getStackTrace(t);
+        String linebreak = LINE_SEPARATOR;
+        StringTokenizer frames = new StringTokenizer(stackTrace, linebreak);
+        List<String> list = new ArrayList<String>();
+        boolean traceStarted = false;
+        while (frames.hasMoreTokens()) {
+            String token = frames.nextToken();
+            // Determine if the line starts with <whitespace>at
+            int at = token.indexOf("at");
+            if (at != -1 && token.substring(0, at).trim().length() == 0) {
+                traceStarted = true;
+                list.add(token);
+            } else if (traceStarted) {
+                break;
+            }
+        }
+        return list;
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Gets a short message summarising the exception.
+     * <p>
+     * The message returned is of the form {ClassNameWithoutPackage}:
+     * {ThrowableMessage}
+     * 
+     * @param th
+     *            the throwable to get a message for, null returns empty string
+     * @return the message, non-null
+     * @since Commons Lang 2.2
+     */
+    public static String getMessage(Throwable th) {
+        if (th == null) {
+            return "";
+        }
+        String clsName = getShortClassName(th, null);
+        String msg = th.getMessage();
+        return clsName + ": " + defaultString(msg);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Gets a short message summarising the root cause exception.
+     * <p>
+     * The message returned is of the form {ClassNameWithoutPackage}:
+     * {ThrowableMessage}
+     * 
+     * @param th
+     *            the throwable to get a message for, null returns empty string
+     * @return the message, non-null
+     * @since Commons Lang 2.2
+     */
+    public static String getRootCauseMessage(Throwable th) {
+        Throwable root = getRootCause(th);
+        root = (root == null ? th : root);
+        return getMessage(root);
+    }
+
+    // ///////////////////////////////////////////
+    //
+    // FilenameUtils
+    //
+    // ///////////////////////////////////////////
+
+    /**
+     * The extension separator character.
+     * 
+     * @since Commons IO 1.4
+     */
+    public static final char EXTENSION_SEPARATOR = '.';
+
+    /**
+     * The extension separator String.
+     * 
+     * @since Commons IO 1.4
+     */
+    public static final String EXTENSION_SEPARATOR_STR = Character
+            .toString(EXTENSION_SEPARATOR);
+
+    /**
+     * The Unix separator character.
+     */
+    private static final char UNIX_SEPARATOR = '/';
+
+    /**
+     * The Windows separator character.
+     */
+    private static final char WINDOWS_SEPARATOR = '\\';
+
+    /**
+     * The system separator character.
+     */
+    private static final char SYSTEM_SEPARATOR = File.separatorChar;
+
+    /**
+     * The separator character that is the opposite of the system separator.
+     */
+    private static final char OTHER_SEPARATOR;
+
+    static {
+        if (isSystemWindows()) {
+            OTHER_SEPARATOR = UNIX_SEPARATOR;
+        } else {
+            OTHER_SEPARATOR = WINDOWS_SEPARATOR;
+        }
+    }
+
+    /**
+     * Determines if Windows file system is in use.
+     * 
+     * @return true if the system is Windows
+     */
+    static boolean isSystemWindows() {
+        return SYSTEM_SEPARATOR == WINDOWS_SEPARATOR;
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Checks if the character is a separator.
+     * 
+     * @param ch
+     *            the character to check
+     * @return true if it is a separator character
+     */
+    private static boolean isPathSeparator(char ch) {
+        return (ch == UNIX_SEPARATOR) || (ch == WINDOWS_SEPARATOR);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Normalizes a path, removing double and single dot path steps.
+     * <p>
+     * This method normalizes a path to a standard format. The input may contain
+     * separators in either Unix or Windows format. The output will contain
+     * separators in the format of the system.
+     * <p>
+     * A trailing slash will be retained. A double slash will be merged to a
+     * single slash (but UNC names are handled). A single dot path segment will
+     * be removed. A double dot will cause that path segment and the one before
+     * to be removed. If the double dot has no parent path segment to work with,
+     * <code>null</code> is returned.
+     * <p>
+     * The output will be the same on both Unix and Windows except for the
+     * separator character.
+     * 
+     * <pre>
+     * /foo//               -->   /foo/
+     * /foo/./              -->   /foo/
+     * /foo/../bar          -->   /bar
+     * /foo/../bar/         -->   /bar/
+     * /foo/../bar/../baz   -->   /baz
+     * //foo//./bar         -->   /foo/bar
+     * /../                 -->   null
+     * ../foo               -->   null
+     * foo/bar/..           -->   foo/
+     * foo/../../bar        -->   null
+     * foo/../bar           -->   bar
+     * //server/foo/../bar  -->   //server/bar
+     * //server/../bar      -->   null
+     * C:\foo\..\bar        -->   C:\bar
+     * C:\..\bar            -->   null
+     * ~/foo/../bar/        -->   ~/bar/
+     * ~/../bar             -->   null
+     * </pre>
+     * 
+     * (Note the file separator returned will be correct for Windows/Unix)
+     * 
+     * @param filename
+     *            the filename to normalize, null returns null
+     * @return the normalized filename, or null if invalid
+     */
+    public static String normalizePath(String filename) {
+        return doNormalizePath(filename, SYSTEM_SEPARATOR, true);
+    }
+
+    /**
+     * Normalizes a path, removing double and single dot path steps.
+     * <p>
+     * This method normalizes a path to a standard format. The input may contain
+     * separators in either Unix or Windows format. The output will contain
+     * separators in the format specified.
+     * <p>
+     * A trailing slash will be retained. A double slash will be merged to a
+     * single slash (but UNC names are handled). A single dot path segment will
+     * be removed. A double dot will cause that path segment and the one before
+     * to be removed. If the double dot has no parent path segment to work with,
+     * <code>null</code> is returned.
+     * <p>
+     * The output will be the same on both Unix and Windows except for the
+     * separator character.
+     * 
+     * <pre>
+     * /foo//               -->   /foo/
+     * /foo/./              -->   /foo/
+     * /foo/../bar          -->   /bar
+     * /foo/../bar/         -->   /bar/
+     * /foo/../bar/../baz   -->   /baz
+     * //foo//./bar         -->   /foo/bar
+     * /../                 -->   null
+     * ../foo               -->   null
+     * foo/bar/..           -->   foo/
+     * foo/../../bar        -->   null
+     * foo/../bar           -->   bar
+     * //server/foo/../bar  -->   //server/bar
+     * //server/../bar      -->   null
+     * C:\foo\..\bar        -->   C:\bar
+     * C:\..\bar            -->   null
+     * ~/foo/../bar/        -->   ~/bar/
+     * ~/../bar             -->   null
+     * </pre>
+     * 
+     * The output will be the same on both Unix and Windows including the
+     * separator character.
+     * 
+     * @param filename
+     *            the filename to normalize, null returns null
+     * @param unixSeparator
+     *            <code>true</code> if a unix separator should be used or
+     *            <code>false</code> if a windows separator should be used.
+     * @return the normalized filename, or null if invalid
+     * @since Commons IO 2.0
+     */
+    public static String normalizePath(String filename, boolean unixSeparator) {
+        char separator = (unixSeparator ? UNIX_SEPARATOR : WINDOWS_SEPARATOR);
+        return doNormalizePath(filename, separator, true);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Normalizes a path, removing double and single dot path steps, and
+     * removing any final directory separator.
+     * <p>
+     * This method normalizes a path to a standard format. The input may contain
+     * separators in either Unix or Windows format. The output will contain
+     * separators in the format of the system.
+     * <p>
+     * A trailing slash will be removed. A double slash will be merged to a
+     * single slash (but UNC names are handled). A single dot path segment will
+     * be removed. A double dot will cause that path segment and the one before
+     * to be removed. If the double dot has no parent path segment to work with,
+     * <code>null</code> is returned.
+     * <p>
+     * The output will be the same on both Unix and Windows except for the
+     * separator character.
+     * 
+     * <pre>
+     * /foo//               -->   /foo
+     * /foo/./              -->   /foo
+     * /foo/../bar          -->   /bar
+     * /foo/../bar/         -->   /bar
+     * /foo/../bar/../baz   -->   /baz
+     * //foo//./bar         -->   /foo/bar
+     * /../                 -->   null
+     * ../foo               -->   null
+     * foo/bar/..           -->   foo
+     * foo/../../bar        -->   null
+     * foo/../bar           -->   bar
+     * //server/foo/../bar  -->   //server/bar
+     * //server/../bar      -->   null
+     * C:\foo\..\bar        -->   C:\bar
+     * C:\..\bar            -->   null
+     * ~/foo/../bar/        -->   ~/bar
+     * ~/../bar             -->   null
+     * </pre>
+     * 
+     * (Note the file separator returned will be correct for Windows/Unix)
+     * 
+     * @param filename
+     *            the filename to normalize, null returns null
+     * @return the normalized filename, or null if invalid
+     */
+    public static String normalizeNoEndSeparator(String filename) {
+        return doNormalizePath(filename, SYSTEM_SEPARATOR, false);
+    }
+
+    /**
+     * Normalizes a path, removing double and single dot path steps, and
+     * removing any final directory separator.
+     * <p>
+     * This method normalizes a path to a standard format. The input may contain
+     * separators in either Unix or Windows format. The output will contain
+     * separators in the format specified.
+     * <p>
+     * A trailing slash will be removed. A double slash will be merged to a
+     * single slash (but UNC names are handled). A single dot path segment will
+     * be removed. A double dot will cause that path segment and the one before
+     * to be removed. If the double dot has no parent path segment to work with,
+     * <code>null</code> is returned.
+     * <p>
+     * The output will be the same on both Unix and Windows including the
+     * separator character.
+     * 
+     * <pre>
+     * /foo//               -->   /foo
+     * /foo/./              -->   /foo
+     * /foo/../bar          -->   /bar
+     * /foo/../bar/         -->   /bar
+     * /foo/../bar/../baz   -->   /baz
+     * //foo//./bar         -->   /foo/bar
+     * /../                 -->   null
+     * ../foo               -->   null
+     * foo/bar/..           -->   foo
+     * foo/../../bar        -->   null
+     * foo/../bar           -->   bar
+     * //server/foo/../bar  -->   //server/bar
+     * //server/../bar      -->   null
+     * C:\foo\..\bar        -->   C:\bar
+     * C:\..\bar            -->   null
+     * ~/foo/../bar/        -->   ~/bar
+     * ~/../bar             -->   null
+     * </pre>
+     * 
+     * @param filename
+     *            the filename to normalize, null returns null
+     * @param unixSeparator
+     *            <code>true</code> if a unix separator should be used or
+     *            <code>false</code> if a windows separtor should be used.
+     * @return the normalized filename, or null if invalid
+     * @since Commons IO 2.0
+     */
+    public static String normalizeNoEndSeparator(String filename,
+            boolean unixSeparator) {
+        char separator = (unixSeparator ? UNIX_SEPARATOR : WINDOWS_SEPARATOR);
+        return doNormalizePath(filename, separator, false);
+    }
+
+    /**
+     * Internal method to perform the normalization.
+     * 
+     * @param filename
+     *            the filename
+     * @param separator
+     *            The separator character to use
+     * @param keepSeparator
+     *            true to keep the final separator
+     * @return the normalized filename
+     */
+    private static String doNormalizePath(String filename, char separator,
+            boolean keepSeparator) {
+        if (filename == null) {
+            return null;
+        }
+        int size = filename.length();
+        if (size == 0) {
+            return filename;
+        }
+        int prefix = getPrefixLength(filename);
+        if (prefix < 0) {
+            return null;
+        }
+
+        char[] array = new char[size + 2]; // +1 for possible extra slash, +2
+        // for arraycopy
+        filename.getChars(0, filename.length(), array, 0);
+
+        // fix separators throughout
+        char otherSeparator = (separator == SYSTEM_SEPARATOR ? OTHER_SEPARATOR
+                : SYSTEM_SEPARATOR);
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == otherSeparator) {
+                array[i] = separator;
+            }
+        }
+
+        // add extra separator on the end to simplify code below
+        boolean lastIsDirectory = true;
+        if (array[size - 1] != separator) {
+            array[size++] = separator;
+            lastIsDirectory = false;
+        }
+
+        // adjoining slashes
+        for (int i = prefix + 1; i < size; i++) {
+            if (array[i] == separator && array[i - 1] == separator) {
+                System.arraycopy(array, i, array, i - 1, size - i);
+                size--;
+                i--;
+            }
+        }
+
+        // dot slash
+        for (int i = prefix + 1; i < size; i++) {
+            if (array[i] == separator && array[i - 1] == '.'
+                    && (i == prefix + 1 || array[i - 2] == separator)) {
+                if (i == size - 1) {
+                    lastIsDirectory = true;
+                }
+                System.arraycopy(array, i + 1, array, i - 1, size - i);
+                size -= 2;
+                i--;
+            }
+        }
+
+        // double dot slash
+        outer: for (int i = prefix + 2; i < size; i++) {
+            if (array[i] == separator && array[i - 1] == '.'
+                    && array[i - 2] == '.'
+                    && (i == prefix + 2 || array[i - 3] == separator)) {
+                if (i == prefix + 2) {
+                    return null;
+                }
+                if (i == size - 1) {
+                    lastIsDirectory = true;
+                }
+                int j;
+                for (j = i - 4; j >= prefix; j--) {
+                    if (array[j] == separator) {
+                        // remove b/../ from a/b/../c
+                        System.arraycopy(array, i + 1, array, j + 1, size - i);
+                        size -= (i - j);
+                        i = j + 1;
+                        continue outer;
+                    }
+                }
+                // remove a/../ from a/../c
+                System.arraycopy(array, i + 1, array, prefix, size - i);
+                size -= (i + 1 - prefix);
+                i = prefix + 1;
+            }
+        }
+
+        if (size <= 0) { // should never be less than 0
+            return "";
+        }
+        if (size <= prefix) { // should never be less than prefix
+            return new String(array, 0, size);
+        }
+        if (lastIsDirectory && keepSeparator) {
+            return new String(array, 0, size); // keep trailing separator
+        }
+        return new String(array, 0, size - 1); // lose trailing separator
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Concatenates a filename to a base path using normal command line style
+     * rules.
+     * <p>
+     * The effect is equivalent to resultant directory after changing directory
+     * to the first argument, followed by changing directory to the second
+     * argument.
+     * <p>
+     * The first argument is the base path, the second is the path to
+     * concatenate. The returned path is always normalized via
+     * {@link #normalizePath(String)}, thus <code>..</code> is handled.
+     * <p>
+     * If <code>pathToAdd</code> is absolute (has an absolute prefix), then it
+     * will be normalized and returned. Otherwise, the paths will be joined,
+     * normalized and returned.
+     * <p>
+     * The output will be the same on both Unix and Windows except for the
+     * separator character.
+     * 
+     * <pre>
+     * /foo/ + bar          -->   /foo/bar
+     * /foo + bar           -->   /foo/bar
+     * /foo + /bar          -->   /bar
+     * /foo + C:/bar        -->   C:/bar
+     * /foo + C:bar         -->   C:bar (*)
+     * /foo/a/ + ../bar     -->   foo/bar
+     * /foo/ + ../../bar    -->   null
+     * /foo/ + /bar         -->   /bar
+     * /foo/.. + /bar       -->   /bar
+     * /foo + bar/c.txt     -->   /foo/bar/c.txt
+     * /foo/c.txt + bar     -->   /foo/c.txt/bar (!)
+     * </pre>
+     * 
+     * (*) Note that the Windows relative drive prefix is unreliable when used
+     * with this method. (!) Note that the first parameter must be a path. If it
+     * ends with a name, then the name will be built into the concatenated path.
+     * If this might be a problem, use {@link #getFullPath(String)} on the base
+     * path argument.
+     * 
+     * @param basePath
+     *            the base path to attach to, always treated as a path
+     * @param fullFilenameToAdd
+     *            the filename (or path) to attach to the base
+     * @return the concatenated path, or null if invalid
+     */
+    public static String concatPath(String basePath, String fullFilenameToAdd) {
+        int prefix = getPrefixLength(fullFilenameToAdd);
+        if (prefix < 0) {
+            return null;
+        }
+        if (prefix > 0) {
+            return normalizePath(fullFilenameToAdd);
+        }
+        if (basePath == null) {
+            return null;
+        }
+        int len = basePath.length();
+        if (len == 0) {
+            return normalizePath(fullFilenameToAdd);
+        }
+        char ch = basePath.charAt(len - 1);
+        if (isPathSeparator(ch)) {
+            return normalizePath(basePath + fullFilenameToAdd);
+        } else {
+            return normalizePath(basePath + '/' + fullFilenameToAdd);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Converts all separators to the Unix separator of forward slash.
+     * 
+     * @param path
+     *            the path to be changed, null ignored
+     * @return the updated path
+     */
+    public static String separatorsToUnix(String path) {
+        if (path == null || path.indexOf(WINDOWS_SEPARATOR) == -1) {
+            return path;
+        }
+        return path.replace(WINDOWS_SEPARATOR, UNIX_SEPARATOR);
+    }
+
+    /**
+     * Converts all separators to the Windows separator of backslash.
+     * 
+     * @param path
+     *            the path to be changed, null ignored
+     * @return the updated path
+     */
+    public static String separatorsToWindows(String path) {
+        if (path == null || path.indexOf(UNIX_SEPARATOR) == -1) {
+            return path;
+        }
+        return path.replace(UNIX_SEPARATOR, WINDOWS_SEPARATOR);
+    }
+
+    /**
+     * Converts all separators to the system separator.
+     * 
+     * @param path
+     *            the path to be changed, null ignored
+     * @return the updated path
+     */
+    public static String separatorsToSystem(String path) {
+        if (path == null) {
+            return null;
+        }
+        if (isSystemWindows()) {
+            return separatorsToWindows(path);
+        } else {
+            return separatorsToUnix(path);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Returns the length of the filename prefix, such as <code>C:/</code> or
+     * <code>~/</code>.
+     * <p>
+     * This method will handle a file in either Unix or Windows format.
+     * <p>
+     * The prefix length includes the first slash in the full filename if
+     * applicable. Thus, it is possible that the length returned is greater than
+     * the length of the input string.
+     * 
+     * <pre>
+     * Windows:
+     * a\b\c.txt           --> ""          --> relative
+     * \a\b\c.txt          --> "\"         --> current drive absolute
+     * C:a\b\c.txt         --> "C:"        --> drive relative
+     * C:\a\b\c.txt        --> "C:\"       --> absolute
+     * \\server\a\b\c.txt  --> "\\server\" --> UNC
+     * 
+     * Unix:
+     * a/b/c.txt           --> ""          --> relative
+     * /a/b/c.txt          --> "/"         --> absolute
+     * ~/a/b/c.txt         --> "~/"        --> current user
+     * ~                   --> "~/"        --> current user (slash added)
+     * ~user/a/b/c.txt     --> "~user/"    --> named user
+     * ~user               --> "~user/"    --> named user (slash added)
+     * </pre>
+     * <p>
+     * The output will be the same irrespective of the machine that the code is
+     * running on. ie. both Unix and Windows prefixes are matched regardless.
+     * 
+     * @param filename
+     *            the filename to find the prefix in, null returns -1
+     * @return the length of the prefix, -1 if invalid or null
+     */
+    public static int getPrefixLength(String filename) {
+        if (filename == null) {
+            return -1;
+        }
+        int len = filename.length();
+        if (len == 0) {
+            return 0;
+        }
+        char ch0 = filename.charAt(0);
+        if (ch0 == ':') {
+            return -1;
+        }
+        if (len == 1) {
+            if (ch0 == '~') {
+                return 2; // return a length greater than the input
+            }
+            return (isPathSeparator(ch0) ? 1 : 0);
+        } else {
+            if (ch0 == '~') {
+                int posUnix = filename.indexOf(UNIX_SEPARATOR, 1);
+                int posWin = filename.indexOf(WINDOWS_SEPARATOR, 1);
+                if (posUnix == -1 && posWin == -1) {
+                    return len + 1; // return a length greater than the input
+                }
+                posUnix = (posUnix == -1 ? posWin : posUnix);
+                posWin = (posWin == -1 ? posUnix : posWin);
+                return Math.min(posUnix, posWin) + 1;
+            }
+            char ch1 = filename.charAt(1);
+            if (ch1 == ':') {
+                ch0 = Character.toUpperCase(ch0);
+                if (ch0 >= 'A' && ch0 <= 'Z') {
+                    if (len == 2
+                            || isPathSeparator(filename.charAt(2)) == false) {
+                        return 2;
+                    }
+                    return 3;
+                }
+                return -1;
+
+            } else if (isPathSeparator(ch0) && isPathSeparator(ch1)) {
+                int posUnix = filename.indexOf(UNIX_SEPARATOR, 2);
+                int posWin = filename.indexOf(WINDOWS_SEPARATOR, 2);
+                if ((posUnix == -1 && posWin == -1) || posUnix == 2
+                        || posWin == 2) {
+                    return -1;
+                }
+                posUnix = (posUnix == -1 ? posWin : posUnix);
+                posWin = (posWin == -1 ? posUnix : posWin);
+                return Math.min(posUnix, posWin) + 1;
+            } else {
+                return (isPathSeparator(ch0) ? 1 : 0);
+            }
+        }
+    }
+
+    /**
+     * Returns the index of the last directory separator character.
+     * <p>
+     * This method will handle a file in either Unix or Windows format. The
+     * position of the last forward or backslash is returned.
+     * <p>
+     * The output will be the same irrespective of the machine that the code is
+     * running on.
+     * 
+     * @param filename
+     *            the filename to find the last path separator in, null returns
+     *            -1
+     * @return the index of the last separator character, or -1 if there is no
+     *         such character
+     */
+    public static int indexOfLastSeparator(String filename) {
+        if (filename == null) {
+            return -1;
+        }
+        int lastUnixPos = filename.lastIndexOf(UNIX_SEPARATOR);
+        int lastWindowsPos = filename.lastIndexOf(WINDOWS_SEPARATOR);
+        return Math.max(lastUnixPos, lastWindowsPos);
+    }
+
+    /**
+     * Returns the index of the last extension separator character, which is a
+     * dot.
+     * <p>
+     * This method also checks that there is no directory separator after the
+     * last dot. To do this it uses {@link #indexOfLastSeparator(String)} which
+     * will handle a file in either Unix or Windows format.
+     * <p>
+     * The output will be the same irrespective of the machine that the code is
+     * running on.
+     * 
+     * @param filename
+     *            the filename to find the last path separator in, null returns
+     *            -1
+     * @return the index of the last separator character, or -1 if there is no
+     *         such character
+     */
+    public static int indexOfExtension(String filename) {
+        if (filename == null) {
+            return -1;
+        }
+        int extensionPos = filename.lastIndexOf(EXTENSION_SEPARATOR);
+        int lastSeparator = indexOfLastSeparator(filename);
+        return (lastSeparator > extensionPos ? -1 : extensionPos);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Gets the prefix from a full filename, such as <code>C:/</code> or
+     * <code>~/</code>.
+     * <p>
+     * This method will handle a file in either Unix or Windows format. The
+     * prefix includes the first slash in the full filename where applicable.
+     * 
+     * <pre>
+     * Windows:
+     * a\b\c.txt           --> ""          --> relative
+     * \a\b\c.txt          --> "\"         --> current drive absolute
+     * C:a\b\c.txt         --> "C:"        --> drive relative
+     * C:\a\b\c.txt        --> "C:\"       --> absolute
+     * \\server\a\b\c.txt  --> "\\server\" --> UNC
+     * 
+     * Unix:
+     * a/b/c.txt           --> ""          --> relative
+     * /a/b/c.txt          --> "/"         --> absolute
+     * ~/a/b/c.txt         --> "~/"        --> current user
+     * ~                   --> "~/"        --> current user (slash added)
+     * ~user/a/b/c.txt     --> "~user/"    --> named user
+     * ~user               --> "~user/"    --> named user (slash added)
+     * </pre>
+     * <p>
+     * The output will be the same irrespective of the machine that the code is
+     * running on. ie. both Unix and Windows prefixes are matched regardless.
+     * 
+     * @param filename
+     *            the filename to query, null returns null
+     * @return the prefix of the file, null if invalid
+     */
+    public static String getPathPrefix(String filename) {
+        if (filename == null) {
+            return null;
+        }
+        int len = getPrefixLength(filename);
+        if (len < 0) {
+            return null;
+        }
+        if (len > filename.length()) {
+            return filename + UNIX_SEPARATOR; // we know this only happens for
+            // unix
+        }
+        return filename.substring(0, len);
+    }
+
+    /**
+     * Gets the path from a full filename, which excludes the prefix.
+     * <p>
+     * This method will handle a file in either Unix or Windows format. The
+     * method is entirely text based, and returns the text before and including
+     * the last forward or backslash.
+     * 
+     * <pre>
+     * C:\a\b\c.txt --> a\b\
+     * ~/a/b/c.txt  --> a/b/
+     * a.txt        --> ""
+     * a/b/c        --> a/b/
+     * a/b/c/       --> a/b/c/
+     * </pre>
+     * <p>
+     * The output will be the same irrespective of the machine that the code is
+     * running on.
+     * <p>
+     * This method drops the prefix from the result. See
+     * {@link #getFullPath(String)} for the method that retains the prefix.
+     * 
+     * @param filename
+     *            the filename to query, null returns null
+     * @return the path of the file, an empty string if none exists, null if
+     *         invalid
+     */
+    public static String getPath(String filename) {
+        return doGetPath(filename, 1);
+    }
+
+    /**
+     * Gets the path from a full filename, which excludes the prefix, and also
+     * excluding the final directory separator.
+     * <p>
+     * This method will handle a file in either Unix or Windows format. The
+     * method is entirely text based, and returns the text before the last
+     * forward or backslash.
+     * 
+     * <pre>
+     * C:\a\b\c.txt --> a\b
+     * ~/a/b/c.txt  --> a/b
+     * a.txt        --> ""
+     * a/b/c        --> a/b
+     * a/b/c/       --> a/b/c
+     * </pre>
+     * <p>
+     * The output will be the same irrespective of the machine that the code is
+     * running on.
+     * <p>
+     * This method drops the prefix from the result. See
+     * {@link #getFullPathNoEndSeparator(String)} for the method that retains
+     * the prefix.
+     * 
+     * @param filename
+     *            the filename to query, null returns null
+     * @return the path of the file, an empty string if none exists, null if
+     *         invalid
+     */
+    public static String getPathNoEndSeparator(String filename) {
+        return doGetPath(filename, 0);
+    }
+
+    /**
+     * Does the work of getting the path.
+     * 
+     * @param filename
+     *            the filename
+     * @param separatorAdd
+     *            0 to omit the end separator, 1 to return it
+     * @return the path
+     */
+    private static String doGetPath(String filename, int separatorAdd) {
+        if (filename == null) {
+            return null;
+        }
+        int prefix = getPrefixLength(filename);
+        if (prefix < 0) {
+            return null;
+        }
+        int index = indexOfLastSeparator(filename);
+        int endIndex = index + separatorAdd;
+        if (prefix >= filename.length() || index < 0 || prefix >= endIndex) {
+            return "";
+        }
+        return filename.substring(prefix, endIndex);
+    }
+
+    /**
+     * Gets the full path from a full filename, which is the prefix + path.
+     * <p>
+     * This method will handle a file in either Unix or Windows format. The
+     * method is entirely text based, and returns the text before and including
+     * the last forward or backslash.
+     * 
+     * <pre>
+     * C:\a\b\c.txt --> C:\a\b\
+     * ~/a/b/c.txt  --> ~/a/b/
+     * a.txt        --> ""
+     * a/b/c        --> a/b/
+     * a/b/c/       --> a/b/c/
+     * C:           --> C:
+     * C:\          --> C:\
+     * ~            --> ~/
+     * ~/           --> ~/
+     * ~user        --> ~user/
+     * ~user/       --> ~user/
+     * </pre>
+     * <p>
+     * The output will be the same irrespective of the machine that the code is
+     * running on.
+     * 
+     * @param filename
+     *            the filename to query, null returns null
+     * @return the path of the file, an empty string if none exists, null if
+     *         invalid
+     */
+    public static String getFullPath(String filename) {
+        return doGetFullPath(filename, true);
+    }
+
+    /**
+     * Gets the full path from a full filename, which is the prefix + path, and
+     * also excluding the final directory separator.
+     * <p>
+     * This method will handle a file in either Unix or Windows format. The
+     * method is entirely text based, and returns the text before the last
+     * forward or backslash.
+     * 
+     * <pre>
+     * C:\a\b\c.txt --> C:\a\b
+     * ~/a/b/c.txt  --> ~/a/b
+     * a.txt        --> ""
+     * a/b/c        --> a/b
+     * a/b/c/       --> a/b/c
+     * C:           --> C:
+     * C:\          --> C:\
+     * ~            --> ~
+     * ~/           --> ~
+     * ~user        --> ~user
+     * ~user/       --> ~user
+     * </pre>
+     * <p>
+     * The output will be the same irrespective of the machine that the code is
+     * running on.
+     * 
+     * @param filename
+     *            the filename to query, null returns null
+     * @return the path of the file, an empty string if none exists, null if
+     *         invalid
+     */
+    public static String getFullPathNoEndSeparator(String filename) {
+        return doGetFullPath(filename, false);
+    }
+
+    /**
+     * Does the work of getting the path.
+     * 
+     * @param filename
+     *            the filename
+     * @param includeSeparator
+     *            true to include the end separator
+     * @return the path
+     */
+    private static String doGetFullPath(String filename,
+            boolean includeSeparator) {
+        if (filename == null) {
+            return null;
+        }
+        int prefix = getPrefixLength(filename);
+        if (prefix < 0) {
+            return null;
+        }
+        if (prefix >= filename.length()) {
+            if (includeSeparator) {
+                return getPathPrefix(filename); // add end slash if necessary
+            } else {
+                return filename;
+            }
+        }
+        int index = indexOfLastSeparator(filename);
+        if (index < 0) {
+            return filename.substring(0, prefix);
+        }
+        int end = index + (includeSeparator ? 1 : 0);
+        if (end == 0) {
+            end++;
+        }
+        return filename.substring(0, end);
+    }
+
+    /**
+     * Gets the name minus the path from a full filename.
+     * <p>
+     * This method will handle a file in either Unix or Windows format. The text
+     * after the last forward or backslash is returned.
+     * 
+     * <pre>
+     * a/b/c.txt --> c.txt
+     * a.txt     --> a.txt
+     * a/b/c     --> c
+     * a/b/c/    --> ""
+     * </pre>
+     * <p>
+     * The output will be the same irrespective of the machine that the code is
+     * running on.
+     * 
+     * @param filename
+     *            the filename to query, null returns null
+     * @return the name of the file without the path, or an empty string if none
+     *         exists
+     */
+    public static String getFileName(String filename) {
+        if (filename == null) {
+            return null;
+        }
+        int index = indexOfLastSeparator(filename);
+        return filename.substring(index + 1);
+    }
+
+    /**
+     * Gets the base name, minus the full path and extension, from a full
+     * filename.
+     * <p>
+     * This method will handle a file in either Unix or Windows format. The text
+     * after the last forward or backslash and before the last dot is returned.
+     * 
+     * <pre>
+     * a/b/c.txt --> c
+     * a.txt     --> a
+     * a/b/c     --> c
+     * a/b/c/    --> ""
+     * </pre>
+     * <p>
+     * The output will be the same irrespective of the machine that the code is
+     * running on.
+     * 
+     * @param filename
+     *            the filename to query, null returns null
+     * @return the name of the file without the path, or an empty string if none
+     *         exists
+     */
+    public static String getBaseName(String filename) {
+        return removeExtension(getFileName(filename));
+    }
+
+    /**
+     * Gets the extension of a filename.
+     * <p>
+     * This method returns the textual part of the filename after the last dot.
+     * There must be no directory separator after the dot.
+     * 
+     * <pre>
+     * foo.txt      --> "txt"
+     * a/b/c.jpg    --> "jpg"
+     * a/b.txt/c    --> ""
+     * a/b/c        --> ""
+     * </pre>
+     * <p>
+     * The output will be the same irrespective of the machine that the code is
+     * running on.
+     * 
+     * @param filename
+     *            the filename to retrieve the extension of.
+     * @return the extension of the file or an empty string if none exists or
+     *         <code>null</code> if the filename is <code>null</code>.
+     */
+    public static String getExtension(String filename) {
+        if (filename == null) {
+            return null;
+        }
+        int index = indexOfExtension(filename);
+        if (index == -1) {
+            return "";
+        } else {
+            return filename.substring(index + 1);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Removes the extension from a filename.
+     * <p>
+     * This method returns the textual part of the filename before the last dot.
+     * There must be no directory separator after the dot.
+     * 
+     * <pre>
+     * foo.txt    --> foo
+     * a\b\c.jpg  --> a\b\c
+     * a\b\c      --> a\b\c
+     * a.b\c      --> a.b\c
+     * </pre>
+     * <p>
+     * The output will be the same irrespective of the machine that the code is
+     * running on.
+     * 
+     * @param filename
+     *            the filename to query, null returns null
+     * @return the filename minus the extension
+     */
+    public static String removeExtension(String filename) {
+        if (filename == null) {
+            return null;
+        }
+        int index = indexOfExtension(filename);
+        if (index == -1) {
+            return filename;
+        } else {
+            return filename.substring(0, index);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Checks whether two filenames are equal exactly.
+     * <p>
+     * No processing is performed on the filenames other than comparison, thus
+     * this is merely a null-safe case-sensitive equals.
+     * 
+     * @param filename1
+     *            the first filename to query, may be null
+     * @param filename2
+     *            the second filename to query, may be null
+     * @return true if the filenames are equal, null equals null
+     * @see IOCase#SENSITIVE
+     */
+    public static boolean equalsFilenames(String filename1, String filename2) {
+        return equalsFilenames(filename1, filename2, false, IOCase.SENSITIVE);
+    }
+
+    /**
+     * Checks whether two filenames are equal using the case rules of the
+     * system.
+     * <p>
+     * No processing is performed on the filenames other than comparison. The
+     * check is case-sensitive on Unix and case-insensitive on Windows.
+     * 
+     * @param filename1
+     *            the first filename to query, may be null
+     * @param filename2
+     *            the second filename to query, may be null
+     * @return true if the filenames are equal, null equals null
+     * @see IOCase#SYSTEM
+     */
+    public static boolean equalsOnSystem(String filename1, String filename2) {
+        return equalsFilenames(filename1, filename2, false, IOCase.SYSTEM);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Checks whether two filenames are equal after both have been normalized.
+     * <p>
+     * Both filenames are first passed to {@link #normalizePath(String)}. The
+     * check is then performed in a case-sensitive manner.
+     * 
+     * @param filename1
+     *            the first filename to query, may be null
+     * @param filename2
+     *            the second filename to query, may be null
+     * @return true if the filenames are equal, null equals null
+     * @see IOCase#SENSITIVE
+     */
+    public static boolean equalsNormalized(String filename1, String filename2) {
+        return equalsFilenames(filename1, filename2, true, IOCase.SENSITIVE);
+    }
+
+    /**
+     * Checks whether two filenames are equal after both have been normalized
+     * and using the case rules of the system.
+     * <p>
+     * Both filenames are first passed to {@link #normalizePath(String)}. The
+     * check is then performed case-sensitive on Unix and case-insensitive on
+     * Windows.
+     * 
+     * @param filename1
+     *            the first filename to query, may be null
+     * @param filename2
+     *            the second filename to query, may be null
+     * @return true if the filenames are equal, null equals null
+     * @see IOCase#SYSTEM
+     */
+    public static boolean equalsNormalizedOnSystem(String filename1,
+            String filename2) {
+        return equalsFilenames(filename1, filename2, true, IOCase.SYSTEM);
+    }
+
+    /**
+     * Checks whether two filenames are equal, optionally normalizing and
+     * providing control over the case-sensitivity.
+     * 
+     * @param filename1
+     *            the first filename to query, may be null
+     * @param filename2
+     *            the second filename to query, may be null
+     * @param normalized
+     *            whether to normalize the filenames
+     * @param caseSensitivity
+     *            what case sensitivity rule to use, null means case-sensitive
+     * @return true if the filenames are equal, null equals null
+     * @since Commons IO 1.3
+     */
+    public static boolean equalsFilenames(String filename1, String filename2,
+            boolean normalized, IOCase caseSensitivity) {
+
+        if (filename1 == null || filename2 == null) {
+            return (filename1 == null && filename2 == null);
+        }
+        if (normalized) {
+            filename1 = normalizePath(filename1);
+            filename2 = normalizePath(filename2);
+            if (filename1 == null || filename2 == null) {
+                throw new NullPointerException(
+                        "Error normalizing one or both of the file names");
+            }
+        }
+        if (caseSensitivity == null) {
+            caseSensitivity = IOCase.SENSITIVE;
+        }
+        return caseSensitivity.checkEquals(filename1, filename2);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Checks whether the extension of the filename is that specified.
+     * <p>
+     * This method obtains the extension as the textual part of the filename
+     * after the last dot. There must be no directory separator after the dot.
+     * The extension check is case-sensitive on all platforms.
+     * 
+     * @param filename
+     *            the filename to query, null returns false
+     * @param extension
+     *            the extension to check for, null or empty checks for no
+     *            extension
+     * @return true if the filename has the specified extension
+     */
+    public static boolean isExtension(String filename, String extension) {
+        if (filename == null) {
+            return false;
+        }
+        if (extension == null || extension.length() == 0) {
+            return (indexOfExtension(filename) == -1);
+        }
+        String fileExt = getExtension(filename);
+        return fileExt.equals(extension);
+    }
+
+    /**
+     * Checks whether the extension of the filename is one of those specified.
+     * <p>
+     * This method obtains the extension as the textual part of the filename
+     * after the last dot. There must be no directory separator after the dot.
+     * The extension check is case-sensitive on all platforms.
+     * 
+     * @param filename
+     *            the filename to query, null returns false
+     * @param extensions
+     *            the extensions to check for, null checks for no extension
+     * @return true if the filename is one of the extensions
+     */
+    public static boolean isExtension(String filename, String[] extensions) {
+        if (filename == null) {
+            return false;
+        }
+        if (extensions == null || extensions.length == 0) {
+            return (indexOfExtension(filename) == -1);
+        }
+        String fileExt = getExtension(filename);
+        for (String extension : extensions) {
+            if (fileExt.equals(extension)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether the extension of the filename is one of those specified.
+     * <p>
+     * This method obtains the extension as the textual part of the filename
+     * after the last dot. There must be no directory separator after the dot.
+     * The extension check is case-sensitive on all platforms.
+     * 
+     * @param filename
+     *            the filename to query, null returns false
+     * @param extensions
+     *            the extensions to check for, null checks for no extension
+     * @return true if the filename is one of the extensions
+     */
+    public static boolean isExtension(String filename,
+            Collection<String> extensions) {
+        if (filename == null) {
+            return false;
+        }
+        if (extensions == null || extensions.isEmpty()) {
+            return (indexOfExtension(filename) == -1);
+        }
+        String fileExt = getExtension(filename);
+        for (String extension : extensions) {
+            if (fileExt.equals(extension)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Checks a filename to see if it matches the specified wildcard matcher,
+     * always testing case-sensitive.
+     * <p>
+     * The wildcard matcher uses the characters '?' and '*' to represent a
+     * single or multiple (zero or more) wildcard characters. This is the same
+     * as often found on Dos/Unix command lines. The check is case-sensitive
+     * always.
+     * 
+     * <pre>
+     * wildcardMatch("c.txt", "*.txt")      --> true
+     * wildcardMatch("c.txt", "*.jpg")      --> false
+     * wildcardMatch("a/b/c.txt", "a/b/*")  --> true
+     * wildcardMatch("c.txt", "*.???")      --> true
+     * wildcardMatch("c.txt", "*.????")     --> false
+     * </pre>
+     * 
+     * N.B. the sequence "*?" does not work properly at present in match
+     * strings.
+     * 
+     * @param filename
+     *            the filename to match on
+     * @param wildcardMatcher
+     *            the wildcard string to match against
+     * @return true if the filename matches the wilcard string
+     * @see IOCase#SENSITIVE
+     */
+    public static boolean wildcardMatch(String filename, String wildcardMatcher) {
+        return wildcardMatch(filename, wildcardMatcher, IOCase.SENSITIVE);
+    }
+
+    /**
+     * Checks a filename to see if it matches the specified wildcard matcher
+     * using the case rules of the system.
+     * <p>
+     * The wildcard matcher uses the characters '?' and '*' to represent a
+     * single or multiple (zero or more) wildcard characters. This is the same
+     * as often found on Dos/Unix command lines. The check is case-sensitive on
+     * Unix and case-insensitive on Windows.
+     * 
+     * <pre>
+     * wildcardMatch("c.txt", "*.txt")      --> true
+     * wildcardMatch("c.txt", "*.jpg")      --> false
+     * wildcardMatch("a/b/c.txt", "a/b/*")  --> true
+     * wildcardMatch("c.txt", "*.???")      --> true
+     * wildcardMatch("c.txt", "*.????")     --> false
+     * </pre>
+     * 
+     * N.B. the sequence "*?" does not work properly at present in match
+     * strings.
+     * 
+     * @param filename
+     *            the filename to match on
+     * @param wildcardMatcher
+     *            the wildcard string to match against
+     * @return true if the filename matches the wilcard string
+     * @see IOCase#SYSTEM
+     */
+    public static boolean wildcardMatchOnSystem(String filename,
+            String wildcardMatcher) {
+        return wildcardMatch(filename, wildcardMatcher, IOCase.SYSTEM);
+    }
+
+    /**
+     * Checks a filename to see if it matches the specified wildcard matcher
+     * allowing control over case-sensitivity.
+     * <p>
+     * The wildcard matcher uses the characters '?' and '*' to represent a
+     * single or multiple (zero or more) wildcard characters. N.B. the sequence
+     * "*?" does not work properly at present in match strings.
+     * 
+     * @param filename
+     *            the filename to match on
+     * @param wildcardMatcher
+     *            the wildcard string to match against
+     * @param caseSensitivity
+     *            what case sensitivity rule to use, null means case-sensitive
+     * @return true if the filename matches the wilcard string
+     * @since Commons IO 1.3
+     */
+    public static boolean wildcardMatch(String filename,
+            String wildcardMatcher, IOCase caseSensitivity) {
+        if (filename == null && wildcardMatcher == null) {
+            return true;
+        }
+        if (filename == null || wildcardMatcher == null) {
+            return false;
+        }
+        if (caseSensitivity == null) {
+            caseSensitivity = IOCase.SENSITIVE;
+        }
+        String[] wcs = splitOnTokens(wildcardMatcher);
+        boolean anyChars = false;
+        int textIdx = 0;
+        int wcsIdx = 0;
+        Stack<int[]> backtrack = new Stack<int[]>();
+
+        // loop around a backtrack stack, to handle complex * matching
+        do {
+            if (backtrack.size() > 0) {
+                int[] array = backtrack.pop();
+                wcsIdx = array[0];
+                textIdx = array[1];
+                anyChars = true;
+            }
+
+            // loop whilst tokens and text left to process
+            while (wcsIdx < wcs.length) {
+
+                if (wcs[wcsIdx].equals("?")) {
+                    // ? so move to next text char
+                    textIdx++;
+                    if (textIdx > filename.length()) {
+                        break;
+                    }
+                    anyChars = false;
+
+                } else if (wcs[wcsIdx].equals("*")) {
+                    // set any chars status
+                    anyChars = true;
+                    if (wcsIdx == wcs.length - 1) {
+                        textIdx = filename.length();
+                    }
+
+                } else {
+                    // matching text token
+                    if (anyChars) {
+                        // any chars then try to locate text token
+                        textIdx = caseSensitivity.checkIndexOf(filename,
+                                textIdx, wcs[wcsIdx]);
+                        if (textIdx == -1) {
+                            // token not found
+                            break;
+                        }
+                        int repeat = caseSensitivity.checkIndexOf(filename,
+                                textIdx + 1, wcs[wcsIdx]);
+                        if (repeat >= 0) {
+                            backtrack.push(new int[] { wcsIdx, repeat });
+                        }
+                    } else {
+                        // matching from current position
+                        if (!caseSensitivity.checkRegionMatches(filename,
+                                textIdx, wcs[wcsIdx])) {
+                            // couldnt match token
+                            break;
+                        }
+                    }
+
+                    // matched text token, move text index to end of matched
+                    // token
+                    textIdx += wcs[wcsIdx].length();
+                    anyChars = false;
+                }
+
+                wcsIdx++;
+            }
+
+            // full match
+            if (wcsIdx == wcs.length && textIdx == filename.length()) {
+                return true;
+            }
+
+        } while (backtrack.size() > 0);
+
+        return false;
+    }
+
+    /**
+     * Splits a string into a number of tokens. The text is split by '?' and
+     * '*'. Where multiple '*' occur consecutively they are collapsed into a
+     * single '*'.
+     * 
+     * @param text
+     *            the text to split
+     * @return the array of tokens, never null
+     */
+    static String[] splitOnTokens(String text) {
+        // used by wildcardMatch
+        // package level so a unit test may run on this
+
+        if (text.indexOf('?') == -1 && text.indexOf('*') == -1) {
+            return new String[] { text };
+        }
+
+        char[] array = text.toCharArray();
+        ArrayList<String> list = new ArrayList<String>();
+        StringBuilder buffer = new StringBuilder();
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == '?' || array[i] == '*') {
+                if (buffer.length() != 0) {
+                    list.add(buffer.toString());
+                    buffer.setLength(0);
+                }
+                if (array[i] == '?') {
+                    list.add("?");
+                } else if (list.size() == 0
+                        || (i > 0 && list.get(list.size() - 1).equals("*") == false)) {
+                    list.add("*");
+                }
+            } else {
+                buffer.append(array[i]);
+            }
+        }
+        if (buffer.length() != 0) {
+            list.add(buffer.toString());
+        }
+
+        return list.toArray(new String[list.size()]);
+    }
+
+    // ///////////////////////////////////////////
+    //
+    // FileFilterUtils
+    //
+    // ///////////////////////////////////////////
+
+    /**
+     * <p>
+     * Applies an {@link IOFileFilter} to the provided {@link File} objects. The
+     * resulting array is a subset of the original file list that matches the
+     * provided filter.
+     * </p>
+     * 
+     * <p>
+     * The {@link Set} returned by this method is not guaranteed to be thread
+     * safe.
+     * </p>
+     * 
+     * <pre>
+     * Set&lt;File&gt; allFiles = ...
+     * Set&lt;File&gt; javaFiles = FileFilterUtils.filterSet(allFiles,
+     *     FileFilterUtils.suffixFileFilter(".java"));
+     * </pre>
+     * 
+     * @param filter
+     *            the filter to apply to the set of files.
+     * @param files
+     *            the array of files to apply the filter to.
+     * 
+     * @return a subset of <code>files</code> that is accepted by the file
+     *         filter.
+     * @throws IllegalArgumentException
+     *             if the filter is <code>null</code> or <code>files</code>
+     *             contains a <code>null</code> value.
+     * 
+     * @since Commons IO 2.0
+     */
+    public static File[] fileFilter(IOFileFilter filter, File... files) {
+        if (filter == null) {
+            throw new IllegalArgumentException("file filter is null");
+        }
+        if (files == null) {
+            return new File[0];
+        }
+        List<File> acceptedFiles = new ArrayList<File>();
+        for (File file : files) {
+            if (file == null) {
+                throw new IllegalArgumentException("file array contains null");
+            }
+            if (filter.accept(file)) {
+                acceptedFiles.add(file);
+            }
+        }
+        return acceptedFiles.toArray(new File[acceptedFiles.size()]);
+    }
+
+    /**
+     * <p>
+     * Applies an {@link IOFileFilter} to the provided {@link File} objects. The
+     * resulting array is a subset of the original file list that matches the
+     * provided filter.
+     * </p>
+     * 
+     * <p>
+     * The {@link Set} returned by this method is not guaranteed to be thread
+     * safe.
+     * </p>
+     * 
+     * <pre>
+     * Set&lt;File&gt; allFiles = ...
+     * Set&lt;File&gt; javaFiles = FileFilterUtils.filterSet(allFiles,
+     *     FileFilterUtils.suffixFileFilter(".java"));
+     * </pre>
+     * 
+     * @param filter
+     *            the filter to apply to the set of files.
+     * @param files
+     *            the array of files to apply the filter to.
+     * 
+     * @return a subset of <code>files</code> that is accepted by the file
+     *         filter.
+     * @throws IllegalArgumentException
+     *             if the filter is <code>null</code> or <code>files</code>
+     *             contains a <code>null</code> value.
+     * 
+     * @since Commons IO 2.0
+     */
+    public static File[] filter(IOFileFilter filter, Iterable<File> files) {
+        List<File> acceptedFiles = filterList(filter, files);
+        return acceptedFiles.toArray(new File[acceptedFiles.size()]);
+    }
+
+    /**
+     * <p>
+     * Applies an {@link IOFileFilter} to the provided {@link File} objects. The
+     * resulting list is a subset of the original files that matches the
+     * provided filter.
+     * </p>
+     * 
+     * <p>
+     * The {@link List} returned by this method is not guaranteed to be thread
+     * safe.
+     * </p>
+     * 
+     * <pre>
+     * List&lt;File&gt; filesAndDirectories = ...
+     * List&lt;File&gt; directories = FileFilterUtils.filterList(filesAndDirectories,
+     *     FileFilterUtils.directoryFileFilter());
+     * </pre>
+     * 
+     * @param filter
+     *            the filter to apply to each files in the list.
+     * @param files
+     *            the collection of files to apply the filter to.
+     * 
+     * @return a subset of <code>files</code> that is accepted by the file
+     *         filter.
+     * @throws IllegalArgumentException
+     *             if the filter is <code>null</code> or <code>files</code>
+     *             contains a <code>null</code> value.
+     * @since Commons IO 2.0
+     */
+    public static List<File> filterList(IOFileFilter filter,
+            Iterable<File> files) {
+        return filter(filter, files, new ArrayList<File>());
+    }
+
+    /**
+     * <p>
+     * Applies an {@link IOFileFilter} to the provided {@link File} objects. The
+     * resulting list is a subset of the original files that matches the
+     * provided filter.
+     * </p>
+     * 
+     * <p>
+     * The {@link List} returned by this method is not guaranteed to be thread
+     * safe.
+     * </p>
+     * 
+     * <pre>
+     * List&lt;File&gt; filesAndDirectories = ...
+     * List&lt;File&gt; directories = FileFilterUtils.filterList(filesAndDirectories,
+     *     FileFilterUtils.directoryFileFilter());
+     * </pre>
+     * 
+     * @param filter
+     *            the filter to apply to each files in the list.
+     * @param files
+     *            the collection of files to apply the filter to.
+     * 
+     * @return a subset of <code>files</code> that is accepted by the file
+     *         filter.
+     * @throws IllegalArgumentException
+     *             if the filter is <code>null</code> or <code>files</code>
+     *             contains a <code>null</code> value.
+     * @since Commons IO 2.0
+     */
+    public static List<File> filterList(IOFileFilter filter, File... files) {
+        File[] acceptedFiles = fileFilter(filter, files);
+        return Arrays.asList(acceptedFiles);
+    }
+
+    /**
+     * <p>
+     * Applies an {@link IOFileFilter} to the provided {@link File} objects. The
+     * resulting set is a subset of the original file list that matches the
+     * provided filter.
+     * </p>
+     * 
+     * <p>
+     * The {@link Set} returned by this method is not guaranteed to be thread
+     * safe.
+     * </p>
+     * 
+     * <pre>
+     * Set&lt;File&gt; allFiles = ...
+     * Set&lt;File&gt; javaFiles = FileFilterUtils.filterSet(allFiles,
+     *     FileFilterUtils.suffixFileFilter(".java"));
+     * </pre>
+     * 
+     * @param filter
+     *            the filter to apply to the set of files.
+     * @param files
+     *            the collection of files to apply the filter to.
+     * 
+     * @return a subset of <code>files</code> that is accepted by the file
+     *         filter.
+     * @throws IllegalArgumentException
+     *             if the filter is <code>null</code> or <code>files</code>
+     *             contains a <code>null</code> value.
+     * 
+     * @since Commons IO 2.0
+     */
+    public static Set<File> filterSet(IOFileFilter filter, File... files) {
+        File[] acceptedFiles = fileFilter(filter, files);
+        return new HashSet<File>(Arrays.asList(acceptedFiles));
+    }
+
+    /**
+     * <p>
+     * Applies an {@link IOFileFilter} to the provided {@link File} objects. The
+     * resulting set is a subset of the original file list that matches the
+     * provided filter.
+     * </p>
+     * 
+     * <p>
+     * The {@link Set} returned by this method is not guaranteed to be thread
+     * safe.
+     * </p>
+     * 
+     * <pre>
+     * Set&lt;File&gt; allFiles = ...
+     * Set&lt;File&gt; javaFiles = FileFilterUtils.filterSet(allFiles,
+     *     FileFilterUtils.suffixFileFilter(".java"));
+     * </pre>
+     * 
+     * @param filter
+     *            the filter to apply to the set of files.
+     * @param files
+     *            the collection of files to apply the filter to.
+     * 
+     * @return a subset of <code>files</code> that is accepted by the file
+     *         filter.
+     * @throws IllegalArgumentException
+     *             if the filter is <code>null</code> or <code>files</code>
+     *             contains a <code>null</code> value.
+     * 
+     * @since Commons IO 2.0
+     */
+    public static Set<File> filterSet(IOFileFilter filter, Iterable<File> files) {
+        return filter(filter, files, new HashSet<File>());
+    }
+
+    /**
+     * <p>
+     * Applies an {@link IOFileFilter} to the provided {@link File} objects and
+     * appends the accepted files to the other supplied collection.
+     * </p>
+     * 
+     * <pre>
+     * List&lt;File&gt; files = ...
+     * List&lt;File&gt; directories = FileFilterUtils.filterList(files,
+     *     FileFilterUtils.sizeFileFilter(FileUtils.FIFTY_MB), 
+     *         new ArrayList&lt;File&gt;());
+     * </pre>
+     * 
+     * @param filter
+     *            the filter to apply to the collection of files.
+     * @param files
+     *            the collection of files to apply the filter to.
+     * @param acceptedFiles
+     *            the list of files to add accepted files to.
+     * 
+     * @param <T>
+     *            the type of the file collection.
+     * @return a subset of <code>files</code> that is accepted by the file
+     *         filter.
+     * @throws IllegalArgumentException
+     *             if the filter is <code>null</code> or <code>files</code>
+     *             contains a <code>null</code> value.
+     */
+    private static <T extends Collection<File>> T filter(IOFileFilter filter,
+            Iterable<File> files, T acceptedFiles) {
+        if (filter == null) {
+            throw new IllegalArgumentException("file filter is null");
+        }
+        if (files != null) {
+            for (File file : files) {
+                if (file == null) {
+                    throw new IllegalArgumentException(
+                            "file collection contains null");
+                }
+                if (filter.accept(file)) {
+                    acceptedFiles.add(file);
+                }
+            }
+        }
+        return acceptedFiles;
+    }
+
+    /**
+     * Returns a filter that returns true if the filename starts with the
+     * specified text.
+     * 
+     * @param prefix
+     *            the filename prefix
+     * @return a prefix checking filter
+     * @see PrefixFileFilter
+     */
+    public static IOFileFilter prefixFileFilter(String prefix) {
+        return new PrefixFileFilter(prefix);
+    }
+
+    /**
+     * Returns a filter that returns true if the filename starts with the
+     * specified text.
+     * 
+     * @param prefix
+     *            the filename prefix
+     * @param caseSensitivity
+     *            how to handle case sensitivity, null means case-sensitive
+     * @return a prefix checking filter
+     * @see PrefixFileFilter
+     * @since Commons IO 2.0
+     */
+    public static IOFileFilter prefixFileFilter(String prefix,
+            IOCase caseSensitivity) {
+        return new PrefixFileFilter(prefix, caseSensitivity);
+    }
+
+    /**
+     * Returns a filter that returns true if the filename ends with the
+     * specified text.
+     * 
+     * @param suffix
+     *            the filename suffix
+     * @return a suffix checking filter
+     * @see SuffixFileFilter
+     */
+    public static IOFileFilter suffixFileFilter(String suffix) {
+        return new SuffixFileFilter(suffix);
+    }
+
+    /**
+     * Returns a filter that returns true if the filename ends with the
+     * specified text.
+     * 
+     * @param suffix
+     *            the filename suffix
+     * @param caseSensitivity
+     *            how to handle case sensitivity, null means case-sensitive
+     * @return a suffix checking filter
+     * @see SuffixFileFilter
+     * @since Commons IO 2.0
+     */
+    public static IOFileFilter suffixFileFilter(String suffix,
+            IOCase caseSensitivity) {
+        return new SuffixFileFilter(suffix, caseSensitivity);
+    }
+
+    /**
+     * Returns a filter that returns true if the filename matches the specified
+     * text.
+     * 
+     * @param name
+     *            the filename
+     * @return a name checking filter
+     * @see NameFileFilter
+     */
+    public static IOFileFilter nameFileFilter(String name) {
+        return new NameFileFilter(name);
+    }
+
+    /**
+     * Returns a filter that returns true if the filename matches the specified
+     * text.
+     * 
+     * @param name
+     *            the filename
+     * @param caseSensitivity
+     *            how to handle case sensitivity, null means case-sensitive
+     * @return a name checking filter
+     * @see NameFileFilter
+     * @since Commons IO 2.0
+     */
+    public static IOFileFilter nameFileFilter(String name,
+            IOCase caseSensitivity) {
+        return new NameFileFilter(name, caseSensitivity);
+    }
+
+    /**
+     * Returns a filter that checks if the file is a directory.
+     * 
+     * @return file filter that accepts only directories and not files
+     * @see DirectoryFileFilter#DIRECTORY
+     */
+    public static IOFileFilter directoryFileFilter() {
+        return DirectoryFileFilter.DIRECTORY;
+    }
+
+    /**
+     * Returns a filter that checks if the file is a file (and not a directory).
+     * 
+     * @return file filter that accepts only files and not directories
+     * @see FileFileFilter#FILE
+     */
+    public static IOFileFilter fileFileFilter() {
+        return FileFileFilter.FILE;
+    }
+
+    /**
+     * Returns a filter that ANDs the specified filters.
+     * 
+     * @param filters
+     *            the IOFileFilters that will be ANDed together.
+     * @return a filter that ANDs the specified filters
+     * 
+     * @throws IllegalArgumentException
+     *             if the filters are null or contain a null value.
+     * @see AndFileFilter
+     * @since Commons IO 2.0
+     */
+    public static IOFileFilter andFileFilter(IOFileFilter... filters) {
+        return new AndFileFilter(toIOFileFilterList(filters));
+    }
+
+    /**
+     * Returns a filter that ORs the specified filters.
+     * 
+     * @param filters
+     *            the IOFileFilters that will be ORed together.
+     * @return a filter that ORs the specified filters
+     * 
+     * @throws IllegalArgumentException
+     *             if the filters are null or contain a null value.
+     * @see OrFileFilter
+     * @since Commons IO 2.0
+     */
+    public static IOFileFilter orFileFilter(IOFileFilter... filters) {
+        return new OrFileFilter(toIOFileFilterList(filters));
+    }
+
+    /**
+     * Create a List of file filters.
+     * 
+     * @param filters
+     *            The file filters
+     * @return The list of file filters
+     * @throws IllegalArgumentException
+     *             if the filters are null or contain a null value.
+     * @since Commons IO 2.0
+     */
+    public static List<IOFileFilter> toIOFileFilterList(IOFileFilter... filters) {
+        if (filters == null) {
+            throw new IllegalArgumentException("The filters must not be null");
+        }
+        List<IOFileFilter> list = new ArrayList<IOFileFilter>(filters.length);
+        for (int i = 0; i < filters.length; i++) {
+            if (filters[i] == null) {
+                throw new IllegalArgumentException("The filter[" + i
+                        + "] is null");
+            }
+            list.add(filters[i]);
+        }
+        return list;
+    }
+
+    /**
+     * Returns a filter that NOTs the specified filter.
+     * 
+     * @param filter
+     *            the filter to invert
+     * @return a filter that NOTs the specified filter
+     * @see NotFileFilter
+     */
+    public static IOFileFilter notFileFilter(IOFileFilter filter) {
+        return new NotFileFilter(filter);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Returns a filter that always returns true.
+     * 
+     * @return a true filter
+     * @see TrueFileFilter#TRUE
+     */
+    public static IOFileFilter trueFileFilter() {
+        return TrueFileFilter.TRUE;
+    }
+
+    /**
+     * Returns a filter that always returns false.
+     * 
+     * @return a false filter
+     * @see FalseFileFilter#FALSE
+     */
+    public static IOFileFilter falseFileFilter() {
+        return FalseFileFilter.FALSE;
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Returns an <code>IOFileFilter</code> that wraps the
+     * <code>FileFilter</code> instance.
+     * 
+     * @param filter
+     *            the filter to be wrapped
+     * @return a new filter that implements IOFileFilter
+     * @see DelegateFileFilter
+     */
+    public static IOFileFilter asFileFilter(FileFilter filter) {
+        return new DelegateFileFilter(filter);
+    }
+
+    /**
+     * Returns an <code>IOFileFilter</code> that wraps the
+     * <code>FilenameFilter</code> instance.
+     * 
+     * @param filter
+     *            the filter to be wrapped
+     * @return a new filter that implements IOFileFilter
+     * @see DelegateFileFilter
+     */
+    public static IOFileFilter asFileFilter(FilenameFilter filter) {
+        return new DelegateFileFilter(filter);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Returns a filter that returns true if the file was last modified after
+     * the specified cutoff time.
+     * 
+     * @param cutoff
+     *            the time threshold
+     * @return an appropriately configured age file filter
+     * @see AgeFileFilter
+     * @since Commons IO 1.2
+     */
+    public static IOFileFilter ageFileFilter(long cutoff) {
+        return new AgeFileFilter(cutoff);
+    }
+
+    /**
+     * Returns a filter that filters files based on a cutoff time.
+     * 
+     * @param cutoff
+     *            the time threshold
+     * @param acceptOlder
+     *            if true, older files get accepted, if false, newer
+     * @return an appropriately configured age file filter
+     * @see AgeFileFilter
+     * @since Commons IO 1.2
+     */
+    public static IOFileFilter ageFileFilter(long cutoff, boolean acceptOlder) {
+        return new AgeFileFilter(cutoff, acceptOlder);
+    }
+
+    /**
+     * Returns a filter that returns true if the file was last modified after
+     * the specified cutoff date.
+     * 
+     * @param cutoffDate
+     *            the time threshold
+     * @return an appropriately configured age file filter
+     * @see AgeFileFilter
+     * @since Commons IO 1.2
+     */
+    public static IOFileFilter ageFileFilter(Date cutoffDate) {
+        return new AgeFileFilter(cutoffDate);
+    }
+
+    /**
+     * Returns a filter that filters files based on a cutoff date.
+     * 
+     * @param cutoffDate
+     *            the time threshold
+     * @param acceptOlder
+     *            if true, older files get accepted, if false, newer
+     * @return an appropriately configured age file filter
+     * @see AgeFileFilter
+     * @since Commons IO 1.2
+     */
+    public static IOFileFilter ageFileFilter(Date cutoffDate,
+            boolean acceptOlder) {
+        return new AgeFileFilter(cutoffDate, acceptOlder);
+    }
+
+    /**
+     * Returns a filter that returns true if the file was last modified after
+     * the specified reference file.
+     * 
+     * @param cutoffReference
+     *            the file whose last modification time is usesd as the
+     *            threshold age of the files
+     * @return an appropriately configured age file filter
+     * @see AgeFileFilter
+     * @since Commons IO 1.2
+     */
+    public static IOFileFilter ageFileFilter(File cutoffReference) {
+        return new AgeFileFilter(cutoffReference);
+    }
+
+    /**
+     * Returns a filter that filters files based on a cutoff reference file.
+     * 
+     * @param cutoffReference
+     *            the file whose last modification time is usesd as the
+     *            threshold age of the files
+     * @param acceptOlder
+     *            if true, older files get accepted, if false, newer
+     * @return an appropriately configured age file filter
+     * @see AgeFileFilter
+     * @since Commons IO 1.2
+     */
+    public static IOFileFilter ageFileFilter(File cutoffReference,
+            boolean acceptOlder) {
+        return new AgeFileFilter(cutoffReference, acceptOlder);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Returns a filter that returns true if the file is bigger than a certain
+     * size.
+     * 
+     * @param threshold
+     *            the file size threshold
+     * @return an appropriately configured SizeFileFilter
+     * @see SizeFileFilter
+     * @since Commons IO 1.2
+     */
+    public static IOFileFilter sizeFileFilter(long threshold) {
+        return new SizeFileFilter(threshold);
+    }
+
+    /**
+     * Returns a filter that filters based on file size.
+     * 
+     * @param threshold
+     *            the file size threshold
+     * @param acceptLarger
+     *            if true, larger files get accepted, if false, smaller
+     * @return an appropriately configured SizeFileFilter
+     * @see SizeFileFilter
+     * @since Commons IO 1.2
+     */
+    public static IOFileFilter sizeFileFilter(long threshold,
+            boolean acceptLarger) {
+        return new SizeFileFilter(threshold, acceptLarger);
+    }
+
+    /**
+     * Returns a filter that accepts files whose size is &gt;= minimum size and
+     * &lt;= maximum size.
+     * 
+     * @param minSizeInclusive
+     *            the minimum file size (inclusive)
+     * @param maxSizeInclusive
+     *            the maximum file size (inclusive)
+     * @return an appropriately configured IOFileFilter
+     * @see SizeFileFilter
+     * @since Commons IO 1.3
+     */
+    public static IOFileFilter sizeRangeFileFilter(long minSizeInclusive,
+            long maxSizeInclusive) {
+        IOFileFilter minimumFilter = new SizeFileFilter(minSizeInclusive, true);
+        IOFileFilter maximumFilter = new SizeFileFilter(maxSizeInclusive + 1L,
+                false);
+        return new AndFileFilter(minimumFilter, maximumFilter);
+    }
+
+    /**
+     * Returns a filter that accepts files that begin with the provided magic
+     * number.
+     * 
+     * @param magicNumber
+     *            the magic number (byte sequence) to match at the beginning of
+     *            each file.
+     * 
+     * @return an IOFileFilter that accepts files beginning with the provided
+     *         magic number.
+     * 
+     * @throws IllegalArgumentException
+     *             if <code>magicNumber</code> is <code>null</code> or the empty
+     *             String.
+     * @see MagicNumberFileFilter
+     * @since Commons IO 2.0
+     */
+    public static IOFileFilter magicNumberFileFilter(String magicNumber) {
+        return new MagicNumberFileFilter(magicNumber);
+    }
+
+    /**
+     * Returns a filter that accepts files that contains the provided magic
+     * number at a specified offset within the file.
+     * 
+     * @param magicNumber
+     *            the magic number (byte sequence) to match at the provided
+     *            offset in each file.
+     * @param offset
+     *            the offset within the files to look for the magic number.
+     * 
+     * @return an IOFileFilter that accepts files containing the magic number at
+     *         the specified offset.
+     * 
+     * @throws IllegalArgumentException
+     *             if <code>magicNumber</code> is <code>null</code> or the empty
+     *             String, or if offset is a negative number.
+     * @see MagicNumberFileFilter
+     * @since Commons IO 2.0
+     */
+    public static IOFileFilter magicNumberFileFilter(String magicNumber,
+            long offset) {
+        return new MagicNumberFileFilter(magicNumber, offset);
+    }
+
+    /**
+     * Returns a filter that accepts files that begin with the provided magic
+     * number.
+     * 
+     * @param magicNumber
+     *            the magic number (byte sequence) to match at the beginning of
+     *            each file.
+     * 
+     * @return an IOFileFilter that accepts files beginning with the provided
+     *         magic number.
+     * 
+     * @throws IllegalArgumentException
+     *             if <code>magicNumber</code> is <code>null</code> or is of
+     *             length zero.
+     * @see MagicNumberFileFilter
+     * @since Commons IO 2.0
+     */
+    public static IOFileFilter magicNumberFileFilter(byte[] magicNumber) {
+        return new MagicNumberFileFilter(magicNumber);
+    }
+
+    /**
+     * Returns a filter that accepts files that contains the provided magic
+     * number at a specified offset within the file.
+     * 
+     * @param magicNumber
+     *            the magic number (byte sequence) to match at the provided
+     *            offset in each file.
+     * @param offset
+     *            the offset within the files to look for the magic number.
+     * 
+     * @return an IOFileFilter that accepts files containing the magic number at
+     *         the specified offset.
+     * 
+     * @throws IllegalArgumentException
+     *             if <code>magicNumber</code> is <code>null</code>, or contains
+     *             no bytes, or <code>offset</code> is a negative number.
+     * @see MagicNumberFileFilter
+     * @since Commons IO 2.0
+     */
+    public static IOFileFilter magicNumberFileFilter(byte[] magicNumber,
+            long offset) {
+        return new MagicNumberFileFilter(magicNumber, offset);
+    }
+
+    // -----------------------------------------------------------------------
+    /* Constructed on demand and then cached */
+    private static final IOFileFilter cvsFilter = notFileFilter(andFileFilter(
+            directoryFileFilter(), nameFileFilter("CVS")));
+
+    /* Constructed on demand and then cached */
+    private static final IOFileFilter svnFilter = notFileFilter(andFileFilter(
+            directoryFileFilter(), nameFileFilter(".svn")));
+
+    /**
+     * Decorates a filter to make it ignore CVS directories. Passing in
+     * <code>null</code> will return a filter that accepts everything except CVS
+     * directories.
+     * 
+     * @param filter
+     *            the filter to decorate, null means an unrestricted filter
+     * @return the decorated filter, never null
+     * @since Commons IO 1.1 (method existed but had bug in 1.0)
+     */
+    public static IOFileFilter makeCVSAware(IOFileFilter filter) {
+        if (filter == null) {
+            return cvsFilter;
+        } else {
+            return andFileFilter(filter, cvsFilter);
+        }
+    }
+
+    /**
+     * Decorates a filter to make it ignore SVN directories. Passing in
+     * <code>null</code> will return a filter that accepts everything except SVN
+     * directories.
+     * 
+     * @param filter
+     *            the filter to decorate, null means an unrestricted filter
+     * @return the decorated filter, never null
+     * @since Commons IO 1.1
+     */
+    public static IOFileFilter makeSVNAware(IOFileFilter filter) {
+        if (filter == null) {
+            return svnFilter;
+        } else {
+            return andFileFilter(filter, svnFilter);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Decorates a filter so that it only applies to directories and not to
+     * files.
+     * 
+     * @param filter
+     *            the filter to decorate, null means an unrestricted filter
+     * @return the decorated filter, never null
+     * @see DirectoryFileFilter#DIRECTORY
+     * @since Commons IO 1.3
+     */
+    public static IOFileFilter makeDirectoryOnly(IOFileFilter filter) {
+        if (filter == null) {
+            return DirectoryFileFilter.DIRECTORY;
+        }
+        return new AndFileFilter(DirectoryFileFilter.DIRECTORY, filter);
+    }
+
+    /**
+     * Decorates a filter so that it only applies to files and not to
+     * directories.
+     * 
+     * @param filter
+     *            the filter to decorate, null means an unrestricted filter
+     * @return the decorated filter, never null
+     * @see FileFileFilter#FILE
+     * @since Commons IO 1.3
+     */
+    public static IOFileFilter makeFileOnly(IOFileFilter filter) {
+        if (filter == null) {
+            return FileFileFilter.FILE;
+        }
+        return new AndFileFilter(FileFileFilter.FILE, filter);
+    }
+
+    // ///////////////////////////////////////////
+    //
+    // FileUtils
+    //
+    // ///////////////////////////////////////////
+
+    /**
+     * The number of bytes in a kilobyte.
+     */
+    public static final long ONE_KB = 1024;
+
+    /**
+     * The number of bytes in a megabyte.
+     */
+    public static final long ONE_MB = ONE_KB * ONE_KB;
+
+    /**
+     * The number of bytes in a 50 MB.
+     */
+    private static final long FIFTY_MB = ONE_MB * 50;
+
+    /**
+     * The number of bytes in a gigabyte.
+     */
+    public static final long ONE_GB = ONE_KB * ONE_MB;
+
+    /**
+     * An empty array of type <code>File</code>.
+     */
+    public static final File[] EMPTY_FILE_ARRAY = new File[0];
+
+    /**
+     * The UTF-8 character set, used to decode octets in URLs.
+     */
+    private static final Charset UTF8 = Charset.forName("UTF-8");
+
+    // -----------------------------------------------------------------------
+    /**
+     * Returns the path to the system temporary directory.
+     * 
+     * @return the path to the system temporary directory.
+     * 
+     * @since Commons IO 2.0
+     */
+    public static String getTempDirectoryPath() {
+        return System.getProperty("java.io.tmpdir");
+    }
+
+    /**
+     * Returns a {@link File} representing the system temporary directory.
+     * 
+     * @return the system temporary directory.
+     * 
+     * @since Commons IO 2.0
+     */
+    public static File getTempDirectory() {
+        return new File(getTempDirectoryPath());
+    }
+
+    /**
+     * Returns the path to the user's home directory.
+     * 
+     * @return the path to the user's home directory.
+     * 
+     * @since Commons IO 2.0
+     */
+    public static String getUserDirectoryPath() {
+        return System.getProperty("user.home");
+    }
+
+    /**
+     * Returns a {@link File} representing the user's home directory.
+     * 
+     * @return the user's home directory.
+     * 
+     * @since Commons IO 2.0
+     */
+    public static File getUserDirectory() {
+        return new File(getUserDirectoryPath());
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Opens a {@link FileInputStream} for the specified file, providing better
+     * error messages than simply calling <code>new FileInputStream(file)</code>
+     * .
+     * <p>
+     * At the end of the method either the stream will be successfully opened,
+     * or an exception will have been thrown.
+     * <p>
+     * An exception is thrown if the file does not exist. An exception is thrown
+     * if the file object exists but is a directory. An exception is thrown if
+     * the file exists but cannot be read.
+     * 
+     * @param file
+     *            the file to open for input, must not be <code>null</code>
+     * @return a new {@link FileInputStream} for the specified file
+     * @throws FileNotFoundException
+     *             if the file does not exist
+     * @throws IOException
+     *             if the file object is a directory
+     * @throws IOException
+     *             if the file cannot be read
+     * @since Commons IO 1.3
+     */
+    public static FileInputStream openInputStream(File file) throws IOException {
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                throw new IOException("File '" + file
+                        + "' exists but is a directory");
+            }
+            if (file.canRead() == false) {
+                throw new IOException("File '" + file + "' cannot be read");
+            }
+        } else {
+            throw new FileNotFoundException("File '" + file
+                    + "' does not exist");
+        }
+        return new FileInputStream(file);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Opens a {@link FileOutputStream} for the specified file, checking and
+     * creating the parent directory if it does not exist.
+     * <p>
+     * At the end of the method either the stream will be successfully opened,
+     * or an exception will have been thrown.
+     * <p>
+     * The parent directory will be created if it does not exist. The file will
+     * be created if it does not exist. An exception is thrown if the file
+     * object exists but is a directory. An exception is thrown if the file
+     * exists but cannot be written to. An exception is thrown if the parent
+     * directory cannot be created.
+     * 
+     * @param file
+     *            the file to open for output, must not be <code>null</code>
+     * @return a new {@link FileOutputStream} for the specified file
+     * @throws IOException
+     *             if the file object is a directory
+     * @throws IOException
+     *             if the file cannot be written to
+     * @throws IOException
+     *             if a parent directory needs creating but that fails
+     * @since Commons IO 1.3
+     */
+    public static FileOutputStream openOutputStream(File file)
+            throws IOException {
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                throw new IOException("File '" + file
+                        + "' exists but is a directory");
+            }
+            if (file.canWrite() == false) {
+                throw new IOException("File '" + file
+                        + "' cannot be written to");
+            }
+        } else {
+            File parent = file.getParentFile();
+            if (parent != null && parent.exists() == false) {
+                if (parent.mkdirs() == false) {
+                    throw new IOException("File '" + file
+                            + "' could not be created");
+                }
+            }
+        }
+        return new FileOutputStream(file);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Returns a human-readable version of the file size, where the input
+     * represents a specific number of bytes.
+     * 
+     * If the size is over 1GB, the size is returned as the number of whole GB,
+     * i.e. the size is rounded down to the nearest GB boundary.
+     * 
+     * Similarly for the 1MB and 1KB boundaries.
+     * 
+     * @param size
+     *            the number of bytes
+     * @return a human-readable display value (includes units - GB, MB, KB or
+     *         bytes)
+     */
+    // See https://issues.apache.org/jira/browse/IO-226 - should the rounding be
+    // changed?
+    public static String byteCountToDisplaySize(long size) {
+        String displaySize;
+
+        if (size / ONE_GB > 0) {
+            displaySize = String.valueOf(size / ONE_GB) + " GB";
+        } else if (size / ONE_MB > 0) {
+            displaySize = String.valueOf(size / ONE_MB) + " MB";
+        } else if (size / ONE_KB > 0) {
+            displaySize = String.valueOf(size / ONE_KB) + " KB";
+        } else {
+            displaySize = String.valueOf(size) + " bytes";
+        }
+        return displaySize;
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Implements the same behaviour as the "touch" utility on Unix. It creates
+     * a new file with size 0 or, if the file exists already, it is opened and
+     * closed without modifying it, but updating the file date and time.
+     * <p>
+     * NOTE: As from v1.3, this method throws an IOException if the last
+     * modified date of the file cannot be set. Also, as from v1.3 this method
+     * creates parent directories if they do not exist.
+     * 
+     * @param file
+     *            the File to touch
+     * @throws IOException
+     *             If an I/O problem occurs
+     */
+    public static void touch(File file) throws IOException {
+        if (!file.exists()) {
+            OutputStream out = openOutputStream(file);
+            closeQuietly(out);
+        }
+        boolean success = file.setLastModified(System.currentTimeMillis());
+        if (!success) {
+            throw new IOException(
+                    "Unable to set the last modification time for " + file);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Converts a Collection containing java.io.File instanced into array
+     * representation. This is to account for the difference between
+     * File.listFiles() and FileUtils.listFiles().
+     * 
+     * @param files
+     *            a Collection containing java.io.File instances
+     * @return an array of java.io.File
+     */
+    public static File[] convertFileCollectionToFileArray(Collection<File> files) {
+        return files.toArray(new File[files.size()]);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Finds files within a given directory (and optionally its subdirectories).
+     * All files found are filtered by an IOFileFilter.
+     * 
+     * @param files
+     *            the collection of files found.
+     * @param directory
+     *            the directory to search in.
+     * @param filter
+     *            the filter to apply to files and directories.
+     */
+    private static void innerListFiles(Collection<File> files, File directory,
+            IOFileFilter filter) {
+        File[] found = directory.listFiles((FileFilter) filter);
+        if (found != null) {
+            for (File file : found) {
+                if (file.isDirectory()) {
+                    innerListFiles(files, file, filter);
+                } else {
+                    files.add(file);
+                }
+            }
+        }
+    }
+
+    /**
+     * Finds files within a given directory (and optionally its subdirectories).
+     * All files found are filtered by an IOFileFilter.
+     * <p>
+     * If your search should recurse into subdirectories you can pass in an
+     * IOFileFilter for directories. You don't need to bind a
+     * DirectoryFileFilter (via logical AND) to this filter. This method does
+     * that for you.
+     * <p>
+     * An example: If you want to search through all directories called "temp"
+     * you pass in <code>FileFilterUtils.NameFileFilter("temp")</code>
+     * <p>
+     * Another common usage of this method is find files in a directory tree but
+     * ignoring the directories generated CVS. You can simply pass in
+     * <code>FileFilterUtils.makeCVSAware(null)</code>.
+     * 
+     * @param directory
+     *            the directory to search in
+     * @param fileFilter
+     *            filter to apply when finding files.
+     * @param dirFilter
+     *            optional filter to apply when finding subdirectories. If this
+     *            parameter is <code>null</code>, subdirectories will not be
+     *            included in the search. Use TrueFileFilter.INSTANCE to match
+     *            all directories.
+     * @return an collection of java.io.File with the matching files
+     * @see org.apache.commons.io.filefilter.FileFilterUtils
+     * @see org.apache.commons.io.filefilter.NameFileFilter
+     */
+    public static Collection<File> listFiles(File directory,
+            IOFileFilter fileFilter, IOFileFilter dirFilter) {
+        if (!directory.isDirectory()) {
+            throw new IllegalArgumentException(
+                    "Parameter 'directory' is not a directory");
+        }
+        if (fileFilter == null) {
+            throw new NullPointerException("Parameter 'fileFilter' is null");
+        }
+
+        // Setup effective file filter
+        IOFileFilter effFileFilter = andFileFilter(fileFilter,
+                notFileFilter(DirectoryFileFilter.INSTANCE));
+
+        // Setup effective directory filter
+        IOFileFilter effDirFilter;
+        if (dirFilter == null) {
+            effDirFilter = FalseFileFilter.INSTANCE;
+        } else {
+            effDirFilter = andFileFilter(dirFilter,
+                    DirectoryFileFilter.INSTANCE);
+        }
+
+        // Find files
+        Collection<File> files = new java.util.LinkedList<File>();
+        innerListFiles(files, directory,
+                orFileFilter(effFileFilter, effDirFilter));
+        return files;
+    }
+
+    /**
+     * Allows iteration over the files in given directory (and optionally its
+     * subdirectories).
+     * <p>
+     * All files found are filtered by an IOFileFilter. This method is based on
+     * {@link #listFiles(File, IOFileFilter, IOFileFilter)}.
+     * 
+     * @param directory
+     *            the directory to search in
+     * @param fileFilter
+     *            filter to apply when finding files.
+     * @param dirFilter
+     *            optional filter to apply when finding subdirectories. If this
+     *            parameter is <code>null</code>, subdirectories will not be
+     *            included in the search. Use TrueFileFilter.INSTANCE to match
+     *            all directories.
+     * @return an iterator of java.io.File for the matching files
+     * @see org.apache.commons.io.filefilter.FileFilterUtils
+     * @see org.apache.commons.io.filefilter.NameFileFilter
+     * @since Commons IO 1.2
+     */
+    public static Iterator<File> iterateFiles(File directory,
+            IOFileFilter fileFilter, IOFileFilter dirFilter) {
+        return listFiles(directory, fileFilter, dirFilter).iterator();
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Converts an array of file extensions to suffixes for use with
+     * IOFileFilters.
+     * 
+     * @param extensions
+     *            an array of extensions. Format: {"java", "xml"}
+     * @return an array of suffixes. Format: {".java", ".xml"}
+     */
+    private static String[] toSuffixes(String[] extensions) {
+        String[] suffixes = new String[extensions.length];
+        for (int i = 0; i < extensions.length; i++) {
+            suffixes[i] = "." + extensions[i];
+        }
+        return suffixes;
+    }
+
+    /**
+     * Finds files within a given directory (and optionally its subdirectories)
+     * which match an array of extensions.
+     * 
+     * @param directory
+     *            the directory to search in
+     * @param extensions
+     *            an array of extensions, ex. {"java","xml"}. If this parameter
+     *            is <code>null</code>, all files are returned.
+     * @param recursive
+     *            if true all subdirectories are searched as well
+     * @return an collection of java.io.File with the matching files
+     */
+    public static Collection<File> listFiles(File directory,
+            String[] extensions, boolean recursive) {
+        IOFileFilter filter;
+        if (extensions == null) {
+            filter = TrueFileFilter.INSTANCE;
+        } else {
+            String[] suffixes = toSuffixes(extensions);
+            filter = new SuffixFileFilter(suffixes);
+        }
+        return listFiles(
+                directory,
+                filter,
+                (recursive ? TrueFileFilter.INSTANCE : FalseFileFilter.INSTANCE));
+    }
+
+    /**
+     * Allows iteration over the files in a given directory (and optionally its
+     * subdirectories) which match an array of extensions. This method is based
+     * on {@link #listFiles(File, String[], boolean)}.
+     * 
+     * @param directory
+     *            the directory to search in
+     * @param extensions
+     *            an array of extensions, ex. {"java","xml"}. If this parameter
+     *            is <code>null</code>, all files are returned.
+     * @param recursive
+     *            if true all subdirectories are searched as well
+     * @return an iterator of java.io.File with the matching files
+     * @since Commons IO 1.2
+     */
+    public static Iterator<File> iterateFiles(File directory,
+            String[] extensions, boolean recursive) {
+        return listFiles(directory, extensions, recursive).iterator();
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Compares the contents of two files to determine if they are equal or not.
+     * <p>
+     * This method checks to see if the two files are different lengths or if
+     * they point to the same file, before resorting to byte-by-byte comparison
+     * of the contents.
+     * <p>
+     * Code origin: Avalon
+     * 
+     * @param file1
+     *            the first file
+     * @param file2
+     *            the second file
+     * @return true if the content of the files are equal or they both don't
+     *         exist, false otherwise
+     * @throws IOException
+     *             in case of an I/O error
+     */
+    public static boolean contentEquals(File file1, File file2)
+            throws IOException {
+        boolean file1Exists = file1.exists();
+        if (file1Exists != file2.exists()) {
+            return false;
+        }
+
+        if (!file1Exists) {
+            // two not existing files are equal
+            return true;
+        }
+
+        if (file1.isDirectory() || file2.isDirectory()) {
+            // don't want to compare directory contents
+            throw new IOException("Can't compare directories, only files");
+        }
+
+        if (file1.length() != file2.length()) {
+            // lengths differ, cannot be equal
+            return false;
+        }
+
+        if (file1.getCanonicalFile().equals(file2.getCanonicalFile())) {
+            // same file
+            return true;
+        }
+
+        InputStream input1 = null;
+        InputStream input2 = null;
+        try {
+            input1 = new FileInputStream(file1);
+            input2 = new FileInputStream(file2);
+            return contentEquals(input1, input2);
+
+        } finally {
+            closeQuietly(input1);
+            closeQuietly(input2);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Convert from a <code>URL</code> to a <code>File</code>.
+     * <p>
+     * From version 1.1 this method will decode the URL. Syntax such as
+     * <code>file:///my%20docs/file.txt</code> will be correctly decoded to
+     * <code>/my docs/file.txt</code>. Starting with version 1.5, this method
+     * uses UTF-8 to decode percent-encoded octets to characters. Additionally,
+     * malformed percent-encoded octets are handled leniently by passing them
+     * through literally.
+     * 
+     * @param url
+     *            the file URL to convert, <code>null</code> returns
+     *            <code>null</code>
+     * @return the equivalent <code>File</code> object, or <code>null</code> if
+     *         the URL's protocol is not <code>file</code>
+     */
+    public static File toFile(URL url) {
+        if (url == null || !"file".equalsIgnoreCase(url.getProtocol())) {
+            return null;
+        } else {
+            String filename = url.getFile().replace('/', File.separatorChar);
+            filename = decodeUrl(filename);
+            return new File(filename);
+        }
+    }
+
+    /**
+     * Decodes the specified URL as per RFC 3986, i.e. transforms
+     * percent-encoded octets to characters by decoding with the UTF-8 character
+     * set. This function is primarily intended for usage with
+     * {@link java.net.URL} which unfortunately does not enforce proper URLs. As
+     * such, this method will leniently accept invalid characters or malformed
+     * percent-encoded octets and simply pass them literally through to the
+     * result string. Except for rare edge cases, this will make unencoded URLs
+     * pass through unaltered.
+     * 
+     * @param url
+     *            The URL to decode, may be <code>null</code>.
+     * @return The decoded URL or <code>null</code> if the input was
+     *         <code>null</code>.
+     */
+    static String decodeUrl(String url) {
+        String decoded = url;
+        if (url != null && url.indexOf('%') >= 0) {
+            int n = url.length();
+            StringBuffer buffer = new StringBuffer();
+            ByteBuffer bytes = ByteBuffer.allocate(n);
+            for (int i = 0; i < n;) {
+                if (url.charAt(i) == '%') {
+                    try {
+                        do {
+                            byte octet = (byte) Integer.parseInt(
+                                    url.substring(i + 1, i + 3), 16);
+                            bytes.put(octet);
+                            i += 3;
+                        } while (i < n && url.charAt(i) == '%');
+                        continue;
+                    } catch (RuntimeException e) {
+                        // malformed percent-encoded octet, fall through and
+                        // append characters literally
+                    } finally {
+                        if (bytes.position() > 0) {
+                            bytes.flip();
+                            buffer.append(UTF8.decode(bytes).toString());
+                            bytes.clear();
+                        }
+                    }
+                }
+                buffer.append(url.charAt(i++));
+            }
+            decoded = buffer.toString();
+        }
+        return decoded;
+    }
+
+    /**
+     * Converts each of an array of <code>URL</code> to a <code>File</code>.
+     * <p>
+     * Returns an array of the same size as the input. If the input is
+     * <code>null</code>, an empty array is returned. If the input contains
+     * <code>null</code>, the output array contains <code>null</code> at the
+     * same index.
+     * <p>
+     * This method will decode the URL. Syntax such as
+     * <code>file:///my%20docs/file.txt</code> will be correctly decoded to
+     * <code>/my docs/file.txt</code>.
+     * 
+     * @param urls
+     *            the file URLs to convert, <code>null</code> returns empty
+     *            array
+     * @return a non-<code>null</code> array of Files matching the input, with a
+     *         <code>null</code> item if there was a <code>null</code> at that
+     *         index in the input array
+     * @throws IllegalArgumentException
+     *             if any file is not a URL file
+     * @throws IllegalArgumentException
+     *             if any file is incorrectly encoded
+     * @since Commons IO 1.1
+     */
+    public static File[] toFiles(URL[] urls) {
+        if (urls == null || urls.length == 0) {
+            return EMPTY_FILE_ARRAY;
+        }
+        File[] files = new File[urls.length];
+        for (int i = 0; i < urls.length; i++) {
+            URL url = urls[i];
+            if (url != null) {
+                if (url.getProtocol().equals("file") == false) {
+                    throw new IllegalArgumentException(
+                            "URL could not be converted to a File: " + url);
+                }
+                files[i] = toFile(url);
+            }
+        }
+        return files;
+    }
+
+    /**
+     * Converts each of an array of <code>File</code> to a <code>URL</code>.
+     * <p>
+     * Returns an array of the same size as the input.
+     * 
+     * @param files
+     *            the files to convert
+     * @return an array of URLs matching the input
+     * @throws IOException
+     *             if a file cannot be converted
+     */
+    public static URL[] toURLs(File[] files) throws IOException {
+        URL[] urls = new URL[files.length];
+
+        for (int i = 0; i < urls.length; i++) {
+            urls[i] = files[i].toURI().toURL();
+        }
+
+        return urls;
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Copies a file to a directory preserving the file date.
+     * <p>
+     * This method copies the contents of the specified source file to a file of
+     * the same name in the specified destination directory. The destination
+     * directory is created if it does not exist. If the destination file
+     * exists, then this method will overwrite it.
+     * <p>
+     * <strong>Note:</strong> This method tries to preserve the file's last
+     * modified date/times using {@link File#setLastModified(long)}, however it
+     * is not guaranteed that the operation will succeed. If the modification
+     * operation fails, no indication is provided.
+     * 
+     * @param srcFile
+     *            an existing file to copy, must not be <code>null</code>
+     * @param destDir
+     *            the directory to place the copy in, must not be
+     *            <code>null</code>
+     * 
+     * @throws NullPointerException
+     *             if source or destination is null
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs during copying
+     * @see #copyFile(File, File, boolean)
+     */
+    public static void copyFileToDirectory(File srcFile, File destDir)
+            throws IOException {
+        copyFileToDirectory(srcFile, destDir, true);
+    }
+
+    /**
+     * Copies a file to a directory optionally preserving the file date.
+     * <p>
+     * This method copies the contents of the specified source file to a file of
+     * the same name in the specified destination directory. The destination
+     * directory is created if it does not exist. If the destination file
+     * exists, then this method will overwrite it.
+     * <p>
+     * <strong>Note:</strong> Setting <code>preserveFileDate</code> to
+     * <code>true</code> tries to preserve the file's last modified date/times
+     * using {@link File#setLastModified(long)}, however it is not guaranteed
+     * that the operation will succeed. If the modification operation fails, no
+     * indication is provided.
+     * 
+     * @param srcFile
+     *            an existing file to copy, must not be <code>null</code>
+     * @param destDir
+     *            the directory to place the copy in, must not be
+     *            <code>null</code>
+     * @param preserveFileDate
+     *            true if the file date of the copy should be the same as the
+     *            original
+     * 
+     * @throws NullPointerException
+     *             if source or destination is <code>null</code>
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs during copying
+     * @see #copyFile(File, File, boolean)
+     * @since Commons IO 1.3
+     */
+    public static void copyFileToDirectory(File srcFile, File destDir,
+            boolean preserveFileDate) throws IOException {
+        if (destDir == null) {
+            throw new NullPointerException("Destination must not be null");
+        }
+        if (destDir.exists() && destDir.isDirectory() == false) {
+            throw new IllegalArgumentException("Destination '" + destDir
+                    + "' is not a directory");
+        }
+        File destFile = new File(destDir, srcFile.getName());
+        copyFile(srcFile, destFile, preserveFileDate);
+    }
+
+    /**
+     * Copies a file to a new location preserving the file date.
+     * <p>
+     * This method copies the contents of the specified source file to the
+     * specified destination file. The directory holding the destination file is
+     * created if it does not exist. If the destination file exists, then this
+     * method will overwrite it.
+     * <p>
+     * <strong>Note:</strong> This method tries to preserve the file's last
+     * modified date/times using {@link File#setLastModified(long)}, however it
+     * is not guaranteed that the operation will succeed. If the modification
+     * operation fails, no indication is provided.
+     * 
+     * @param srcFile
+     *            an existing file to copy, must not be <code>null</code>
+     * @param destFile
+     *            the new file, must not be <code>null</code>
+     * 
+     * @throws NullPointerException
+     *             if source or destination is <code>null</code>
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs during copying
+     * @see #copyFileToDirectory(File, File)
+     */
+    public static void copyFile(File srcFile, File destFile) throws IOException {
+        copyFile(srcFile, destFile, true);
+    }
+
+    /**
+     * Copies a file to a new location.
+     * <p>
+     * This method copies the contents of the specified source file to the
+     * specified destination file. The directory holding the destination file is
+     * created if it does not exist. If the destination file exists, then this
+     * method will overwrite it.
+     * <p>
+     * <strong>Note:</strong> Setting <code>preserveFileDate</code> to
+     * <code>true</code> tries to preserve the file's last modified date/times
+     * using {@link File#setLastModified(long)}, however it is not guaranteed
+     * that the operation will succeed. If the modification operation fails, no
+     * indication is provided.
+     * 
+     * @param srcFile
+     *            an existing file to copy, must not be <code>null</code>
+     * @param destFile
+     *            the new file, must not be <code>null</code>
+     * @param preserveFileDate
+     *            true if the file date of the copy should be the same as the
+     *            original
+     * 
+     * @throws NullPointerException
+     *             if source or destination is <code>null</code>
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs during copying
+     * @see #copyFileToDirectory(File, File, boolean)
+     */
+    public static void copyFile(File srcFile, File destFile,
+            boolean preserveFileDate) throws IOException {
+        if (srcFile == null) {
+            throw new NullPointerException("Source must not be null");
+        }
+        if (destFile == null) {
+            throw new NullPointerException("Destination must not be null");
+        }
+        if (srcFile.exists() == false) {
+            throw new FileNotFoundException("Source '" + srcFile
+                    + "' does not exist");
+        }
+        if (srcFile.isDirectory()) {
+            throw new IOException("Source '" + srcFile
+                    + "' exists but is a directory");
+        }
+        if (srcFile.getCanonicalPath().equals(destFile.getCanonicalPath())) {
+            throw new IOException("Source '" + srcFile + "' and destination '"
+                    + destFile + "' are the same");
+        }
+        if (destFile.getParentFile() != null
+                && destFile.getParentFile().exists() == false) {
+            if (destFile.getParentFile().mkdirs() == false) {
+                throw new IOException("Destination '" + destFile
+                        + "' directory cannot be created");
+            }
+        }
+        if (destFile.exists() && destFile.canWrite() == false) {
+            throw new IOException("Destination '" + destFile
+                    + "' exists but is read-only");
+        }
+        doCopyFile(srcFile, destFile, preserveFileDate);
+    }
+
+    /**
+     * Internal copy file method.
+     * 
+     * @param srcFile
+     *            the validated source file, must not be <code>null</code>
+     * @param destFile
+     *            the validated destination file, must not be <code>null</code>
+     * @param preserveFileDate
+     *            whether to preserve the file date
+     * @throws IOException
+     *             if an error occurs
+     */
+    private static void doCopyFile(File srcFile, File destFile,
+            boolean preserveFileDate) throws IOException {
+        if (destFile.exists() && destFile.isDirectory()) {
+            throw new IOException("Destination '" + destFile
+                    + "' exists but is a directory");
+        }
+
+        FileInputStream fis = null;
+        FileOutputStream fos = null;
+        FileChannel input = null;
+        FileChannel output = null;
+        try {
+            fis = new FileInputStream(srcFile);
+            fos = new FileOutputStream(destFile);
+            input = fis.getChannel();
+            output = fos.getChannel();
+            long size = input.size();
+            long pos = 0;
+            long count = 0;
+            while (pos < size) {
+                count = (size - pos) > FIFTY_MB ? FIFTY_MB : (size - pos);
+                pos += output.transferFrom(input, pos, count);
+            }
+        } finally {
+            closeQuietly(output);
+            closeQuietly(fos);
+            closeQuietly(input);
+            closeQuietly(fis);
+        }
+
+        if (srcFile.length() != destFile.length()) {
+            throw new IOException("Failed to copy full contents from '"
+                    + srcFile + "' to '" + destFile + "'");
+        }
+        if (preserveFileDate) {
+            destFile.setLastModified(srcFile.lastModified());
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Copies a directory to within another directory preserving the file dates.
+     * <p>
+     * This method copies the source directory and all its contents to a
+     * directory of the same name in the specified destination directory.
+     * <p>
+     * The destination directory is created if it does not exist. If the
+     * destination directory did exist, then this method merges the source with
+     * the destination, with the source taking precedence.
+     * <p>
+     * <strong>Note:</strong> This method tries to preserve the files' last
+     * modified date/times using {@link File#setLastModified(long)}, however it
+     * is not guaranteed that those operations will succeed. If the modification
+     * operation fails, no indication is provided.
+     * 
+     * @param srcDir
+     *            an existing directory to copy, must not be <code>null</code>
+     * @param destDir
+     *            the directory to place the copy in, must not be
+     *            <code>null</code>
+     * 
+     * @throws NullPointerException
+     *             if source or destination is <code>null</code>
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs during copying
+     * @since Commons IO 1.2
+     */
+    public static void copyDirectoryToDirectory(File srcDir, File destDir)
+            throws IOException {
+        if (srcDir == null) {
+            throw new NullPointerException("Source must not be null");
+        }
+        if (srcDir.exists() && srcDir.isDirectory() == false) {
+            throw new IllegalArgumentException("Source '" + destDir
+                    + "' is not a directory");
+        }
+        if (destDir == null) {
+            throw new NullPointerException("Destination must not be null");
+        }
+        if (destDir.exists() && destDir.isDirectory() == false) {
+            throw new IllegalArgumentException("Destination '" + destDir
+                    + "' is not a directory");
+        }
+        copyDirectory(srcDir, new File(destDir, srcDir.getName()), true);
+    }
+
+    /**
+     * Copies a whole directory to a new location preserving the file dates.
+     * <p>
+     * This method copies the specified directory and all its child directories
+     * and files to the specified destination. The destination is the new
+     * location and name of the directory.
+     * <p>
+     * The destination directory is created if it does not exist. If the
+     * destination directory did exist, then this method merges the source with
+     * the destination, with the source taking precedence.
+     * <p>
+     * <strong>Note:</strong> This method tries to preserve the files' last
+     * modified date/times using {@link File#setLastModified(long)}, however it
+     * is not guaranteed that those operations will succeed. If the modification
+     * operation fails, no indication is provided.
+     * 
+     * @param srcDir
+     *            an existing directory to copy, must not be <code>null</code>
+     * @param destDir
+     *            the new directory, must not be <code>null</code>
+     * 
+     * @throws NullPointerException
+     *             if source or destination is <code>null</code>
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs during copying
+     * @since Commons IO 1.1
+     */
+    public static void copyDirectory(File srcDir, File destDir)
+            throws IOException {
+        copyDirectory(srcDir, destDir, true);
+    }
+
+    /**
+     * Copies a whole directory to a new location.
+     * <p>
+     * This method copies the contents of the specified source directory to
+     * within the specified destination directory.
+     * <p>
+     * The destination directory is created if it does not exist. If the
+     * destination directory did exist, then this method merges the source with
+     * the destination, with the source taking precedence.
+     * <p>
+     * <strong>Note:</strong> Setting <code>preserveFileDate</code> to
+     * <code>true</code> tries to preserve the files' last modified date/times
+     * using {@link File#setLastModified(long)}, however it is not guaranteed
+     * that those operations will succeed. If the modification operation fails,
+     * no indication is provided.
+     * 
+     * @param srcDir
+     *            an existing directory to copy, must not be <code>null</code>
+     * @param destDir
+     *            the new directory, must not be <code>null</code>
+     * @param preserveFileDate
+     *            true if the file date of the copy should be the same as the
+     *            original
+     * 
+     * @throws NullPointerException
+     *             if source or destination is <code>null</code>
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs during copying
+     * @since Commons IO 1.1
+     */
+    public static void copyDirectory(File srcDir, File destDir,
+            boolean preserveFileDate) throws IOException {
+        copyDirectory(srcDir, destDir, null, preserveFileDate);
+    }
+
+    /**
+     * Copies a filtered directory to a new location preserving the file dates.
+     * <p>
+     * This method copies the contents of the specified source directory to
+     * within the specified destination directory.
+     * <p>
+     * The destination directory is created if it does not exist. If the
+     * destination directory did exist, then this method merges the source with
+     * the destination, with the source taking precedence.
+     * <p>
+     * <strong>Note:</strong> This method tries to preserve the files' last
+     * modified date/times using {@link File#setLastModified(long)}, however it
+     * is not guaranteed that those operations will succeed. If the modification
+     * operation fails, no indication is provided.
+     * 
+     * <h4>Example: Copy directories only</h4>
+     * 
+     * <pre>
+     * // only copy the directory structure
+     * FileUtils.copyDirectory(srcDir, destDir, DirectoryFileFilter.DIRECTORY);
+     * </pre>
+     * 
+     * <h4>Example: Copy directories and txt files</h4>
+     * 
+     * <pre>
+     * // Create a filter for &quot;.txt&quot; files
+     * IOFileFilter txtSuffixFilter = FileFilterUtils.suffixFileFilter(&quot;.txt&quot;);
+     * IOFileFilter txtFiles = FileFilterUtils.andFileFilter(FileFileFilter.FILE,
+     *         txtSuffixFilter);
+     * 
+     * // Create a filter for either directories or &quot;.txt&quot; files
+     * FileFilter filter = FileFilterUtils.orFileFilter(DirectoryFileFilter.DIRECTORY,
+     *         txtFiles);
+     * 
+     * // Copy using the filter
+     * FileUtils.copyDirectory(srcDir, destDir, filter);
+     * </pre>
+     * 
+     * @param srcDir
+     *            an existing directory to copy, must not be <code>null</code>
+     * @param destDir
+     *            the new directory, must not be <code>null</code>
+     * @param filter
+     *            the filter to apply, null means copy all directories and files
+     *            should be the same as the original
+     * 
+     * @throws NullPointerException
+     *             if source or destination is <code>null</code>
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs during copying
+     * @since Commons IO 1.4
+     */
+    public static void copyDirectory(File srcDir, File destDir,
+            FileFilter filter) throws IOException {
+        copyDirectory(srcDir, destDir, filter, true);
+    }
+
+    /**
+     * Copies a filtered directory to a new location.
+     * <p>
+     * This method copies the contents of the specified source directory to
+     * within the specified destination directory.
+     * <p>
+     * The destination directory is created if it does not exist. If the
+     * destination directory did exist, then this method merges the source with
+     * the destination, with the source taking precedence.
+     * <p>
+     * <strong>Note:</strong> Setting <code>preserveFileDate</code> to
+     * <code>true</code> tries to preserve the files' last modified date/times
+     * using {@link File#setLastModified(long)}, however it is not guaranteed
+     * that those operations will succeed. If the modification operation fails,
+     * no indication is provided.
+     * 
+     * <h4>Example: Copy directories only</h4>
+     * 
+     * <pre>
+     * // only copy the directory structure
+     * FileUtils.copyDirectory(srcDir, destDir, DirectoryFileFilter.DIRECTORY, false);
+     * </pre>
+     * 
+     * <h4>Example: Copy directories and txt files</h4>
+     * 
+     * <pre>
+     * // Create a filter for &quot;.txt&quot; files
+     * IOFileFilter txtSuffixFilter = FileFilterUtils.suffixFileFilter(&quot;.txt&quot;);
+     * IOFileFilter txtFiles = FileFilterUtils.andFileFilter(FileFileFilter.FILE,
+     *         txtSuffixFilter);
+     * 
+     * // Create a filter for either directories or &quot;.txt&quot; files
+     * FileFilter filter = FileFilterUtils.orFileFilter(DirectoryFileFilter.DIRECTORY,
+     *         txtFiles);
+     * 
+     * // Copy using the filter
+     * FileUtils.copyDirectory(srcDir, destDir, filter, false);
+     * </pre>
+     * 
+     * @param srcDir
+     *            an existing directory to copy, must not be <code>null</code>
+     * @param destDir
+     *            the new directory, must not be <code>null</code>
+     * @param filter
+     *            the filter to apply, null means copy all directories and files
+     * @param preserveFileDate
+     *            true if the file date of the copy should be the same as the
+     *            original
+     * 
+     * @throws NullPointerException
+     *             if source or destination is <code>null</code>
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs during copying
+     * @since Commons IO 1.4
+     */
+    public static void copyDirectory(File srcDir, File destDir,
+            FileFilter filter, boolean preserveFileDate) throws IOException {
+        if (srcDir == null) {
+            throw new NullPointerException("Source must not be null");
+        }
+        if (destDir == null) {
+            throw new NullPointerException("Destination must not be null");
+        }
+        if (srcDir.exists() == false) {
+            throw new FileNotFoundException("Source '" + srcDir
+                    + "' does not exist");
+        }
+        if (srcDir.isDirectory() == false) {
+            throw new IOException("Source '" + srcDir
+                    + "' exists but is not a directory");
+        }
+        if (srcDir.getCanonicalPath().equals(destDir.getCanonicalPath())) {
+            throw new IOException("Source '" + srcDir + "' and destination '"
+                    + destDir + "' are the same");
+        }
+
+        // Cater for destination being directory within the source directory
+        // (see IO-141)
+        List<String> exclusionList = null;
+        if (destDir.getCanonicalPath().startsWith(srcDir.getCanonicalPath())) {
+            File[] srcFiles = filter == null ? srcDir.listFiles() : srcDir
+                    .listFiles(filter);
+            if (srcFiles != null && srcFiles.length > 0) {
+                exclusionList = new ArrayList<String>(srcFiles.length);
+                for (File srcFile : srcFiles) {
+                    File copiedFile = new File(destDir, srcFile.getName());
+                    exclusionList.add(copiedFile.getCanonicalPath());
+                }
+            }
+        }
+        doCopyDirectory(srcDir, destDir, filter, preserveFileDate,
+                exclusionList);
+    }
+
+    /**
+     * Internal copy directory method.
+     * 
+     * @param srcDir
+     *            the validated source directory, must not be <code>null</code>
+     * @param destDir
+     *            the validated destination directory, must not be
+     *            <code>null</code>
+     * @param filter
+     *            the filter to apply, null means copy all directories and files
+     * @param preserveFileDate
+     *            whether to preserve the file date
+     * @param exclusionList
+     *            List of files and directories to exclude from the copy, may be
+     *            null
+     * @throws IOException
+     *             if an error occurs
+     * @since Commons IO 1.1
+     */
+    private static void doCopyDirectory(File srcDir, File destDir,
+            FileFilter filter, boolean preserveFileDate,
+            List<String> exclusionList) throws IOException {
+        // recurse
+        File[] files = filter == null ? srcDir.listFiles() : srcDir
+                .listFiles(filter);
+        if (files == null) { // null if security restricted
+            throw new IOException("Failed to list contents of " + srcDir);
+        }
+        if (destDir.exists()) {
+            if (destDir.isDirectory() == false) {
+                throw new IOException("Destination '" + destDir
+                        + "' exists but is not a directory");
+            }
+        } else {
+            if (destDir.mkdirs() == false) {
+                throw new IOException("Destination '" + destDir
+                        + "' directory cannot be created");
+            }
+        }
+        if (destDir.canWrite() == false) {
+            throw new IOException("Destination '" + destDir
+                    + "' cannot be written to");
+        }
+        for (File file : files) {
+            File copiedFile = new File(destDir, file.getName());
+            if (exclusionList == null
+                    || !exclusionList.contains(file.getCanonicalPath())) {
+                if (file.isDirectory()) {
+                    doCopyDirectory(file, copiedFile, filter, preserveFileDate,
+                            exclusionList);
+                } else {
+                    doCopyFile(file, copiedFile, preserveFileDate);
+                }
+            }
+        }
+
+        // Do this last, as the above has probably affected directory metadata
+        if (preserveFileDate) {
+            destDir.setLastModified(srcDir.lastModified());
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Copies bytes from the URL <code>source</code> to a file
+     * <code>destination</code>. The directories up to <code>destination</code>
+     * will be created if they don't already exist. <code>destination</code>
+     * will be overwritten if it already exists.
+     * <p>
+     * Warning: this method does not set a connection or read timeout and thus
+     * might block forever. Use {@link #copyURLToFile(URL, File, int, int)} with
+     * reasonable timeouts to prevent this.
+     * 
+     * @param source
+     *            the <code>URL</code> to copy bytes from, must not be
+     *            <code>null</code>
+     * @param destination
+     *            the non-directory <code>File</code> to write bytes to
+     *            (possibly overwriting), must not be <code>null</code>
+     * @throws IOException
+     *             if <code>source</code> URL cannot be opened
+     * @throws IOException
+     *             if <code>destination</code> is a directory
+     * @throws IOException
+     *             if <code>destination</code> cannot be written
+     * @throws IOException
+     *             if <code>destination</code> needs creating but can't be
+     * @throws IOException
+     *             if an IO error occurs during copying
+     */
+    public static void copyURLToFile(URL source, File destination)
+            throws IOException {
+        InputStream input = source.openStream();
+        copyInputStreamToFile(input, destination);
+    }
+
+    /**
+     * Copies bytes from the URL <code>source</code> to a file
+     * <code>destination</code>. The directories up to <code>destination</code>
+     * will be created if they don't already exist. <code>destination</code>
+     * will be overwritten if it already exists.
+     * 
+     * @param source
+     *            the <code>URL</code> to copy bytes from, must not be
+     *            <code>null</code>
+     * @param destination
+     *            the non-directory <code>File</code> to write bytes to
+     *            (possibly overwriting), must not be <code>null</code>
+     * @param connectionTimeout
+     *            the number of milliseconds until this method will timeout if
+     *            no connection could be established to the <code>source</code>
+     * @param readTimeout
+     *            the number of milliseconds until this method will timeout if
+     *            no data could be read from the <code>source</code>
+     * @throws IOException
+     *             if <code>source</code> URL cannot be opened
+     * @throws IOException
+     *             if <code>destination</code> is a directory
+     * @throws IOException
+     *             if <code>destination</code> cannot be written
+     * @throws IOException
+     *             if <code>destination</code> needs creating but can't be
+     * @throws IOException
+     *             if an IO error occurs during copying
+     * @since Commons IO 2.0
+     */
+    public static void copyURLToFile(URL source, File destination,
+            int connectionTimeout, int readTimeout) throws IOException {
+        URLConnection connection = source.openConnection();
+        connection.setConnectTimeout(connectionTimeout);
+        connection.setReadTimeout(readTimeout);
+        InputStream input = connection.getInputStream();
+        copyInputStreamToFile(input, destination);
+    }
+
+    /**
+     * Copies bytes from an {@link InputStream} <code>source</code> to a file
+     * <code>destination</code>. The directories up to <code>destination</code>
+     * will be created if they don't already exist. <code>destination</code>
+     * will be overwritten if it already exists.
+     * 
+     * @param source
+     *            the <code>InputStream</code> to copy bytes from, must not be
+     *            <code>null</code>
+     * @param destination
+     *            the non-directory <code>File</code> to write bytes to
+     *            (possibly overwriting), must not be <code>null</code>
+     * @throws IOException
+     *             if <code>destination</code> is a directory
+     * @throws IOException
+     *             if <code>destination</code> cannot be written
+     * @throws IOException
+     *             if <code>destination</code> needs creating but can't be
+     * @throws IOException
+     *             if an IO error occurs during copying
+     * @since Commons IO 2.0
+     */
+    public static void copyInputStreamToFile(InputStream source,
+            File destination) throws IOException {
+        try {
+            FileOutputStream output = openOutputStream(destination);
+            try {
+                copy(source, output);
+            } finally {
+                closeQuietly(output);
+            }
+        } finally {
+            closeQuietly(source);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Deletes a directory recursively.
+     * 
+     * @param directory
+     *            directory to delete
+     * @throws IOException
+     *             in case deletion is unsuccessful
+     */
+    public static void deleteDirectory(File directory) throws IOException {
+        if (!directory.exists()) {
+            return;
+        }
+
+        if (!isSymlink(directory)) {
+            cleanDirectory(directory);
+        }
+
+        if (!directory.delete()) {
+            String message = "Unable to delete directory " + directory + ".";
+            throw new IOException(message);
+        }
+    }
+
+    /**
+     * Deletes a file, never throwing an exception. If file is a directory,
+     * delete it and all sub-directories.
+     * <p>
+     * The difference between File.delete() and this method are:
+     * <ul>
+     * <li>A directory to be deleted does not have to be empty.</li>
+     * <li>No exceptions are thrown when a file or directory cannot be deleted.</li>
+     * </ul>
+     * 
+     * @param file
+     *            file or directory to delete, can be <code>null</code>
+     * @return <code>true</code> if the file or directory was deleted, otherwise
+     *         <code>false</code>
+     * 
+     * @since Commons IO 1.4
+     */
+    public static boolean deleteQuietly(File file) {
+        if (file == null) {
+            return false;
+        }
+        try {
+            if (file.isDirectory()) {
+                cleanDirectory(file);
+            }
+        } catch (Exception ignored) {
+        }
+
+        try {
+            return file.delete();
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    /**
+     * Cleans a directory without deleting it.
+     * 
+     * @param directory
+     *            directory to clean
+     * @throws IOException
+     *             in case cleaning is unsuccessful
+     */
+    public static void cleanDirectory(File directory) throws IOException {
+        if (!directory.exists()) {
+            String message = directory + " does not exist";
+            throw new IllegalArgumentException(message);
+        }
+
+        if (!directory.isDirectory()) {
+            String message = directory + " is not a directory";
+            throw new IllegalArgumentException(message);
+        }
+
+        File[] files = directory.listFiles();
+        if (files == null) { // null if security restricted
+            throw new IOException("Failed to list contents of " + directory);
+        }
+
+        IOException exception = null;
+        for (File file : files) {
+            try {
+                forceDelete(file);
+            } catch (IOException ioe) {
+                exception = ioe;
+            }
+        }
+
+        if (null != exception) {
+            throw exception;
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Waits for NFS to propagate a file creation, imposing a timeout.
+     * <p>
+     * This method repeatedly tests {@link File#exists()} until it returns true
+     * up to the maximum time specified in seconds.
+     * 
+     * @param file
+     *            the file to check, must not be <code>null</code>
+     * @param seconds
+     *            the maximum time in seconds to wait
+     * @return true if file exists
+     * @throws NullPointerException
+     *             if the file is <code>null</code>
+     */
+    public static boolean waitFor(File file, int seconds) {
+        int timeout = 0;
+        int tick = 0;
+        while (!file.exists()) {
+            if (tick++ >= 10) {
+                tick = 0;
+                if (timeout++ > seconds) {
+                    return false;
+                }
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignore) {
+                // ignore exception
+            } catch (Exception ex) {
+                break;
+            }
+        }
+        return true;
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Reads the contents of a file into a String. The file is always closed.
+     * 
+     * @param file
+     *            the file to read, must not be <code>null</code>
+     * @param encoding
+     *            the encoding to use, <code>null</code> means platform default
+     * @return the file contents, never <code>null</code>
+     * @throws IOException
+     *             in case of an I/O error
+     * @throws java.io.UnsupportedEncodingException
+     *             if the encoding is not supported by the VM
+     */
+    public static String readFileToString(File file, String encoding)
+            throws IOException {
+        InputStream in = null;
+        try {
+            in = openInputStream(file);
+            return toString(in, encoding);
+        } finally {
+            closeQuietly(in);
+        }
+    }
+
+    /**
+     * Reads the contents of a file into a String using the default encoding for
+     * the VM. The file is always closed.
+     * 
+     * @param file
+     *            the file to read, must not be <code>null</code>
+     * @return the file contents, never <code>null</code>
+     * @throws IOException
+     *             in case of an I/O error
+     * @since Commons IO 1.3.1
+     */
+    public static String readFileToString(File file) throws IOException {
+        return readFileToString(file, null);
+    }
+
+    /**
+     * Reads the contents of a file into a byte array. The file is always
+     * closed.
+     * 
+     * @param file
+     *            the file to read, must not be <code>null</code>
+     * @return the file contents, never <code>null</code>
+     * @throws IOException
+     *             in case of an I/O error
+     * @since Commons IO 1.1
+     */
+    public static byte[] readFileToByteArray(File file) throws IOException {
+        InputStream in = null;
+        try {
+            in = openInputStream(file);
+            return toByteArray(in);
+        } finally {
+            closeQuietly(in);
+        }
+    }
+
+    /**
+     * Reads the contents of a file line by line to a List of Strings. The file
+     * is always closed.
+     * 
+     * @param file
+     *            the file to read, must not be <code>null</code>
+     * @param encoding
+     *            the encoding to use, <code>null</code> means platform default
+     * @return the list of Strings representing each line in the file, never
+     *         <code>null</code>
+     * @throws IOException
+     *             in case of an I/O error
+     * @throws java.io.UnsupportedEncodingException
+     *             if the encoding is not supported by the VM
+     * @since Commons IO 1.1
+     */
+    public static List<String> readLines(File file, String encoding)
+            throws IOException {
+        InputStream in = null;
+        try {
+            in = openInputStream(file);
+            return readLines(in, encoding);
+        } finally {
+            closeQuietly(in);
+        }
+    }
+
+    /**
+     * Reads the contents of a file line by line to a List of Strings using the
+     * default encoding for the VM. The file is always closed.
+     * 
+     * @param file
+     *            the file to read, must not be <code>null</code>
+     * @return the list of Strings representing each line in the file, never
+     *         <code>null</code>
+     * @throws IOException
+     *             in case of an I/O error
+     * @since Commons IO 1.3
+     */
+    public static List<String> readLines(File file) throws IOException {
+        return readLines(file, null);
+    }
+
+    /**
+     * Returns an Iterator for the lines in a <code>File</code>.
+     * <p>
+     * This method opens an <code>InputStream</code> for the file. When you have
+     * finished with the iterator you should close the stream to free internal
+     * resources. This can be done by calling the {@link LineIterator#close()}
+     * or {@link LineIterator#closeQuietly(LineIterator)} method.
+     * <p>
+     * The recommended usage pattern is:
+     * 
+     * <pre>
+     * LineIterator it = FileUtils.lineIterator(file, &quot;UTF-8&quot;);
+     * try {
+     *     while (it.hasNext()) {
+     *         String line = it.nextLine();
+     *         // / do something with line
+     *     }
+     * } finally {
+     *     LineIterator.closeQuietly(iterator);
+     * }
+     * </pre>
+     * <p>
+     * If an exception occurs during the creation of the iterator, the
+     * underlying stream is closed.
+     * 
+     * @param file
+     *            the file to open for input, must not be <code>null</code>
+     * @param encoding
+     *            the encoding to use, <code>null</code> means platform default
+     * @return an Iterator of the lines in the file, never <code>null</code>
+     * @throws IOException
+     *             in case of an I/O error (file closed)
+     * @since Commons IO 1.2
+     */
+    public static LineIterator lineIterator(File file, String encoding)
+            throws IOException {
+        InputStream in = null;
+        try {
+            in = openInputStream(file);
+            return lineIterator(in, encoding);
+        } catch (IOException ex) {
+            closeQuietly(in);
+            throw ex;
+        } catch (RuntimeException ex) {
+            closeQuietly(in);
+            throw ex;
+        }
+    }
+
+    /**
+     * Returns an Iterator for the lines in a <code>File</code> using the
+     * default encoding for the VM.
+     * 
+     * @param file
+     *            the file to open for input, must not be <code>null</code>
+     * @return an Iterator of the lines in the file, never <code>null</code>
+     * @throws IOException
+     *             in case of an I/O error (file closed)
+     * @since Commons IO 1.3
+     * @see #lineIterator(File, String)
+     */
+    public static LineIterator lineIterator(File file) throws IOException {
+        return lineIterator(file, null);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Writes a String to a file creating the file if it does not exist.
+     * 
+     * NOTE: As from v1.3, the parent directories of the file will be created if
+     * they do not exist.
+     * 
+     * @param file
+     *            the file to write
+     * @param data
+     *            the content to write to the file
+     * @param encoding
+     *            the encoding to use, <code>null</code> means platform default
+     * @throws IOException
+     *             in case of an I/O error
+     * @throws java.io.UnsupportedEncodingException
+     *             if the encoding is not supported by the VM
+     */
+    public static void writeStringToFile(File file, String data, String encoding)
+            throws IOException {
+        OutputStream out = null;
+        try {
+            out = openOutputStream(file);
+            write(data, out, encoding);
+        } finally {
+            closeQuietly(out);
+        }
+    }
+
+    /**
+     * Writes a String to a file creating the file if it does not exist using
+     * the default encoding for the VM.
+     * 
+     * @param file
+     *            the file to write
+     * @param data
+     *            the content to write to the file
+     * @throws IOException
+     *             in case of an I/O error
+     */
+    public static void writeStringToFile(File file, String data)
+            throws IOException {
+        writeStringToFile(file, data, null);
+    }
+
+    /**
+     * Writes a CharSequence to a file creating the file if it does not exist
+     * using the default encoding for the VM.
+     * 
+     * @param file
+     *            the file to write
+     * @param data
+     *            the content to write to the file
+     * @throws IOException
+     *             in case of an I/O error
+     * @since Commons IO 2.0
+     */
+    public static void write(File file, CharSequence data) throws IOException {
+        String str = data == null ? null : data.toString();
+        writeStringToFile(file, str);
+    }
+
+    /**
+     * Writes a CharSequence to a file creating the file if it does not exist.
+     * 
+     * @param file
+     *            the file to write
+     * @param data
+     *            the content to write to the file
+     * @param encoding
+     *            the encoding to use, <code>null</code> means platform default
+     * @throws IOException
+     *             in case of an I/O error
+     * @throws java.io.UnsupportedEncodingException
+     *             if the encoding is not supported by the VM
+     * @since Commons IO 2.0
+     */
+    public static void write(File file, CharSequence data, String encoding)
+            throws IOException {
+        String str = data == null ? null : data.toString();
+        writeStringToFile(file, str, encoding);
+    }
+
+    /**
+     * Writes a byte array to a file creating the file if it does not exist.
+     * <p>
+     * NOTE: As from v1.3, the parent directories of the file will be created if
+     * they do not exist.
+     * 
+     * @param file
+     *            the file to write to
+     * @param data
+     *            the content to write to the file
+     * @throws IOException
+     *             in case of an I/O error
+     * @since Commons IO 1.1
+     */
+    public static void writeByteArrayToFile(File file, byte[] data)
+            throws IOException {
+        OutputStream out = null;
+        try {
+            out = openOutputStream(file);
+            out.write(data);
+        } finally {
+            closeQuietly(out);
+        }
+    }
+
+    /**
+     * Writes the <code>toString()</code> value of each item in a collection to
+     * the specified <code>File</code> line by line. The specified character
+     * encoding and the default line ending will be used.
+     * <p>
+     * NOTE: As from v1.3, the parent directories of the file will be created if
+     * they do not exist.
+     * 
+     * @param file
+     *            the file to write to
+     * @param encoding
+     *            the encoding to use, <code>null</code> means platform default
+     * @param lines
+     *            the lines to write, <code>null</code> entries produce blank
+     *            lines
+     * @throws IOException
+     *             in case of an I/O error
+     * @throws java.io.UnsupportedEncodingException
+     *             if the encoding is not supported by the VM
+     * @since Commons IO 1.1
+     */
+    public static void writeLines(File file, String encoding,
+            Collection<?> lines) throws IOException {
+        writeLines(file, encoding, lines, null);
+    }
+
+    /**
+     * Writes the <code>toString()</code> value of each item in a collection to
+     * the specified <code>File</code> line by line. The default VM encoding and
+     * the default line ending will be used.
+     * 
+     * @param file
+     *            the file to write to
+     * @param lines
+     *            the lines to write, <code>null</code> entries produce blank
+     *            lines
+     * @throws IOException
+     *             in case of an I/O error
+     * @since Commons IO 1.3
+     */
+    public static void writeLines(File file, Collection<?> lines)
+            throws IOException {
+        writeLines(file, null, lines, null);
+    }
+
+    /**
+     * Writes the <code>toString()</code> value of each item in a collection to
+     * the specified <code>File</code> line by line. The specified character
+     * encoding and the line ending will be used.
+     * <p>
+     * NOTE: As from v1.3, the parent directories of the file will be created if
+     * they do not exist.
+     * 
+     * @param file
+     *            the file to write to
+     * @param encoding
+     *            the encoding to use, <code>null</code> means platform default
+     * @param lines
+     *            the lines to write, <code>null</code> entries produce blank
+     *            lines
+     * @param lineEnding
+     *            the line separator to use, <code>null</code> is system default
+     * @throws IOException
+     *             in case of an I/O error
+     * @throws java.io.UnsupportedEncodingException
+     *             if the encoding is not supported by the VM
+     * @since Commons IO 1.1
+     */
+    public static void writeLines(File file, String encoding,
+            Collection<?> lines, String lineEnding) throws IOException {
+        OutputStream out = null;
+        try {
+            out = openOutputStream(file);
+            writeLines(lines, lineEnding, out, encoding);
+        } finally {
+            closeQuietly(out);
+        }
+    }
+
+    /**
+     * Writes the <code>toString()</code> value of each item in a collection to
+     * the specified <code>File</code> line by line. The default VM encoding and
+     * the specified line ending will be used.
+     * 
+     * @param file
+     *            the file to write to
+     * @param lines
+     *            the lines to write, <code>null</code> entries produce blank
+     *            lines
+     * @param lineEnding
+     *            the line separator to use, <code>null</code> is system default
+     * @throws IOException
+     *             in case of an I/O error
+     * @since Commons IO 1.3
+     */
+    public static void writeLines(File file, Collection<?> lines,
+            String lineEnding) throws IOException {
+        writeLines(file, null, lines, lineEnding);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Deletes a file. If file is a directory, delete it and all
+     * sub-directories.
+     * <p>
+     * The difference between File.delete() and this method are:
+     * <ul>
+     * <li>A directory to be deleted does not have to be empty.</li>
+     * <li>You get exceptions when a file or directory cannot be deleted.
+     * (java.io.File methods returns a boolean)</li>
+     * </ul>
+     * 
+     * @param file
+     *            file or directory to delete, must not be <code>null</code>
+     * @throws NullPointerException
+     *             if the directory is <code>null</code>
+     * @throws FileNotFoundException
+     *             if the file was not found
+     * @throws IOException
+     *             in case deletion is unsuccessful
+     */
+    public static void forceDelete(File file) throws IOException {
+        if (file.isDirectory()) {
+            deleteDirectory(file);
+        } else {
+            boolean filePresent = file.exists();
+            if (!file.delete()) {
+                if (!filePresent) {
+                    throw new FileNotFoundException("File does not exist: "
+                            + file);
+                }
+                String message = "Unable to delete file: " + file;
+                throw new IOException(message);
+            }
+        }
+    }
+
+    /**
+     * Schedules a file to be deleted when JVM exits. If file is directory
+     * delete it and all sub-directories.
+     * 
+     * @param file
+     *            file or directory to delete, must not be <code>null</code>
+     * @throws NullPointerException
+     *             if the file is <code>null</code>
+     * @throws IOException
+     *             in case deletion is unsuccessful
+     */
+    public static void forceDeleteOnExit(File file) throws IOException {
+        if (file.isDirectory()) {
+            deleteDirectoryOnExit(file);
+        } else {
+            file.deleteOnExit();
+        }
+    }
+
+    /**
+     * Schedules a directory recursively for deletion on JVM exit.
+     * 
+     * @param directory
+     *            directory to delete, must not be <code>null</code>
+     * @throws NullPointerException
+     *             if the directory is <code>null</code>
+     * @throws IOException
+     *             in case deletion is unsuccessful
+     */
+    private static void deleteDirectoryOnExit(File directory)
+            throws IOException {
+        if (!directory.exists()) {
+            return;
+        }
+
+        if (!isSymlink(directory)) {
+            cleanDirectoryOnExit(directory);
+        }
+        directory.deleteOnExit();
+    }
+
+    /**
+     * Cleans a directory without deleting it.
+     * 
+     * @param directory
+     *            directory to clean, must not be <code>null</code>
+     * @throws NullPointerException
+     *             if the directory is <code>null</code>
+     * @throws IOException
+     *             in case cleaning is unsuccessful
+     */
+    private static void cleanDirectoryOnExit(File directory) throws IOException {
+        if (!directory.exists()) {
+            String message = directory + " does not exist";
+            throw new IllegalArgumentException(message);
+        }
+
+        if (!directory.isDirectory()) {
+            String message = directory + " is not a directory";
+            throw new IllegalArgumentException(message);
+        }
+
+        File[] files = directory.listFiles();
+        if (files == null) { // null if security restricted
+            throw new IOException("Failed to list contents of " + directory);
+        }
+
+        IOException exception = null;
+        for (File file : files) {
+            try {
+                forceDeleteOnExit(file);
+            } catch (IOException ioe) {
+                exception = ioe;
+            }
+        }
+
+        if (null != exception) {
+            throw exception;
+        }
+    }
+
+    /**
+     * Makes a directory, including any necessary but nonexistent parent
+     * directories. If a file already exists with specified name but it is not a
+     * directory then an IOException is thrown. If the directory cannot be
+     * created (or does not already exist) then an IOException is thrown.
+     * 
+     * @param directory
+     *            directory to create, must not be <code>null</code>
+     * @throws NullPointerException
+     *             if the directory is <code>null</code>
+     * @throws IOException
+     *             if the directory cannot be created or the file already exists
+     *             but is not a directory
+     */
+    public static void forceMkdir(File directory) throws IOException {
+        if (directory.exists()) {
+            if (!directory.isDirectory()) {
+                String message = "File " + directory + " exists and is "
+                        + "not a directory. Unable to create directory.";
+                throw new IOException(message);
+            }
+        } else {
+            if (!directory.mkdirs()) {
+                // Double-check that some other thread or process hasn't made
+                // the directory in the background
+                if (!directory.isDirectory()) {
+                    String message = "Unable to create directory " + directory;
+                    throw new IOException(message);
+                }
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Returns the size of the specified file or directory. If the provided
+     * {@link File} is a regular file, then the file's length is returned. If
+     * the argument is a directory, then the size of the directory is calculated
+     * recursively. If a directory or subdirectory is security restricted, its
+     * size will not be included.
+     * 
+     * @param file
+     *            the regular file or directory to return the size of (must not
+     *            be <code>null</code>).
+     * 
+     * @return the length of the file, or recursive size of the directory,
+     *         provided (in bytes).
+     * 
+     * @throws NullPointerException
+     *             if the file is <code>null</code>
+     * @throws IllegalArgumentException
+     *             if the file does not exist.
+     * 
+     * @since Commons IO 2.0
+     */
+    public static long sizeOf(File file) {
+
+        if (!file.exists()) {
+            String message = file + " does not exist";
+            throw new IllegalArgumentException(message);
+        }
+
+        if (file.isDirectory()) {
+            return sizeOfDirectory(file);
+        } else {
+            return file.length();
+        }
+
+    }
+
+    /**
+     * Counts the size of a directory recursively (sum of the length of all
+     * files).
+     * 
+     * @param directory
+     *            directory to inspect, must not be <code>null</code>
+     * @return size of directory in bytes, 0 if directory is security restricted
+     * @throws NullPointerException
+     *             if the directory is <code>null</code>
+     */
+    public static long sizeOfDirectory(File directory) {
+        if (!directory.exists()) {
+            String message = directory + " does not exist";
+            throw new IllegalArgumentException(message);
+        }
+
+        if (!directory.isDirectory()) {
+            String message = directory + " is not a directory";
+            throw new IllegalArgumentException(message);
+        }
+
+        long size = 0;
+
+        File[] files = directory.listFiles();
+        if (files == null) { // null if security restricted
+            return 0L;
+        }
+        for (File file : files) {
+            size += sizeOf(file);
+        }
+
+        return size;
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Tests if the specified <code>File</code> is newer than the reference
+     * <code>File</code>.
+     * 
+     * @param file
+     *            the <code>File</code> of which the modification date must be
+     *            compared, must not be <code>null</code>
+     * @param reference
+     *            the <code>File</code> of which the modification date is used,
+     *            must not be <code>null</code>
+     * @return true if the <code>File</code> exists and has been modified more
+     *         recently than the reference <code>File</code>
+     * @throws IllegalArgumentException
+     *             if the file is <code>null</code>
+     * @throws IllegalArgumentException
+     *             if the reference file is <code>null</code> or doesn't exist
+     */
+    public static boolean isFileNewer(File file, File reference) {
+        if (reference == null) {
+            throw new IllegalArgumentException("No specified reference file");
+        }
+        if (!reference.exists()) {
+            throw new IllegalArgumentException("The reference file '"
+                    + reference + "' doesn't exist");
+        }
+        return isFileNewer(file, reference.lastModified());
+    }
+
+    /**
+     * Tests if the specified <code>File</code> is newer than the specified
+     * <code>Date</code>.
+     * 
+     * @param file
+     *            the <code>File</code> of which the modification date must be
+     *            compared, must not be <code>null</code>
+     * @param date
+     *            the date reference, must not be <code>null</code>
+     * @return true if the <code>File</code> exists and has been modified after
+     *         the given <code>Date</code>.
+     * @throws IllegalArgumentException
+     *             if the file is <code>null</code>
+     * @throws IllegalArgumentException
+     *             if the date is <code>null</code>
+     */
+    public static boolean isFileNewer(File file, Date date) {
+        if (date == null) {
+            throw new IllegalArgumentException("No specified date");
+        }
+        return isFileNewer(file, date.getTime());
+    }
+
+    /**
+     * Tests if the specified <code>File</code> is newer than the specified time
+     * reference.
+     * 
+     * @param file
+     *            the <code>File</code> of which the modification date must be
+     *            compared, must not be <code>null</code>
+     * @param timeMillis
+     *            the time reference measured in milliseconds since the epoch
+     *            (00:00:00 GMT, January 1, 1970)
+     * @return true if the <code>File</code> exists and has been modified after
+     *         the given time reference.
+     * @throws IllegalArgumentException
+     *             if the file is <code>null</code>
+     */
+    public static boolean isFileNewer(File file, long timeMillis) {
+        if (file == null) {
+            throw new IllegalArgumentException("No specified file");
+        }
+        if (!file.exists()) {
+            return false;
+        }
+        return file.lastModified() > timeMillis;
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Tests if the specified <code>File</code> is older than the reference
+     * <code>File</code>.
+     * 
+     * @param file
+     *            the <code>File</code> of which the modification date must be
+     *            compared, must not be <code>null</code>
+     * @param reference
+     *            the <code>File</code> of which the modification date is used,
+     *            must not be <code>null</code>
+     * @return true if the <code>File</code> exists and has been modified before
+     *         the reference <code>File</code>
+     * @throws IllegalArgumentException
+     *             if the file is <code>null</code>
+     * @throws IllegalArgumentException
+     *             if the reference file is <code>null</code> or doesn't exist
+     */
+    public static boolean isFileOlder(File file, File reference) {
+        if (reference == null) {
+            throw new IllegalArgumentException("No specified reference file");
+        }
+        if (!reference.exists()) {
+            throw new IllegalArgumentException("The reference file '"
+                    + reference + "' doesn't exist");
+        }
+        return isFileOlder(file, reference.lastModified());
+    }
+
+    /**
+     * Tests if the specified <code>File</code> is older than the specified
+     * <code>Date</code>.
+     * 
+     * @param file
+     *            the <code>File</code> of which the modification date must be
+     *            compared, must not be <code>null</code>
+     * @param date
+     *            the date reference, must not be <code>null</code>
+     * @return true if the <code>File</code> exists and has been modified before
+     *         the given <code>Date</code>.
+     * @throws IllegalArgumentException
+     *             if the file is <code>null</code>
+     * @throws IllegalArgumentException
+     *             if the date is <code>null</code>
+     */
+    public static boolean isFileOlder(File file, Date date) {
+        if (date == null) {
+            throw new IllegalArgumentException("No specified date");
+        }
+        return isFileOlder(file, date.getTime());
+    }
+
+    /**
+     * Tests if the specified <code>File</code> is older than the specified time
+     * reference.
+     * 
+     * @param file
+     *            the <code>File</code> of which the modification date must be
+     *            compared, must not be <code>null</code>
+     * @param timeMillis
+     *            the time reference measured in milliseconds since the epoch
+     *            (00:00:00 GMT, January 1, 1970)
+     * @return true if the <code>File</code> exists and has been modified before
+     *         the given time reference.
+     * @throws IllegalArgumentException
+     *             if the file is <code>null</code>
+     */
+    public static boolean isFileOlder(File file, long timeMillis) {
+        if (file == null) {
+            throw new IllegalArgumentException("No specified file");
+        }
+        if (!file.exists()) {
+            return false;
+        }
+        return file.lastModified() < timeMillis;
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Computes the checksum of a file using the CRC32 checksum routine. The
+     * value of the checksum is returned.
+     * 
+     * @param file
+     *            the file to checksum, must not be <code>null</code>
+     * @return the checksum value
+     * @throws NullPointerException
+     *             if the file or checksum is <code>null</code>
+     * @throws IllegalArgumentException
+     *             if the file is a directory
+     * @throws IOException
+     *             if an IO error occurs reading the file
+     * @since Commons IO 1.3
+     */
+    public static long checksumCRC32(File file) throws IOException {
+        CRC32 crc = new CRC32();
+        checksum(file, crc);
+        return crc.getValue();
+    }
+
+    /**
+     * Computes the checksum of a file using the specified checksum object.
+     * Multiple files may be checked using one <code>Checksum</code> instance if
+     * desired simply by reusing the same checksum object. For example:
+     * 
+     * <pre>
+     * long csum = FileUtils.checksum(file, new CRC32()).getValue();
+     * </pre>
+     * 
+     * @param file
+     *            the file to checksum, must not be <code>null</code>
+     * @param checksum
+     *            the checksum object to be used, must not be <code>null</code>
+     * @return the checksum specified, updated with the content of the file
+     * @throws NullPointerException
+     *             if the file or checksum is <code>null</code>
+     * @throws IllegalArgumentException
+     *             if the file is a directory
+     * @throws IOException
+     *             if an IO error occurs reading the file
+     * @since Commons IO 1.3
+     */
+    public static Checksum checksum(File file, Checksum checksum)
+            throws IOException {
+        if (file.isDirectory()) {
+            throw new IllegalArgumentException(
+                    "Checksums can't be computed on directories");
+        }
+        InputStream in = null;
+        try {
+            in = new CheckedInputStream(new FileInputStream(file), checksum);
+            copy(in, new NullOutputStream());
+        } finally {
+            closeQuietly(in);
+        }
+        return checksum;
+    }
+
+    /**
+     * Moves a directory.
+     * <p>
+     * When the destination directory is on another file system, do a
+     * "copy and delete".
+     * 
+     * @param srcDir
+     *            the directory to be moved
+     * @param destDir
+     *            the destination directory
+     * @throws NullPointerException
+     *             if source or destination is <code>null</code>
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs moving the file
+     * @since Commons IO 1.4
+     */
+    public static void moveDirectory(File srcDir, File destDir)
+            throws IOException {
+        if (srcDir == null) {
+            throw new NullPointerException("Source must not be null");
+        }
+        if (destDir == null) {
+            throw new NullPointerException("Destination must not be null");
+        }
+        if (!srcDir.exists()) {
+            throw new FileNotFoundException("Source '" + srcDir
+                    + "' does not exist");
+        }
+        if (!srcDir.isDirectory()) {
+            throw new IOException("Source '" + srcDir + "' is not a directory");
+        }
+        if (destDir.exists()) {
+            throw new FileExistsException("Destination '" + destDir
+                    + "' already exists");
+        }
+        boolean rename = srcDir.renameTo(destDir);
+        if (!rename) {
+            copyDirectory(srcDir, destDir);
+            deleteDirectory(srcDir);
+            if (srcDir.exists()) {
+                throw new IOException("Failed to delete original directory '"
+                        + srcDir + "' after copy to '" + destDir + "'");
+            }
+        }
+    }
+
+    /**
+     * Moves a directory to another directory.
+     * 
+     * @param src
+     *            the file to be moved
+     * @param destDir
+     *            the destination file
+     * @param createDestDir
+     *            If <code>true</code> create the destination directory,
+     *            otherwise if <code>false</code> throw an IOException
+     * @throws NullPointerException
+     *             if source or destination is <code>null</code>
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs moving the file
+     * @since Commons IO 1.4
+     */
+    public static void moveDirectoryToDirectory(File src, File destDir,
+            boolean createDestDir) throws IOException {
+        if (src == null) {
+            throw new NullPointerException("Source must not be null");
+        }
+        if (destDir == null) {
+            throw new NullPointerException(
+                    "Destination directory must not be null");
+        }
+        if (!destDir.exists() && createDestDir) {
+            destDir.mkdirs();
+        }
+        if (!destDir.exists()) {
+            throw new FileNotFoundException("Destination directory '" + destDir
+                    + "' does not exist [createDestDir=" + createDestDir + "]");
+        }
+        if (!destDir.isDirectory()) {
+            throw new IOException("Destination '" + destDir
+                    + "' is not a directory");
+        }
+        moveDirectory(src, new File(destDir, src.getName()));
+
+    }
+
+    /**
+     * Moves a file.
+     * <p>
+     * When the destination file is on another file system, do a
+     * "copy and delete".
+     * 
+     * @param srcFile
+     *            the file to be moved
+     * @param destFile
+     *            the destination file
+     * @throws NullPointerException
+     *             if source or destination is <code>null</code>
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs moving the file
+     * @since Commons IO 1.4
+     */
+    public static void moveFile(File srcFile, File destFile) throws IOException {
+        if (srcFile == null) {
+            throw new NullPointerException("Source must not be null");
+        }
+        if (destFile == null) {
+            throw new NullPointerException("Destination must not be null");
+        }
+        if (!srcFile.exists()) {
+            throw new FileNotFoundException("Source '" + srcFile
+                    + "' does not exist");
+        }
+        if (srcFile.isDirectory()) {
+            throw new IOException("Source '" + srcFile + "' is a directory");
+        }
+        if (destFile.exists()) {
+            throw new FileExistsException("Destination '" + destFile
+                    + "' already exists");
+        }
+        if (destFile.isDirectory()) {
+            throw new IOException("Destination '" + destFile
+                    + "' is a directory");
+        }
+        boolean rename = srcFile.renameTo(destFile);
+        if (!rename) {
+            copyFile(srcFile, destFile);
+            if (!srcFile.delete()) {
+                deleteQuietly(destFile);
+                throw new IOException("Failed to delete original file '"
+                        + srcFile + "' after copy to '" + destFile + "'");
+            }
+        }
+    }
+
+    /**
+     * Moves a file to a directory.
+     * 
+     * @param srcFile
+     *            the file to be moved
+     * @param destDir
+     *            the destination file
+     * @param createDestDir
+     *            If <code>true</code> create the destination directory,
+     *            otherwise if <code>false</code> throw an IOException
+     * @throws NullPointerException
+     *             if source or destination is <code>null</code>
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs moving the file
+     * @since Commons IO 1.4
+     */
+    public static void moveFileToDirectory(File srcFile, File destDir,
+            boolean createDestDir) throws IOException {
+        if (srcFile == null) {
+            throw new NullPointerException("Source must not be null");
+        }
+        if (destDir == null) {
+            throw new NullPointerException(
+                    "Destination directory must not be null");
+        }
+        if (!destDir.exists() && createDestDir) {
+            destDir.mkdirs();
+        }
+        if (!destDir.exists()) {
+            throw new FileNotFoundException("Destination directory '" + destDir
+                    + "' does not exist [createDestDir=" + createDestDir + "]");
+        }
+        if (!destDir.isDirectory()) {
+            throw new IOException("Destination '" + destDir
+                    + "' is not a directory");
+        }
+        moveFile(srcFile, new File(destDir, srcFile.getName()));
+    }
+
+    /**
+     * Moves a file or directory to the destination directory.
+     * <p>
+     * When the destination is on another file system, do a "copy and delete".
+     * 
+     * @param src
+     *            the file or directory to be moved
+     * @param destDir
+     *            the destination directory
+     * @param createDestDir
+     *            If <code>true</code> create the destination directory,
+     *            otherwise if <code>false</code> throw an IOException
+     * @throws NullPointerException
+     *             if source or destination is <code>null</code>
+     * @throws IOException
+     *             if source or destination is invalid
+     * @throws IOException
+     *             if an IO error occurs moving the file
+     * @since Commons IO 1.4
+     */
+    public static void moveToDirectory(File src, File destDir,
+            boolean createDestDir) throws IOException {
+        if (src == null) {
+            throw new NullPointerException("Source must not be null");
+        }
+        if (destDir == null) {
+            throw new NullPointerException("Destination must not be null");
+        }
+        if (!src.exists()) {
+            throw new FileNotFoundException("Source '" + src
+                    + "' does not exist");
+        }
+        if (src.isDirectory()) {
+            moveDirectoryToDirectory(src, destDir, createDestDir);
+        } else {
+            moveFileToDirectory(src, destDir, createDestDir);
+        }
+    }
+
+    /**
+     * Determines whether the specified file is a Symbolic Link rather than an
+     * actual file.
+     * <p>
+     * Will not return true if there is a Symbolic Link anywhere in the path,
+     * only if the specific file is.
+     * 
+     * @param file
+     *            the file to check
+     * @return true if the file is a Symbolic Link
+     * @throws IOException
+     *             if an IO error occurs while checking the file
+     * @since Commons IO 2.0
+     */
+    public static boolean isSymlink(File file) throws IOException {
+        if (file == null) {
+            throw new NullPointerException("File must not be null");
+        }
+        if (isSystemWindows()) {
+            return false;
+        }
+        File fileInCanonicalDir = null;
+        if (file.getParent() == null) {
+            fileInCanonicalDir = file;
+        } else {
+            File canonicalDir = file.getParentFile().getCanonicalFile();
+            fileInCanonicalDir = new File(canonicalDir, file.getName());
+        }
+
+        if (fileInCanonicalDir.getCanonicalFile().equals(
+                fileInCanonicalDir.getAbsoluteFile())) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    // ///////////////////////////////////////////
+    //
+    // IOUtils
+    //
+    // ///////////////////////////////////////////
+
+    /**
+     * The Unix directory separator character.
+     */
+    public static final char DIR_SEPARATOR_UNIX = '/';
+    /**
+     * The Windows directory separator character.
+     */
+    public static final char DIR_SEPARATOR_WINDOWS = '\\';
+    /**
+     * The system directory separator character.
+     */
+    public static final char DIR_SEPARATOR = File.separatorChar;
+    /**
+     * The Unix line separator string.
+     */
+    public static final String LINE_SEPARATOR_UNIX = "\n";
+    /**
+     * The Windows line separator string.
+     */
+    public static final String LINE_SEPARATOR_WINDOWS = "\r\n";
+
+    /**
+     * The default buffer size to use for
+     * {@link #copyLarge(InputStream, OutputStream)} and
+     * {@link #copyLarge(Reader, Writer)}
+     */
+    private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
+
+    /**
+     * The default buffer size to use for the skip() methods.
+     */
+    private static final int SKIP_BUFFER_SIZE = 2048;
+
+    // Allocated in the skip method if necessary.
+    private static char[] SKIP_CHAR_BUFFER;
+    private static byte[] SKIP_BYTE_BUFFER;
+
+    /**
+     * Unconditionally close an <code>Reader</code>.
+     * <p>
+     * Equivalent to {@link Reader#close()}, except any exceptions will be
+     * ignored. This is typically used in finally blocks.
+     * <p>
+     * Example code:
+     * 
+     * <pre>
+     * char[] data = new char[1024];
+     * Reader in = null;
+     * try {
+     *     in = new FileReader(&quot;foo.txt&quot;);
+     *     in.read(data);
+     *     in.close(); // close errors are handled
+     * } catch (Exception e) {
+     *     // error handling
+     * } finally {
+     *     IOUtils.closeQuietly(in);
+     * }
+     * </pre>
+     * 
+     * @param input
+     *            the Reader to close, may be null or already closed
+     */
+    public static void closeQuietly(Reader input) {
+        closeQuietly((Closeable) input);
+    }
+
+    /**
+     * Unconditionally close a <code>Writer</code>.
+     * <p>
+     * Equivalent to {@link Writer#close()}, except any exceptions will be
+     * ignored. This is typically used in finally blocks.
+     * <p>
+     * Example code:
+     * 
+     * <pre>
+     * Writer out = null;
+     * try {
+     *     out = new StringWriter();
+     *     out.write(&quot;Hello World&quot;);
+     *     out.close(); // close errors are handled
+     * } catch (Exception e) {
+     *     // error handling
+     * } finally {
+     *     IOUtils.closeQuietly(out);
+     * }
+     * </pre>
+     * 
+     * @param output
+     *            the Writer to close, may be null or already closed
+     */
+    public static void closeQuietly(Writer output) {
+        closeQuietly((Closeable) output);
+    }
+
+    /**
+     * Unconditionally close an <code>InputStream</code>.
+     * <p>
+     * Equivalent to {@link InputStream#close()}, except any exceptions will be
+     * ignored. This is typically used in finally blocks.
+     * <p>
+     * Example code:
+     * 
+     * <pre>
+     * byte[] data = new byte[1024];
+     * InputStream in = null;
+     * try {
+     *     in = new FileInputStream(&quot;foo.txt&quot;);
+     *     in.read(data);
+     *     in.close(); // close errors are handled
+     * } catch (Exception e) {
+     *     // error handling
+     * } finally {
+     *     IOUtils.closeQuietly(in);
+     * }
+     * </pre>
+     * 
+     * @param input
+     *            the InputStream to close, may be null or already closed
+     */
+    public static void closeQuietly(InputStream input) {
+        closeQuietly((Closeable) input);
+    }
+
+    /**
+     * Unconditionally close an <code>OutputStream</code>.
+     * <p>
+     * Equivalent to {@link OutputStream#close()}, except any exceptions will be
+     * ignored. This is typically used in finally blocks.
+     * <p>
+     * Example code:
+     * 
+     * <pre>
+     * byte[] data = &quot;Hello, World&quot;.getBytes();
+     * 
+     * OutputStream out = null;
+     * try {
+     *     out = new FileOutputStream(&quot;foo.txt&quot;);
+     *     out.write(data);
+     *     out.close(); // close errors are handled
+     * } catch (IOException e) {
+     *     // error handling
+     * } finally {
+     *     IOUtils.closeQuietly(out);
+     * }
+     * </pre>
+     * 
+     * @param output
+     *            the OutputStream to close, may be null or already closed
+     */
+    public static void closeQuietly(OutputStream output) {
+        closeQuietly((Closeable) output);
+    }
+
+    /**
+     * Unconditionally close a <code>Closeable</code>.
+     * <p>
+     * Equivalent to {@link Closeable#close()}, except any exceptions will be
+     * ignored. This is typically used in finally blocks.
+     * <p>
+     * Example code:
+     * 
+     * <pre>
+     * Closeable closeable = null;
+     * try {
+     *     closeable = new FileReader(&quot;foo.txt&quot;);
+     *     // process closeable
+     *     closeable.close();
+     * } catch (Exception e) {
+     *     // error handling
+     * } finally {
+     *     IOUtils.closeQuietly(closeable);
+     * }
+     * </pre>
+     * 
+     * @param closeable
+     *            the object to close, may be null or already closed
+     * @since Commons IO 2.0
+     */
+    public static void closeQuietly(Closeable closeable) {
+        try {
+            if (closeable != null) {
+                closeable.close();
+            }
+        } catch (IOException ioe) {
+            // ignore
+        }
+    }
+
+    /**
+     * Unconditionally close a <code>Socket</code>.
+     * <p>
+     * Equivalent to {@link Socket#close()}, except any exceptions will be
+     * ignored. This is typically used in finally blocks.
+     * <p>
+     * Example code:
+     * 
+     * <pre>
+     * Socket socket = null;
+     * try {
+     *     socket = new Socket(&quot;http://www.foo.com/&quot;, 80);
+     *     // process socket
+     *     socket.close();
+     * } catch (Exception e) {
+     *     // error handling
+     * } finally {
+     *     IOUtils.closeQuietly(socket);
+     * }
+     * </pre>
+     * 
+     * @param sock
+     *            the Socket to close, may be null or already closed
+     * @since Commons IO 2.0
+     */
+    public static void closeQuietly(Socket sock) {
+        if (sock != null) {
+            try {
+                sock.close();
+            } catch (IOException ioe) {
+                // ignored
+            }
+        }
+    }
+
+    /**
+     * Fetches entire contents of an <code>InputStream</code> and represent same
+     * data as result InputStream.
+     * <p>
+     * This method is useful where,
+     * <ul>
+     * <li>Source InputStream is slow.</li>
+     * <li>It has network resources associated, so we cannot keep it open for
+     * long time.</li>
+     * <li>It has network timeout associated.</li>
+     * </ul>
+     * It can be used in favor of {@link #toByteArray(InputStream)}, since it
+     * avoids unnecessary allocation and copy of byte[].<br>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * 
+     * @param input
+     *            Stream to be fully buffered.
+     * @return A fully buffered stream.
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 2.0
+     */
+    public static InputStream toBufferedInputStream(InputStream input)
+            throws IOException {
+        return org.apache.commons.io.output.ByteArrayOutputStream
+                .toBufferedInputStream(input);
+    }
+
+    // read toByteArray
+    // -----------------------------------------------------------------------
+    /**
+     * Get the contents of an <code>InputStream</code> as a <code>byte[]</code>.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * 
+     * @param input
+     *            the <code>InputStream</code> to read from
+     * @return the requested byte array
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     */
+    public static byte[] toByteArray(InputStream input) throws IOException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        copy(input, output);
+        return output.toByteArray();
+    }
+
+    /**
+     * Get the contents of a <code>Reader</code> as a <code>byte[]</code> using
+     * the default character encoding of the platform.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedReader</code>.
+     * 
+     * @param input
+     *            the <code>Reader</code> to read from
+     * @return the requested byte array
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     */
+    public static byte[] toByteArray(Reader input) throws IOException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        copy(input, output);
+        return output.toByteArray();
+    }
+
+    /**
+     * Get the contents of a <code>Reader</code> as a <code>byte[]</code> using
+     * the specified character encoding.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedReader</code>.
+     * 
+     * @param input
+     *            the <code>Reader</code> to read from
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @return the requested byte array
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static byte[] toByteArray(Reader input, String encoding)
+            throws IOException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        copy(input, output, encoding);
+        return output.toByteArray();
+    }
+
+    /**
+     * Get the contents of a <code>String</code> as a <code>byte[]</code> using
+     * the default character encoding of the platform.
+     * <p>
+     * This is the same as {@link String#getBytes()}.
+     * 
+     * @param input
+     *            the <code>String</code> to convert
+     * @return the requested byte array
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs (never occurs)
+     * @deprecated Use {@link String#getBytes()}
+     */
+    @Deprecated
+    public static byte[] toByteArray(String input) throws IOException {
+        return input.getBytes();
+    }
+
+    // read char[]
+    // -----------------------------------------------------------------------
+    /**
+     * Get the contents of an <code>InputStream</code> as a character array
+     * using the default character encoding of the platform.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * 
+     * @param is
+     *            the <code>InputStream</code> to read from
+     * @return the requested character array
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static char[] toCharArray(InputStream is) throws IOException {
+        CharArrayWriter output = new CharArrayWriter();
+        copy(is, output);
+        return output.toCharArray();
+    }
+
+    /**
+     * Get the contents of an <code>InputStream</code> as a character array
+     * using the specified character encoding.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * 
+     * @param is
+     *            the <code>InputStream</code> to read from
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @return the requested character array
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static char[] toCharArray(InputStream is, String encoding)
+            throws IOException {
+        CharArrayWriter output = new CharArrayWriter();
+        copy(is, output, encoding);
+        return output.toCharArray();
+    }
+
+    /**
+     * Get the contents of a <code>Reader</code> as a character array.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedReader</code>.
+     * 
+     * @param input
+     *            the <code>Reader</code> to read from
+     * @return the requested character array
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static char[] toCharArray(Reader input) throws IOException {
+        CharArrayWriter sw = new CharArrayWriter();
+        copy(input, sw);
+        return sw.toCharArray();
+    }
+
+    // read toString
+    // -----------------------------------------------------------------------
+    /**
+     * Get the contents of an <code>InputStream</code> as a String using the
+     * default character encoding of the platform.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * 
+     * @param input
+     *            the <code>InputStream</code> to read from
+     * @return the requested String
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     */
+    public static String toString(InputStream input) throws IOException {
+        StringBuilderWriter sw = new StringBuilderWriter();
+        copy(input, sw);
+        return sw.toString();
+    }
+
+    /**
+     * Get the contents of an <code>InputStream</code> as a String using the
+     * specified character encoding.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * 
+     * @param input
+     *            the <code>InputStream</code> to read from
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @return the requested String
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     */
+    public static String toString(InputStream input, String encoding)
+            throws IOException {
+        StringBuilderWriter sw = new StringBuilderWriter();
+        copy(input, sw, encoding);
+        return sw.toString();
+    }
+
+    /**
+     * Get the contents of a <code>Reader</code> as a String.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedReader</code>.
+     * 
+     * @param input
+     *            the <code>Reader</code> to read from
+     * @return the requested String
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     */
+    public static String toString(Reader input) throws IOException {
+        StringBuilderWriter sw = new StringBuilderWriter();
+        copy(input, sw);
+        return sw.toString();
+    }
+
+    /**
+     * Get the contents of a <code>byte[]</code> as a String using the default
+     * character encoding of the platform.
+     * 
+     * @param input
+     *            the byte array to read from
+     * @return the requested String
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs (never occurs)
+     * @deprecated Use {@link String#String(byte[])}
+     */
+    @Deprecated
+    public static String toString(byte[] input) throws IOException {
+        return new String(input);
+    }
+
+    /**
+     * Get the contents of a <code>byte[]</code> as a String using the specified
+     * character encoding.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * 
+     * @param input
+     *            the byte array to read from
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @return the requested String
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs (never occurs)
+     * @deprecated Use {@link String#String(byte[],String)}
+     */
+    @Deprecated
+    public static String toString(byte[] input, String encoding)
+            throws IOException {
+        if (encoding == null) {
+            return new String(input);
+        } else {
+            return new String(input, encoding);
+        }
+    }
+
+    // readLines
+    // -----------------------------------------------------------------------
+    /**
+     * Get the contents of an <code>InputStream</code> as a list of Strings, one
+     * entry per line, using the default character encoding of the platform.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * 
+     * @param input
+     *            the <code>InputStream</code> to read from, not null
+     * @return the list of Strings, never null
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static List<String> readLines(InputStream input) throws IOException {
+        InputStreamReader reader = new InputStreamReader(input);
+        return readLines(reader);
+    }
+
+    /**
+     * Get the contents of an <code>InputStream</code> as a list of Strings, one
+     * entry per line, using the specified character encoding.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * 
+     * @param input
+     *            the <code>InputStream</code> to read from, not null
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @return the list of Strings, never null
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static List<String> readLines(InputStream input, String encoding)
+            throws IOException {
+        if (encoding == null) {
+            return readLines(input);
+        } else {
+            InputStreamReader reader = new InputStreamReader(input, encoding);
+            return readLines(reader);
+        }
+    }
+
+    /**
+     * Get the contents of a <code>Reader</code> as a list of Strings, one entry
+     * per line.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedReader</code>.
+     * 
+     * @param input
+     *            the <code>Reader</code> to read from, not null
+     * @return the list of Strings, never null
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static List<String> readLines(Reader input) throws IOException {
+        BufferedReader reader = new BufferedReader(input);
+        List<String> list = new ArrayList<String>();
+        String line = reader.readLine();
+        while (line != null) {
+            list.add(line);
+            line = reader.readLine();
+        }
+        return list;
+    }
+
+    // lineIterator
+    // -----------------------------------------------------------------------
+    /**
+     * Return an Iterator for the lines in a <code>Reader</code>.
+     * <p>
+     * <code>LineIterator</code> holds a reference to the open
+     * <code>Reader</code> specified here. When you have finished with the
+     * iterator you should close the reader to free internal resources. This can
+     * be done by closing the reader directly, or by calling
+     * {@link LineIterator#close()} or
+     * {@link LineIterator#closeQuietly(LineIterator)}.
+     * <p>
+     * The recommended usage pattern is:
+     * 
+     * <pre>
+     * try {
+     *     LineIterator it = IOUtils.lineIterator(reader);
+     *     while (it.hasNext()) {
+     *         String line = it.nextLine();
+     *         // / do something with line
+     *     }
+     * } finally {
+     *     IOUtils.closeQuietly(reader);
+     * }
+     * </pre>
+     * 
+     * @param reader
+     *            the <code>Reader</code> to read from, not null
+     * @return an Iterator of the lines in the reader, never null
+     * @throws IllegalArgumentException
+     *             if the reader is null
+     * @since Commons IO 1.2
+     */
+    public static LineIterator lineIterator(Reader reader) {
+        return new LineIterator(reader);
+    }
+
+    /**
+     * Return an Iterator for the lines in an <code>InputStream</code>, using
+     * the character encoding specified (or default encoding if null).
+     * <p>
+     * <code>LineIterator</code> holds a reference to the open
+     * <code>InputStream</code> specified here. When you have finished with the
+     * iterator you should close the stream to free internal resources. This can
+     * be done by closing the stream directly, or by calling
+     * {@link LineIterator#close()} or
+     * {@link LineIterator#closeQuietly(LineIterator)}.
+     * <p>
+     * The recommended usage pattern is:
+     * 
+     * <pre>
+     * try {
+     *     LineIterator it = IOUtils.lineIterator(stream, &quot;UTF-8&quot;);
+     *     while (it.hasNext()) {
+     *         String line = it.nextLine();
+     *         // / do something with line
+     *     }
+     * } finally {
+     *     IOUtils.closeQuietly(stream);
+     * }
+     * </pre>
+     * 
+     * @param input
+     *            the <code>InputStream</code> to read from, not null
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @return an Iterator of the lines in the reader, never null
+     * @throws IllegalArgumentException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs, such as if the encoding is invalid
+     * @since Commons IO 1.2
+     */
+    public static LineIterator lineIterator(InputStream input, String encoding)
+            throws IOException {
+        Reader reader = null;
+        if (encoding == null) {
+            reader = new InputStreamReader(input);
+        } else {
+            reader = new InputStreamReader(input, encoding);
+        }
+        return new LineIterator(reader);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Convert the specified CharSequence to an input stream, encoded as bytes
+     * using the default character encoding of the platform.
+     * 
+     * @param input
+     *            the CharSequence to convert
+     * @return an input stream
+     * @since Commons IO 2.0
+     */
+    public static InputStream toInputStream(CharSequence input) {
+        return toInputStream(input.toString());
+    }
+
+    /**
+     * Convert the specified CharSequence to an input stream, encoded as bytes
+     * using the specified character encoding.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * 
+     * @param input
+     *            the CharSequence to convert
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @throws IOException
+     *             if the encoding is invalid
+     * @return an input stream
+     * @since Commons IO 2.0
+     */
+    public static InputStream toInputStream(CharSequence input, String encoding)
+            throws IOException {
+        return toInputStream(input.toString(), encoding);
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * Convert the specified string to an input stream, encoded as bytes using
+     * the default character encoding of the platform.
+     * 
+     * @param input
+     *            the string to convert
+     * @return an input stream
+     * @since Commons IO 1.1
+     */
+    public static InputStream toInputStream(String input) {
+        byte[] bytes = input.getBytes();
+        return new ByteArrayInputStream(bytes);
+    }
+
+    /**
+     * Convert the specified string to an input stream, encoded as bytes using
+     * the specified character encoding.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * 
+     * @param input
+     *            the string to convert
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @throws IOException
+     *             if the encoding is invalid
+     * @return an input stream
+     * @since Commons IO 1.1
+     */
+    public static InputStream toInputStream(String input, String encoding)
+            throws IOException {
+        byte[] bytes = encoding != null ? input.getBytes(encoding) : input
+                .getBytes();
+        return new ByteArrayInputStream(bytes);
+    }
+
+    // write byte[]
+    // -----------------------------------------------------------------------
+    /**
+     * Writes bytes from a <code>byte[]</code> to an <code>OutputStream</code>.
+     * 
+     * @param data
+     *            the byte array to write, do not modify during output, null
+     *            ignored
+     * @param output
+     *            the <code>OutputStream</code> to write to
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void write(byte[] data, OutputStream output)
+            throws IOException {
+        if (data != null) {
+            output.write(data);
+        }
+    }
+
+    /**
+     * Writes bytes from a <code>byte[]</code> to chars on a <code>Writer</code>
+     * using the default character encoding of the platform.
+     * <p>
+     * This method uses {@link String#String(byte[])}.
+     * 
+     * @param data
+     *            the byte array to write, do not modify during output, null
+     *            ignored
+     * @param output
+     *            the <code>Writer</code> to write to
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void write(byte[] data, Writer output) throws IOException {
+        if (data != null) {
+            output.write(new String(data));
+        }
+    }
+
+    /**
+     * Writes bytes from a <code>byte[]</code> to chars on a <code>Writer</code>
+     * using the specified character encoding.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * <p>
+     * This method uses {@link String#String(byte[], String)}.
+     * 
+     * @param data
+     *            the byte array to write, do not modify during output, null
+     *            ignored
+     * @param output
+     *            the <code>Writer</code> to write to
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void write(byte[] data, Writer output, String encoding)
+            throws IOException {
+        if (data != null) {
+            if (encoding == null) {
+                write(data, output);
+            } else {
+                output.write(new String(data, encoding));
+            }
+        }
+    }
+
+    // write char[]
+    // -----------------------------------------------------------------------
+    /**
+     * Writes chars from a <code>char[]</code> to a <code>Writer</code> using
+     * the default character encoding of the platform.
+     * 
+     * @param data
+     *            the char array to write, do not modify during output, null
+     *            ignored
+     * @param output
+     *            the <code>Writer</code> to write to
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void write(char[] data, Writer output) throws IOException {
+        if (data != null) {
+            output.write(data);
+        }
+    }
+
+    /**
+     * Writes chars from a <code>char[]</code> to bytes on an
+     * <code>OutputStream</code>.
+     * <p>
+     * This method uses {@link String#String(char[])} and
+     * {@link String#getBytes()}.
+     * 
+     * @param data
+     *            the char array to write, do not modify during output, null
+     *            ignored
+     * @param output
+     *            the <code>OutputStream</code> to write to
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void write(char[] data, OutputStream output)
+            throws IOException {
+        if (data != null) {
+            output.write(new String(data).getBytes());
+        }
+    }
+
+    /**
+     * Writes chars from a <code>char[]</code> to bytes on an
+     * <code>OutputStream</code> using the specified character encoding.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * <p>
+     * This method uses {@link String#String(char[])} and
+     * {@link String#getBytes(String)}.
+     * 
+     * @param data
+     *            the char array to write, do not modify during output, null
+     *            ignored
+     * @param output
+     *            the <code>OutputStream</code> to write to
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void write(char[] data, OutputStream output, String encoding)
+            throws IOException {
+        if (data != null) {
+            if (encoding == null) {
+                write(data, output);
+            } else {
+                output.write(new String(data).getBytes(encoding));
+            }
+        }
+    }
+
+    // write CharSequence
+    // -----------------------------------------------------------------------
+    /**
+     * Writes chars from a <code>CharSequence</code> to a <code>Writer</code>.
+     * 
+     * @param data
+     *            the <code>CharSequence</code> to write, null ignored
+     * @param output
+     *            the <code>Writer</code> to write to
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 2.0
+     */
+    public static void write(CharSequence data, Writer output)
+            throws IOException {
+        if (data != null) {
+            write(data.toString(), output);
+        }
+    }
+
+    /**
+     * Writes chars from a <code>CharSequence</code> to bytes on an
+     * <code>OutputStream</code> using the default character encoding of the
+     * platform.
+     * <p>
+     * This method uses {@link String#getBytes()}.
+     * 
+     * @param data
+     *            the <code>CharSequence</code> to write, null ignored
+     * @param output
+     *            the <code>OutputStream</code> to write to
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 2.0
+     */
+    public static void write(CharSequence data, OutputStream output)
+            throws IOException {
+        if (data != null) {
+            write(data.toString(), output);
+        }
+    }
+
+    /**
+     * Writes chars from a <code>CharSequence</code> to bytes on an
+     * <code>OutputStream</code> using the specified character encoding.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * <p>
+     * This method uses {@link String#getBytes(String)}.
+     * 
+     * @param data
+     *            the <code>CharSequence</code> to write, null ignored
+     * @param output
+     *            the <code>OutputStream</code> to write to
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 2.0
+     */
+    public static void write(CharSequence data, OutputStream output,
+            String encoding) throws IOException {
+        if (data != null) {
+            write(data.toString(), output, encoding);
+        }
+    }
+
+    // write String
+    // -----------------------------------------------------------------------
+    /**
+     * Writes chars from a <code>String</code> to a <code>Writer</code>.
+     * 
+     * @param data
+     *            the <code>String</code> to write, null ignored
+     * @param output
+     *            the <code>Writer</code> to write to
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void write(String data, Writer output) throws IOException {
+        if (data != null) {
+            output.write(data);
+        }
+    }
+
+    /**
+     * Writes chars from a <code>String</code> to bytes on an
+     * <code>OutputStream</code> using the default character encoding of the
+     * platform.
+     * <p>
+     * This method uses {@link String#getBytes()}.
+     * 
+     * @param data
+     *            the <code>String</code> to write, null ignored
+     * @param output
+     *            the <code>OutputStream</code> to write to
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void write(String data, OutputStream output)
+            throws IOException {
+        if (data != null) {
+            output.write(data.getBytes());
+        }
+    }
+
+    /**
+     * Writes chars from a <code>String</code> to bytes on an
+     * <code>OutputStream</code> using the specified character encoding.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * <p>
+     * This method uses {@link String#getBytes(String)}.
+     * 
+     * @param data
+     *            the <code>String</code> to write, null ignored
+     * @param output
+     *            the <code>OutputStream</code> to write to
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void write(String data, OutputStream output, String encoding)
+            throws IOException {
+        if (data != null) {
+            if (encoding == null) {
+                write(data, output);
+            } else {
+                output.write(data.getBytes(encoding));
+            }
+        }
+    }
+
+    // write StringBuffer
+    // -----------------------------------------------------------------------
+    /**
+     * Writes chars from a <code>StringBuffer</code> to a <code>Writer</code>.
+     * 
+     * @param data
+     *            the <code>StringBuffer</code> to write, null ignored
+     * @param output
+     *            the <code>Writer</code> to write to
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     * @deprecated replaced by write(CharSequence, Writer)
+     */
+    @Deprecated
+    public static void write(StringBuffer data, Writer output)
+            throws IOException {
+        if (data != null) {
+            output.write(data.toString());
+        }
+    }
+
+    /**
+     * Writes chars from a <code>StringBuffer</code> to bytes on an
+     * <code>OutputStream</code> using the default character encoding of the
+     * platform.
+     * <p>
+     * This method uses {@link String#getBytes()}.
+     * 
+     * @param data
+     *            the <code>StringBuffer</code> to write, null ignored
+     * @param output
+     *            the <code>OutputStream</code> to write to
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     * @deprecated replaced by write(CharSequence, OutputStream)
+     */
+    @Deprecated
+    public static void write(StringBuffer data, OutputStream output)
+            throws IOException {
+        if (data != null) {
+            output.write(data.toString().getBytes());
+        }
+    }
+
+    /**
+     * Writes chars from a <code>StringBuffer</code> to bytes on an
+     * <code>OutputStream</code> using the specified character encoding.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * <p>
+     * This method uses {@link String#getBytes(String)}.
+     * 
+     * @param data
+     *            the <code>StringBuffer</code> to write, null ignored
+     * @param output
+     *            the <code>OutputStream</code> to write to
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @throws NullPointerException
+     *             if output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     * @deprecated replaced by write(CharSequence, OutputStream, String)
+     */
+    @Deprecated
+    public static void write(StringBuffer data, OutputStream output,
+            String encoding) throws IOException {
+        if (data != null) {
+            if (encoding == null) {
+                write(data, output);
+            } else {
+                output.write(data.toString().getBytes(encoding));
+            }
+        }
+    }
+
+    // writeLines
+    // -----------------------------------------------------------------------
+    /**
+     * Writes the <code>toString()</code> value of each item in a collection to
+     * an <code>OutputStream</code> line by line, using the default character
+     * encoding of the platform and the specified line ending.
+     * 
+     * @param lines
+     *            the lines to write, null entries produce blank lines
+     * @param lineEnding
+     *            the line separator to use, null is system default
+     * @param output
+     *            the <code>OutputStream</code> to write to, not null, not
+     *            closed
+     * @throws NullPointerException
+     *             if the output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void writeLines(Collection<?> lines, String lineEnding,
+            OutputStream output) throws IOException {
+        if (lines == null) {
+            return;
+        }
+        if (lineEnding == null) {
+            lineEnding = LINE_SEPARATOR;
+        }
+        for (Object line : lines) {
+            if (line != null) {
+                output.write(line.toString().getBytes());
+            }
+            output.write(lineEnding.getBytes());
+        }
+    }
+
+    /**
+     * Writes the <code>toString()</code> value of each item in a collection to
+     * an <code>OutputStream</code> line by line, using the specified character
+     * encoding and the specified line ending.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * 
+     * @param lines
+     *            the lines to write, null entries produce blank lines
+     * @param lineEnding
+     *            the line separator to use, null is system default
+     * @param output
+     *            the <code>OutputStream</code> to write to, not null, not
+     *            closed
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @throws NullPointerException
+     *             if the output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void writeLines(Collection<?> lines, String lineEnding,
+            OutputStream output, String encoding) throws IOException {
+        if (encoding == null) {
+            writeLines(lines, lineEnding, output);
+        } else {
+            if (lines == null) {
+                return;
+            }
+            if (lineEnding == null) {
+                lineEnding = LINE_SEPARATOR;
+            }
+            for (Object line : lines) {
+                if (line != null) {
+                    output.write(line.toString().getBytes(encoding));
+                }
+                output.write(lineEnding.getBytes(encoding));
+            }
+        }
+    }
+
+    /**
+     * Writes the <code>toString()</code> value of each item in a collection to
+     * a <code>Writer</code> line by line, using the specified line ending.
+     * 
+     * @param lines
+     *            the lines to write, null entries produce blank lines
+     * @param lineEnding
+     *            the line separator to use, null is system default
+     * @param writer
+     *            the <code>Writer</code> to write to, not null, not closed
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void writeLines(Collection<?> lines, String lineEnding,
+            Writer writer) throws IOException {
+        if (lines == null) {
+            return;
+        }
+        if (lineEnding == null) {
+            lineEnding = LINE_SEPARATOR;
+        }
+        for (Object line : lines) {
+            if (line != null) {
+                writer.write(line.toString());
+            }
+            writer.write(lineEnding);
+        }
+    }
+
+    // copy from InputStream
+    // -----------------------------------------------------------------------
+    /**
+     * Copy bytes from an <code>InputStream</code> to an
+     * <code>OutputStream</code>.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * <p>
+     * Large streams (over 2GB) will return a bytes copied value of
+     * <code>-1</code> after the copy has completed since the correct number of
+     * bytes cannot be returned as an int. For large streams use the
+     * <code>copyLarge(InputStream, OutputStream)</code> method.
+     * 
+     * @param input
+     *            the <code>InputStream</code> to read from
+     * @param output
+     *            the <code>OutputStream</code> to write to
+     * @return the number of bytes copied, or -1 if &gt; Integer.MAX_VALUE
+     * @throws NullPointerException
+     *             if the input or output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static int copy(InputStream input, OutputStream output)
+            throws IOException {
+        long count = copyLarge(input, output);
+        if (count > Integer.MAX_VALUE) {
+            return -1;
+        }
+        return (int) count;
+    }
+
+    /**
+     * Copy bytes from a large (over 2GB) <code>InputStream</code> to an
+     * <code>OutputStream</code>.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * 
+     * @param input
+     *            the <code>InputStream</code> to read from
+     * @param output
+     *            the <code>OutputStream</code> to write to
+     * @return the number of bytes copied
+     * @throws NullPointerException
+     *             if the input or output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.3
+     */
+    public static long copyLarge(InputStream input, OutputStream output)
+            throws IOException {
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        long count = 0;
+        int n = 0;
+        while (-1 != (n = input.read(buffer))) {
+            output.write(buffer, 0, n);
+            count += n;
+        }
+        return count;
+    }
+
+    /**
+     * Copy bytes from an <code>InputStream</code> to chars on a
+     * <code>Writer</code> using the default character encoding of the platform.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * <p>
+     * This method uses {@link InputStreamReader}.
+     * 
+     * @param input
+     *            the <code>InputStream</code> to read from
+     * @param output
+     *            the <code>Writer</code> to write to
+     * @throws NullPointerException
+     *             if the input or output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void copy(InputStream input, Writer output)
+            throws IOException {
+        InputStreamReader in = new InputStreamReader(input);
+        copy(in, output);
+    }
+
+    /**
+     * Copy bytes from an <code>InputStream</code> to chars on a
+     * <code>Writer</code> using the specified character encoding.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * <p>
+     * This method uses {@link InputStreamReader}.
+     * 
+     * @param input
+     *            the <code>InputStream</code> to read from
+     * @param output
+     *            the <code>Writer</code> to write to
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @throws NullPointerException
+     *             if the input or output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void copy(InputStream input, Writer output, String encoding)
+            throws IOException {
+        if (encoding == null) {
+            copy(input, output);
+        } else {
+            InputStreamReader in = new InputStreamReader(input, encoding);
+            copy(in, output);
+        }
+    }
+
+    // copy from Reader
+    // -----------------------------------------------------------------------
+    /**
+     * Copy chars from a <code>Reader</code> to a <code>Writer</code>.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedReader</code>.
+     * <p>
+     * Large streams (over 2GB) will return a chars copied value of
+     * <code>-1</code> after the copy has completed since the correct number of
+     * chars cannot be returned as an int. For large streams use the
+     * <code>copyLarge(Reader, Writer)</code> method.
+     * 
+     * @param input
+     *            the <code>Reader</code> to read from
+     * @param output
+     *            the <code>Writer</code> to write to
+     * @return the number of characters copied, or -1 if &gt; Integer.MAX_VALUE
+     * @throws NullPointerException
+     *             if the input or output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static int copy(Reader input, Writer output) throws IOException {
+        long count = copyLarge(input, output);
+        if (count > Integer.MAX_VALUE) {
+            return -1;
+        }
+        return (int) count;
+    }
+
+    /**
+     * Copy chars from a large (over 2GB) <code>Reader</code> to a
+     * <code>Writer</code>.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedReader</code>.
+     * 
+     * @param input
+     *            the <code>Reader</code> to read from
+     * @param output
+     *            the <code>Writer</code> to write to
+     * @return the number of characters copied
+     * @throws NullPointerException
+     *             if the input or output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.3
+     */
+    public static long copyLarge(Reader input, Writer output)
+            throws IOException {
+        char[] buffer = new char[DEFAULT_BUFFER_SIZE];
+        long count = 0;
+        int n = 0;
+        while (-1 != (n = input.read(buffer))) {
+            output.write(buffer, 0, n);
+            count += n;
+        }
+        return count;
+    }
+
+    /**
+     * Copy chars from a <code>Reader</code> to bytes on an
+     * <code>OutputStream</code> using the default character encoding of the
+     * platform, and calling flush.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedReader</code>.
+     * <p>
+     * Due to the implementation of OutputStreamWriter, this method performs a
+     * flush.
+     * <p>
+     * This method uses {@link OutputStreamWriter}.
+     * 
+     * @param input
+     *            the <code>Reader</code> to read from
+     * @param output
+     *            the <code>OutputStream</code> to write to
+     * @throws NullPointerException
+     *             if the input or output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void copy(Reader input, OutputStream output)
+            throws IOException {
+        OutputStreamWriter out = new OutputStreamWriter(output);
+        copy(input, out);
+        // XXX Unless anyone is planning on rewriting OutputStreamWriter, we
+        // have to flush here.
+        out.flush();
+    }
+
+    /**
+     * Copy chars from a <code>Reader</code> to bytes on an
+     * <code>OutputStream</code> using the specified character encoding, and
+     * calling flush.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedReader</code>.
+     * <p>
+     * Character encoding names can be found at <a
+     * href="http://www.iana.org/assignments/character-sets">IANA</a>.
+     * <p>
+     * Due to the implementation of OutputStreamWriter, this method performs a
+     * flush.
+     * <p>
+     * This method uses {@link OutputStreamWriter}.
+     * 
+     * @param input
+     *            the <code>Reader</code> to read from
+     * @param output
+     *            the <code>OutputStream</code> to write to
+     * @param encoding
+     *            the encoding to use, null means platform default
+     * @throws NullPointerException
+     *             if the input or output is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static void copy(Reader input, OutputStream output, String encoding)
+            throws IOException {
+        if (encoding == null) {
+            copy(input, output);
+        } else {
+            OutputStreamWriter out = new OutputStreamWriter(output, encoding);
+            copy(input, out);
+            // XXX Unless anyone is planning on rewriting OutputStreamWriter,
+            // we have to flush here.
+            out.flush();
+        }
+    }
+
+    // content equals
+    // -----------------------------------------------------------------------
+    /**
+     * Compare the contents of two Streams to determine if they are equal or
+     * not.
+     * <p>
+     * This method buffers the input internally using
+     * <code>BufferedInputStream</code> if they are not already buffered.
+     * 
+     * @param input1
+     *            the first stream
+     * @param input2
+     *            the second stream
+     * @return true if the content of the streams are equal or they both don't
+     *         exist, false otherwise
+     * @throws NullPointerException
+     *             if either input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     */
+    public static boolean contentEquals(InputStream input1, InputStream input2)
+            throws IOException {
+        if (!(input1 instanceof BufferedInputStream)) {
+            input1 = new BufferedInputStream(input1);
+        }
+        if (!(input2 instanceof BufferedInputStream)) {
+            input2 = new BufferedInputStream(input2);
+        }
+
+        int ch = input1.read();
+        while (-1 != ch) {
+            int ch2 = input2.read();
+            if (ch != ch2) {
+                return false;
+            }
+            ch = input1.read();
+        }
+
+        int ch2 = input2.read();
+        return (ch2 == -1);
+    }
+
+    /**
+     * Compare the contents of two Readers to determine if they are equal or
+     * not.
+     * <p>
+     * This method buffers the input internally using
+     * <code>BufferedReader</code> if they are not already buffered.
+     * 
+     * @param input1
+     *            the first reader
+     * @param input2
+     *            the second reader
+     * @return true if the content of the readers are equal or they both don't
+     *         exist, false otherwise
+     * @throws NullPointerException
+     *             if either input is null
+     * @throws IOException
+     *             if an I/O error occurs
+     * @since Commons IO 1.1
+     */
+    public static boolean contentEquals(Reader input1, Reader input2)
+            throws IOException {
+        if (!(input1 instanceof BufferedReader)) {
+            input1 = new BufferedReader(input1);
+        }
+        if (!(input2 instanceof BufferedReader)) {
+            input2 = new BufferedReader(input2);
+        }
+
+        int ch = input1.read();
+        while (-1 != ch) {
+            int ch2 = input2.read();
+            if (ch != ch2) {
+                return false;
+            }
+            ch = input1.read();
+        }
+
+        int ch2 = input2.read();
+        return (ch2 == -1);
+    }
+
+    /**
+     * Skip bytes from an input byte stream. This implementation guarantees that
+     * it will read as many bytes as possible before giving up; this may not
+     * always be the case for subclasses of {@link Reader}.
+     * 
+     * @param input
+     *            byte stream to skip
+     * @param toSkip
+     *            number of bytes to skip.
+     * @return number of bytes actually skipped.
+     * 
+     * @see InputStream#skip(long)
+     * 
+     * @throws IOException
+     *             if there is a problem reading the file
+     * @throws IllegalArgumentException
+     *             if toSkip is negative
+     * @since Commons IO 2.0
+     */
+    public static long skip(InputStream input, long toSkip) throws IOException {
+        if (toSkip < 0) {
+            throw new IllegalArgumentException(
+                    "Skip count must be non-negative, actual: " + toSkip);
+        }
+        /*
+         * N.B. no need to synchronize this because: - we don't care if the
+         * buffer is created multiple times (the data is ignored) - we always
+         * use the same size buffer, so if it it is recreated it will still be
+         * OK (if the buffer size were variable, we would need to synch. to
+         * ensure some other thread did not create a smaller one)
+         */
+        if (SKIP_BYTE_BUFFER == null) {
+            SKIP_BYTE_BUFFER = new byte[SKIP_BUFFER_SIZE];
+        }
+        long remain = toSkip;
+        while (remain > 0) {
+            long n = input.read(SKIP_BYTE_BUFFER, 0,
+                    (int) Math.min(remain, SKIP_BUFFER_SIZE));
+            if (n < 0) { // EOF
+                break;
+            }
+            remain -= n;
+        }
+        return toSkip - remain;
+    }
+
+    /**
+     * Skip characters from an input character stream. This implementation
+     * guarantees that it will read as many characters as possible before giving
+     * up; this may not always be the case for subclasses of {@link Reader}.
+     * 
+     * @param input
+     *            character stream to skip
+     * @param toSkip
+     *            number of characters to skip.
+     * @return number of characters actually skipped.
+     * 
+     * @see Reader#skip(long)
+     * 
+     * @throws IOException
+     *             if there is a problem reading the file
+     * @throws IllegalArgumentException
+     *             if toSkip is negative
+     * @since Commons IO 2.0
+     */
+    public static long skip(Reader input, long toSkip) throws IOException {
+        if (toSkip < 0) {
+            throw new IllegalArgumentException(
+                    "Skip count must be non-negative, actual: " + toSkip);
+        }
+        /*
+         * N.B. no need to synchronize this because: - we don't care if the
+         * buffer is created multiple times (the data is ignored) - we always
+         * use the same size buffer, so if it it is recreated it will still be
+         * OK (if the buffer size were variable, we would need to synch. to
+         * ensure some other thread did not create a smaller one)
+         */
+        if (SKIP_CHAR_BUFFER == null) {
+            SKIP_CHAR_BUFFER = new char[SKIP_BUFFER_SIZE];
+        }
+        long remain = toSkip;
+        while (remain > 0) {
+            long n = input.read(SKIP_CHAR_BUFFER, 0,
+                    (int) Math.min(remain, SKIP_BUFFER_SIZE));
+            if (n < 0) { // EOF
+                break;
+            }
+            remain -= n;
+        }
+        return toSkip - remain;
+    }
+
+    /**
+     * Skip the requested number of bytes or fail if there are not enough left.
+     * <p>
+     * This allows for the possibility that {@link InputStream#skip(long)} may
+     * not skip as many bytes as requested (most likely because of reaching
+     * EOF).
+     * 
+     * @param input
+     *            stream to skip
+     * @param toSkip
+     *            the number of bytes to skip
+     * @see InputStream#skip(long)
+     * 
+     * @throws IOException
+     *             if there is a problem reading the file
+     * @throws IllegalArgumentException
+     *             if toSkip is negative
+     * @throws EOFException
+     *             if the number of bytes skipped was incorrect
+     * @since Commons IO 2.0
+     */
+    public static void skipFully(InputStream input, long toSkip)
+            throws IOException {
+        if (toSkip < 0) {
+            throw new IllegalArgumentException(
+                    "Bytes to skip must not be negative: " + toSkip);
+        }
+        long skipped = skip(input, toSkip);
+        if (skipped != toSkip) {
+            throw new EOFException("Bytes to skip: " + toSkip + " actual: "
+                    + skipped);
+        }
+    }
+
+    /**
+     * Skip the requested number of characters or fail if there are not enough
+     * left.
+     * <p>
+     * This allows for the possibility that {@link Reader#skip(long)} may not
+     * skip as many characters as requested (most likely because of reaching
+     * EOF).
+     * 
+     * @param input
+     *            stream to skip
+     * @param toSkip
+     *            the number of characters to skip
+     * @see Reader#skip(long)
+     * 
+     * @throws IOException
+     *             if there is a problem reading the file
+     * @throws IllegalArgumentException
+     *             if toSkip is negative
+     * @throws EOFException
+     *             if the number of characters skipped was incorrect
+     * @since Commons IO 2.0
+     */
+    public static void skipFully(Reader input, long toSkip) throws IOException {
+        long skipped = skip(input, toSkip);
+        if (skipped != toSkip) {
+            throw new EOFException("Bytes to skip: " + toSkip + " actual: "
+                    + skipped);
         }
     }
 }
