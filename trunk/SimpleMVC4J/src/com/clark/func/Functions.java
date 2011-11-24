@@ -34088,8 +34088,7 @@ public final class Functions {
      */
     public static InputStream toBufferedInputStream(InputStream input)
             throws IOException {
-        return org.apache.commons.io.output.ByteArrayOutputStream
-                .toBufferedInputStream(input);
+        return com.clark.io.ByteArrayOutputStream.toBufferedInputStream(input);
     }
 
     // read toByteArray
