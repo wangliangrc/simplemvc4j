@@ -8,6 +8,8 @@ import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import org.apache.commons.io.filefilter.FileFilterUtils;
+
 /**
  * <p>
  * File filter for matching files containing a "magic number". A magic number is

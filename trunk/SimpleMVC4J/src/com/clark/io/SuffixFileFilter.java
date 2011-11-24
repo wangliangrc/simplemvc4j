@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.commons.io.filefilter.FileFilterUtils;
 
 /**
  * Filters files based on the suffix (what the filename ends with). This is used

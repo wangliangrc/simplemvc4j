@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.apache.commons.io.filefilter.FileFilterUtils;
+
 /**
  * Filters files based on a cutoff time, can filter either newer files or files
  * equal to or older.
@@ -49,7 +51,7 @@ public class AgeFileFilter extends AbstractFileFilter implements Serializable {
      *            the threshold age of the files
      */
     public AgeFileFilter(long cutoff) {
-    this(cutoff, true);
+        this(cutoff, true);
     }
 
     /**
@@ -63,8 +65,8 @@ public class AgeFileFilter extends AbstractFileFilter implements Serializable {
      *            else newer ones (after the cutoff).
      */
     public AgeFileFilter(long cutoff, boolean acceptOlder) {
-    this.acceptOlder = acceptOlder;
-    this.cutoff = cutoff;
+        this.acceptOlder = acceptOlder;
+        this.cutoff = cutoff;
     }
 
     /**
@@ -75,7 +77,7 @@ public class AgeFileFilter extends AbstractFileFilter implements Serializable {
      *            the threshold age of the files
      */
     public AgeFileFilter(Date cutoffDate) {
-    this(cutoffDate, true);
+        this(cutoffDate, true);
     }
 
     /**
@@ -89,7 +91,7 @@ public class AgeFileFilter extends AbstractFileFilter implements Serializable {
      *            else newer ones (after the cutoff).
      */
     public AgeFileFilter(Date cutoffDate, boolean acceptOlder) {
-    this(cutoffDate.getTime(), acceptOlder);
+        this(cutoffDate.getTime(), acceptOlder);
     }
 
     /**
@@ -101,7 +103,7 @@ public class AgeFileFilter extends AbstractFileFilter implements Serializable {
      *            threshold age of the files
      */
     public AgeFileFilter(File cutoffReference) {
-    this(cutoffReference, true);
+        this(cutoffReference, true);
     }
 
     /**
@@ -116,7 +118,7 @@ public class AgeFileFilter extends AbstractFileFilter implements Serializable {
      *            else newer ones (after the cutoff).
      */
     public AgeFileFilter(File cutoffReference, boolean acceptOlder) {
-    this(cutoffReference.lastModified(), acceptOlder);
+        this(cutoffReference.lastModified(), acceptOlder);
     }
 
     // -----------------------------------------------------------------------
@@ -134,8 +136,8 @@ public class AgeFileFilter extends AbstractFileFilter implements Serializable {
      */
     @Override
     public boolean accept(File file) {
-    boolean newer = isFileNewer(file, cutoff);
-    return acceptOlder ? !newer : newer;
+        boolean newer = isFileNewer(file, cutoff);
+        return acceptOlder ? !newer : newer;
     }
 
     /**
@@ -145,7 +147,7 @@ public class AgeFileFilter extends AbstractFileFilter implements Serializable {
      */
     @Override
     public String toString() {
-    String condition = acceptOlder ? "<=" : ">";
-    return super.toString() + "(" + condition + cutoff + ")";
+        String condition = acceptOlder ? "<=" : ">";
+        return super.toString() + "(" + condition + cutoff + ")";
     }
 }

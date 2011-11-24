@@ -311,8 +311,7 @@ public class FileAlterationObserver implements Serializable {
             checkAndNotify(rootEntry, rootEntry.getChildren(),
                     listFiles(rootFile));
         } else if (rootEntry.isExists()) {
-            checkAndNotify(rootEntry, rootEntry.getChildren(),
-                    EMPTY_FILE_ARRAY);
+            checkAndNotify(rootEntry, rootEntry.getChildren(), EMPTY_FILE_ARRAY);
         } else {
             // Didn't exist and still doesn't
         }
@@ -353,8 +352,7 @@ public class FileAlterationObserver implements Serializable {
                 current[c] = entry;
                 c++;
             } else {
-                checkAndNotify(entry, entry.getChildren(),
-                        EMPTY_FILE_ARRAY);
+                checkAndNotify(entry, entry.getChildren(), EMPTY_FILE_ARRAY);
                 doDelete(entry);
             }
         }

@@ -103,6 +103,7 @@ import com.clark.lang.FastDateFormat;
 import com.clark.lang.SerializationException;
 import com.clark.lang.ToStringBuilder;
 import com.clark.lang.ToStringStyle;
+import com.sun.xml.internal.ws.util.StringUtils;
 
 public final class Functions {
 

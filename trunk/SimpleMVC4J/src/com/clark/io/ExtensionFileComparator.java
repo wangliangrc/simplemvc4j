@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import org.apache.commons.io.FilenameUtils;
+
 /**
  * Compare the file name <b>extensions</b> for order (see
  * {@link FilenameUtils#getExtension(String)}).

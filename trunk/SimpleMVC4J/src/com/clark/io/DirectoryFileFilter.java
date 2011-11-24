@@ -3,6 +3,8 @@ package com.clark.io;
 import java.io.File;
 import java.io.Serializable;
 
+import org.apache.commons.io.filefilter.FileFilterUtils;
+
 /**
  * This filter accepts <code>File</code>s that are directories.
  * <p>

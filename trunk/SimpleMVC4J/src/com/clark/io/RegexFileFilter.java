@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.regex.Pattern;
 
-
 /**
  * Filters files using supplied regular expression(s).
  * <p/>

@@ -12,6 +12,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.io.EndianUtils;
+
 /**
  * DataInput for systems relying on little endian data formats. When read,
  * values will be changed from little endian to big endian formats for internal

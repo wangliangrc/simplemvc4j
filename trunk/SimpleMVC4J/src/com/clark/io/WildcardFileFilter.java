@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 
 /**
  * Filters files using the supplied wildcards.

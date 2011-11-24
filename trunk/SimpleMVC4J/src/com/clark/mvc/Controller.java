@@ -96,7 +96,8 @@ public class Controller {
 
         if (hashMap.containsKey(clazz)) {
             FunctionHolder functionHolder = hashMap.get(clazz);
-            Facade.getInstance().remove(functionHolder.name, functionHolder.function);
+            Facade.getInstance().remove(functionHolder.name,
+                    functionHolder.function);
             hashMap.remove(clazz);
             System.out.println("remove command: [" + clazz.getCanonicalName()
                     + "]");

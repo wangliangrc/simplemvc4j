@@ -3,6 +3,8 @@ package com.clark.io;
 import java.io.File;
 import java.io.Serializable;
 
+import org.apache.commons.io.filefilter.FileFilterUtils;
+
 /**
  * This filter produces a logical NOT of the filters specified.
  * 
