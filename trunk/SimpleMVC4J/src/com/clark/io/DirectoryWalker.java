@@ -9,8 +9,6 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Collection;
 
-import org.apache.commons.io.filefilter.FileFilterUtils;
-
 /**
  * Abstract class that walks through a directory hierarchy and provides
  * subclasses with convenient hooks to add specific behaviour.

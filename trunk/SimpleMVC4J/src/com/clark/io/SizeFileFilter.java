@@ -3,8 +3,6 @@ package com.clark.io;
 import java.io.File;
 import java.io.Serializable;
 
-import org.apache.commons.io.filefilter.FileFilterUtils;
-
 /**
  * Filters files based on size, can filter either smaller files or files equal
  * to or larger than a given threshold.

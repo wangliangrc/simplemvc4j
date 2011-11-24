@@ -27611,7 +27611,7 @@ public final class Functions {
      * durations.
      * </p>
      * 
-     * @see org.apache.commons.lang3.time.FastDateFormat
+     * @see FastDateFormat
      * @see java.text.SimpleDateFormat
      */
     public static final String ISO_EXTENDED_FORMAT_PATTERN = "'P'yyyy'Y'M'M'd'DT'H'H'm'M's.S'S'";
@@ -31642,8 +31642,7 @@ public final class Functions {
      *            included in the search. Use TrueFileFilter.INSTANCE to match
      *            all directories.
      * @return an collection of java.io.File with the matching files
-     * @see org.apache.commons.io.filefilter.FileFilterUtils
-     * @see org.apache.commons.io.filefilter.NameFileFilter
+     * @see NameFileFilter
      */
     public static Collection<File> listFiles(File directory,
             IOFileFilter fileFilter, IOFileFilter dirFilter) {
@@ -31692,8 +31691,7 @@ public final class Functions {
      *            included in the search. Use TrueFileFilter.INSTANCE to match
      *            all directories.
      * @return an iterator of java.io.File for the matching files
-     * @see org.apache.commons.io.filefilter.FileFilterUtils
-     * @see org.apache.commons.io.filefilter.NameFileFilter
+     * @see NameFileFilter
      * @since Commons IO 1.2
      */
     public static Iterator<File> iterateFiles(File directory,

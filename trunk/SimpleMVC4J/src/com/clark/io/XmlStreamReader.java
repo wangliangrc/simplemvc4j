@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
  * 
  * @author Alejandro Abdelnur
  * @version $Id: XmlStreamReader.java 1052161 2010-12-23 03:12:09Z niallp $
- * @see org.apache.commons.io.output.XmlStreamWriter
+ * @see XmlStreamWriter
  * @since Commons IO 2.0
  */
 public class XmlStreamReader extends Reader {

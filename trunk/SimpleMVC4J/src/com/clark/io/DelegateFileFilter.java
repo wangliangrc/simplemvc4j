@@ -5,8 +5,6 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.Serializable;
 
-import org.apache.commons.io.filefilter.FileFilterUtils;
-
 /**
  * This class turns a Java FileFilter or FilenameFilter into an IO FileFilter.
  * 

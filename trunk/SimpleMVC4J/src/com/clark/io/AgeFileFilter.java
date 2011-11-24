@@ -6,8 +6,6 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.apache.commons.io.filefilter.FileFilterUtils;
-
 /**
  * Filters files based on a cutoff time, can filter either newer files or files
  * equal to or older.

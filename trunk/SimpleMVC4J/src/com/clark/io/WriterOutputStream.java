@@ -57,7 +57,7 @@ import java.nio.charset.CodingErrorAction;
  * <p>
  * Instances of {@link WriterOutputStream} are not thread safe.
  * 
- * @see org.apache.commons.io.input.ReaderInputStream
+ * @see ReaderInputStream
  * 
  * @author <a href="mailto:veithen@apache.org">Andreas Veithen</a>
  * @since Commons IO 2.0

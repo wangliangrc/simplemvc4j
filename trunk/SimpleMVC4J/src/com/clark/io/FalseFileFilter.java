@@ -3,8 +3,6 @@ package com.clark.io;
 import java.io.File;
 import java.io.Serializable;
 
-import org.apache.commons.io.filefilter.FileFilterUtils;
-
 /**
  * A file filter that always returns false.
  * 

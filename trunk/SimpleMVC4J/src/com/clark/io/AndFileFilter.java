@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.io.filefilter.FileFilterUtils;
-
 /**
  * A {@link java.io.FileFilter} providing conditional AND logic across a list of
  * file filters. This filter returns <code>true</code> if all filters in the

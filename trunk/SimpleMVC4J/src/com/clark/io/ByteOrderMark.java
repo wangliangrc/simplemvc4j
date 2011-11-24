@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 /**
  * Byte Order Mark (BOM) representation - see
- * {@link org.apache.commons.io.input.BOMInputStream}.
+ * {@link BOMInputStream}.
  * 
- * @see org.apache.commons.io.input.BOMInputStream
+ * @see BOMInputStream
  * @see <a href="http://en.wikipedia.org/wiki/Byte_order_mark">Wikipedia - Byte
  *      Order Mark</a>
  * @version $Id: ByteOrderMark.java 1005099 2010-10-06 16:13:01Z niallp $
