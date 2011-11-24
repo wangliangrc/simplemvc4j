@@ -77,9 +77,6 @@ import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 import java.util.zip.Checksum;
 
-import org.apache.commons.io.output.NullOutputStream;
-import org.apache.commons.io.output.StringBuilderWriter;
-
 import com.clark.io.AgeFileFilter;
 import com.clark.io.AndFileFilter;
 import com.clark.io.DelegateFileFilter;
@@ -93,9 +90,11 @@ import com.clark.io.LineIterator;
 import com.clark.io.MagicNumberFileFilter;
 import com.clark.io.NameFileFilter;
 import com.clark.io.NotFileFilter;
+import com.clark.io.NullOutputStream;
 import com.clark.io.OrFileFilter;
 import com.clark.io.PrefixFileFilter;
 import com.clark.io.SizeFileFilter;
+import com.clark.io.StringBuilderWriter;
 import com.clark.io.SuffixFileFilter;
 import com.clark.io.TrueFileFilter;
 import com.clark.lang.CloneFailedException;
@@ -191,11 +190,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.isBlank(null)      = true
-     * StringUtils.isBlank("")        = true
-     * StringUtils.isBlank(" ")       = true
-     * StringUtils.isBlank("bob")     = false
-     * StringUtils.isBlank("  bob  ") = false
+     * isBlank(null)      = true
+     * isBlank("")        = true
+     * isBlank(" ")       = true
+     * isBlank("bob")     = false
+     * isBlank("  bob  ") = false
      * </pre>
      * 
      * @param cs
@@ -226,11 +225,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.isNotBlank(null)      = false
-     * StringUtils.isNotBlank("")        = false
-     * StringUtils.isNotBlank(" ")       = false
-     * StringUtils.isNotBlank("bob")     = true
-     * StringUtils.isNotBlank("  bob  ") = true
+     * isNotBlank(null)      = false
+     * isNotBlank("")        = false
+     * isNotBlank(" ")       = false
+     * isNotBlank("bob")     = true
+     * isNotBlank("  bob  ") = true
      * </pre>
      * 
      * @param cs
@@ -264,11 +263,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.trim(null)          = null
-     * StringUtils.trim("")            = ""
-     * StringUtils.trim("     ")       = ""
-     * StringUtils.trim("abc")         = "abc"
-     * StringUtils.trim("    abc    ") = "abc"
+     * trim(null)          = null
+     * trim("")            = ""
+     * trim("     ")       = ""
+     * trim("abc")         = "abc"
+     * trim("    abc    ") = "abc"
      * </pre>
      * 
      * @param str
@@ -292,11 +291,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.trimToNull(null)          = null
-     * StringUtils.trimToNull("")            = null
-     * StringUtils.trimToNull("     ")       = null
-     * StringUtils.trimToNull("abc")         = "abc"
-     * StringUtils.trimToNull("    abc    ") = "abc"
+     * trimToNull(null)          = null
+     * trimToNull("")            = null
+     * trimToNull("     ")       = null
+     * trimToNull("abc")         = "abc"
+     * trimToNull("    abc    ") = "abc"
      * </pre>
      * 
      * @param str
@@ -323,11 +322,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.trimToEmpty(null)          = ""
-     * StringUtils.trimToEmpty("")            = ""
-     * StringUtils.trimToEmpty("     ")       = ""
-     * StringUtils.trimToEmpty("abc")         = "abc"
-     * StringUtils.trimToEmpty("    abc    ") = "abc"
+     * trimToEmpty(null)          = ""
+     * trimToEmpty("")            = ""
+     * trimToEmpty("     ")       = ""
+     * trimToEmpty("abc")         = "abc"
+     * trimToEmpty("    abc    ") = "abc"
      * </pre>
      * 
      * @param str
@@ -356,14 +355,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.strip(null)     = null
-     * StringUtils.strip("")       = ""
-     * StringUtils.strip("   ")    = ""
-     * StringUtils.strip("abc")    = "abc"
-     * StringUtils.strip("  abc")  = "abc"
-     * StringUtils.strip("abc  ")  = "abc"
-     * StringUtils.strip(" abc ")  = "abc"
-     * StringUtils.strip(" ab c ") = "ab c"
+     * strip(null)     = null
+     * strip("")       = ""
+     * strip("   ")    = ""
+     * strip("abc")    = "abc"
+     * strip("  abc")  = "abc"
+     * strip("abc  ")  = "abc"
+     * strip(" abc ")  = "abc"
+     * strip(" ab c ") = "ab c"
      * </pre>
      * 
      * @param str
@@ -386,14 +385,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.stripToNull(null)     = null
-     * StringUtils.stripToNull("")       = null
-     * StringUtils.stripToNull("   ")    = null
-     * StringUtils.stripToNull("abc")    = "abc"
-     * StringUtils.stripToNull("  abc")  = "abc"
-     * StringUtils.stripToNull("abc  ")  = "abc"
-     * StringUtils.stripToNull(" abc ")  = "abc"
-     * StringUtils.stripToNull(" ab c ") = "ab c"
+     * stripToNull(null)     = null
+     * stripToNull("")       = null
+     * stripToNull("   ")    = null
+     * stripToNull("abc")    = "abc"
+     * stripToNull("  abc")  = "abc"
+     * stripToNull("abc  ")  = "abc"
+     * stripToNull(" abc ")  = "abc"
+     * stripToNull(" ab c ") = "ab c"
      * </pre>
      * 
      * @param str
@@ -422,14 +421,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.stripToEmpty(null)     = ""
-     * StringUtils.stripToEmpty("")       = ""
-     * StringUtils.stripToEmpty("   ")    = ""
-     * StringUtils.stripToEmpty("abc")    = "abc"
-     * StringUtils.stripToEmpty("  abc")  = "abc"
-     * StringUtils.stripToEmpty("abc  ")  = "abc"
-     * StringUtils.stripToEmpty(" abc ")  = "abc"
-     * StringUtils.stripToEmpty(" ab c ") = "ab c"
+     * stripToEmpty(null)     = ""
+     * stripToEmpty("")       = ""
+     * stripToEmpty("   ")    = ""
+     * stripToEmpty("abc")    = "abc"
+     * stripToEmpty("  abc")  = "abc"
+     * stripToEmpty("abc  ")  = "abc"
+     * stripToEmpty(" abc ")  = "abc"
+     * stripToEmpty(" ab c ") = "ab c"
      * </pre>
      * 
      * @param str
@@ -460,13 +459,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.strip(null, *)          = null
-     * StringUtils.strip("", *)            = ""
-     * StringUtils.strip("abc", null)      = "abc"
-     * StringUtils.strip("  abc", null)    = "abc"
-     * StringUtils.strip("abc  ", null)    = "abc"
-     * StringUtils.strip(" abc ", null)    = "abc"
-     * StringUtils.strip("  abcyx", "xyz") = "  abc"
+     * strip(null, *)          = null
+     * strip("", *)            = ""
+     * strip("abc", null)      = "abc"
+     * strip("  abc", null)    = "abc"
+     * strip("abc  ", null)    = "abc"
+     * strip(" abc ", null)    = "abc"
+     * strip("  abcyx", "xyz") = "  abc"
      * </pre>
      * 
      * @param str
@@ -499,14 +498,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.stripStart(null, *)          = null
-     * StringUtils.stripStart("", *)            = ""
-     * StringUtils.stripStart("abc", "")        = "abc"
-     * StringUtils.stripStart("abc", null)      = "abc"
-     * StringUtils.stripStart("  abc", null)    = "abc"
-     * StringUtils.stripStart("abc  ", null)    = "abc  "
-     * StringUtils.stripStart(" abc ", null)    = "abc "
-     * StringUtils.stripStart("yxabc  ", "xyz") = "abc  "
+     * stripStart(null, *)          = null
+     * stripStart("", *)            = ""
+     * stripStart("abc", "")        = "abc"
+     * stripStart("abc", null)      = "abc"
+     * stripStart("  abc", null)    = "abc"
+     * stripStart("abc  ", null)    = "abc  "
+     * stripStart(" abc ", null)    = "abc "
+     * stripStart("yxabc  ", "xyz") = "abc  "
      * </pre>
      * 
      * @param str
@@ -553,14 +552,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.stripEnd(null, *)          = null
-     * StringUtils.stripEnd("", *)            = ""
-     * StringUtils.stripEnd("abc", "")        = "abc"
-     * StringUtils.stripEnd("abc", null)      = "abc"
-     * StringUtils.stripEnd("  abc", null)    = "  abc"
-     * StringUtils.stripEnd("abc  ", null)    = "abc"
-     * StringUtils.stripEnd(" abc ", null)    = " abc"
-     * StringUtils.stripEnd("  abcyx", "xyz") = "  abc"
+     * stripEnd(null, *)          = null
+     * stripEnd("", *)            = ""
+     * stripEnd("abc", "")        = "abc"
+     * stripEnd("abc", null)      = "abc"
+     * stripEnd("  abc", null)    = "  abc"
+     * stripEnd("abc  ", null)    = "abc"
+     * stripEnd(" abc ", null)    = " abc"
+     * stripEnd("  abcyx", "xyz") = "  abc"
      * </pre>
      * 
      * @param str
@@ -605,10 +604,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.stripAll(null)             = null
-     * StringUtils.stripAll([])               = []
-     * StringUtils.stripAll(["abc", "  abc"]) = ["abc", "abc"]
-     * StringUtils.stripAll(["abc  ", null])  = ["abc", null]
+     * stripAll(null)             = null
+     * stripAll([])               = []
+     * stripAll(["abc", "  abc"]) = ["abc", "abc"]
+     * stripAll(["abc  ", null])  = ["abc", null]
      * </pre>
      * 
      * @param strs
@@ -635,12 +634,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.stripAll(null, *)                = null
-     * StringUtils.stripAll([], *)                  = []
-     * StringUtils.stripAll(["abc", "  abc"], null) = ["abc", "abc"]
-     * StringUtils.stripAll(["abc  ", null], null)  = ["abc", null]
-     * StringUtils.stripAll(["abc  ", null], "yz")  = ["abc  ", null]
-     * StringUtils.stripAll(["yabcz", null], "yz")  = ["abc", null]
+     * stripAll(null, *)                = null
+     * stripAll([], *)                  = []
+     * stripAll(["abc", "  abc"], null) = ["abc", "abc"]
+     * stripAll(["abc  ", null], null)  = ["abc", null]
+     * stripAll(["abc  ", null], "yz")  = ["abc  ", null]
+     * stripAll(["yabcz", null], "yz")  = ["abc", null]
      * </pre>
      * 
      * @param strs
@@ -670,10 +669,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.stripAccents(null)                = null
-     * StringUtils.stripAccents("")                  = ""
-     * StringUtils.stripAccents("control")           = "control"
-     * StringUtils.stripAccents("&ecute;clair")      = "eclair"
+     * stripAccents(null)                = null
+     * stripAccents("")                  = ""
+     * stripAccents("control")           = "control"
+     * stripAccents("&ecute;clair")      = "eclair"
      * </pre>
      * 
      * @param input
@@ -766,11 +765,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.equals(null, null)   = true
-     * StringUtils.equals(null, "abc")  = false
-     * StringUtils.equals("abc", null)  = false
-     * StringUtils.equals("abc", "abc") = true
-     * StringUtils.equals("abc", "ABC") = false
+     * equals(null, null)   = true
+     * equals(null, "abc")  = false
+     * equals("abc", null)  = false
+     * equals("abc", "abc") = true
+     * equals("abc", "ABC") = false
      * </pre>
      * 
      * @see java.lang.String#equals(Object)
@@ -799,11 +798,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.equalsIgnoreCase(null, null)   = true
-     * StringUtils.equalsIgnoreCase(null, "abc")  = false
-     * StringUtils.equalsIgnoreCase("abc", null)  = false
-     * StringUtils.equalsIgnoreCase("abc", "abc") = true
-     * StringUtils.equalsIgnoreCase("abc", "ABC") = true
+     * equalsIgnoreCase(null, null)   = true
+     * equalsIgnoreCase(null, "abc")  = false
+     * equalsIgnoreCase("abc", null)  = false
+     * equalsIgnoreCase("abc", "abc") = true
+     * equalsIgnoreCase("abc", "ABC") = true
      * </pre>
      * 
      * @see java.lang.String#equalsIgnoreCase(String)
@@ -832,10 +831,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.indexOf(null, *)         = -1
-     * StringUtils.indexOf("", *)           = -1
-     * StringUtils.indexOf("aabaabaa", 'a') = 0
-     * StringUtils.indexOf("aabaabaa", 'b') = 2
+     * indexOf(null, *)         = -1
+     * indexOf("", *)           = -1
+     * indexOf("aabaabaa", 'a') = 0
+     * indexOf("aabaabaa", 'b') = 2
      * </pre>
      * 
      * @param str
@@ -867,12 +866,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.indexOf(null, *, *)          = -1
-     * StringUtils.indexOf("", *, *)            = -1
-     * StringUtils.indexOf("aabaabaa", 'b', 0)  = 2
-     * StringUtils.indexOf("aabaabaa", 'b', 3)  = 5
-     * StringUtils.indexOf("aabaabaa", 'b', 9)  = -1
-     * StringUtils.indexOf("aabaabaa", 'b', -1) = 2
+     * indexOf(null, *, *)          = -1
+     * indexOf("", *, *)            = -1
+     * indexOf("aabaabaa", 'b', 0)  = 2
+     * indexOf("aabaabaa", 'b', 3)  = 5
+     * indexOf("aabaabaa", 'b', 9)  = -1
+     * indexOf("aabaabaa", 'b', -1) = 2
      * </pre>
      * 
      * @param str
@@ -903,14 +902,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.indexOf(null, *)          = -1
-     * StringUtils.indexOf(*, null)          = -1
-     * StringUtils.indexOf("", "")           = 0
-     * StringUtils.indexOf("", *)            = -1 (except when * = "")
-     * StringUtils.indexOf("aabaabaa", "a")  = 0
-     * StringUtils.indexOf("aabaabaa", "b")  = 2
-     * StringUtils.indexOf("aabaabaa", "ab") = 1
-     * StringUtils.indexOf("aabaabaa", "")   = 0
+     * indexOf(null, *)          = -1
+     * indexOf(*, null)          = -1
+     * indexOf("", "")           = 0
+     * indexOf("", *)            = -1 (except when * = "")
+     * indexOf("aabaabaa", "a")  = 0
+     * indexOf("aabaabaa", "b")  = 2
+     * indexOf("aabaabaa", "ab") = 1
+     * indexOf("aabaabaa", "")   = 0
      * </pre>
      * 
      * @param str
@@ -942,18 +941,18 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.indexOf(null, *, *)          = -1
-     * StringUtils.indexOf(*, null, *)          = -1
-     * StringUtils.indexOf("", "", 0)           = 0
-     * StringUtils.indexOf("", *, 0)            = -1 (except when * = "")
-     * StringUtils.indexOf("aabaabaa", "a", 0)  = 0
-     * StringUtils.indexOf("aabaabaa", "b", 0)  = 2
-     * StringUtils.indexOf("aabaabaa", "ab", 0) = 1
-     * StringUtils.indexOf("aabaabaa", "b", 3)  = 5
-     * StringUtils.indexOf("aabaabaa", "b", 9)  = -1
-     * StringUtils.indexOf("aabaabaa", "b", -1) = 2
-     * StringUtils.indexOf("aabaabaa", "", 2)   = 2
-     * StringUtils.indexOf("abc", "", 9)        = 3
+     * indexOf(null, *, *)          = -1
+     * indexOf(*, null, *)          = -1
+     * indexOf("", "", 0)           = 0
+     * indexOf("", *, 0)            = -1 (except when * = "")
+     * indexOf("aabaabaa", "a", 0)  = 0
+     * indexOf("aabaabaa", "b", 0)  = 2
+     * indexOf("aabaabaa", "ab", 0) = 1
+     * indexOf("aabaabaa", "b", 3)  = 5
+     * indexOf("aabaabaa", "b", 9)  = -1
+     * indexOf("aabaabaa", "b", -1) = 2
+     * indexOf("aabaabaa", "", 2)   = 2
+     * indexOf("abc", "", 9)        = 3
      * </pre>
      * 
      * @param str
@@ -984,17 +983,17 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.ordinalIndexOf(null, *, *)          = -1
-     * StringUtils.ordinalIndexOf(*, null, *)          = -1
-     * StringUtils.ordinalIndexOf("", "", *)           = 0
-     * StringUtils.ordinalIndexOf("aabaabaa", "a", 1)  = 0
-     * StringUtils.ordinalIndexOf("aabaabaa", "a", 2)  = 1
-     * StringUtils.ordinalIndexOf("aabaabaa", "b", 1)  = 2
-     * StringUtils.ordinalIndexOf("aabaabaa", "b", 2)  = 5
-     * StringUtils.ordinalIndexOf("aabaabaa", "ab", 1) = 1
-     * StringUtils.ordinalIndexOf("aabaabaa", "ab", 2) = 4
-     * StringUtils.ordinalIndexOf("aabaabaa", "", 1)   = 0
-     * StringUtils.ordinalIndexOf("aabaabaa", "", 2)   = 0
+     * ordinalIndexOf(null, *, *)          = -1
+     * ordinalIndexOf(*, null, *)          = -1
+     * ordinalIndexOf("", "", *)           = 0
+     * ordinalIndexOf("aabaabaa", "a", 1)  = 0
+     * ordinalIndexOf("aabaabaa", "a", 2)  = 1
+     * ordinalIndexOf("aabaabaa", "b", 1)  = 2
+     * ordinalIndexOf("aabaabaa", "b", 2)  = 5
+     * ordinalIndexOf("aabaabaa", "ab", 1) = 1
+     * ordinalIndexOf("aabaabaa", "ab", 2) = 4
+     * ordinalIndexOf("aabaabaa", "", 1)   = 0
+     * ordinalIndexOf("aabaabaa", "", 2)   = 0
      * </pre>
      * 
      * <p>
@@ -1082,12 +1081,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.indexOfIgnoreCase(null, *)          = -1
-     * StringUtils.indexOfIgnoreCase(*, null)          = -1
-     * StringUtils.indexOfIgnoreCase("", "")           = 0
-     * StringUtils.indexOfIgnoreCase("aabaabaa", "a")  = 0
-     * StringUtils.indexOfIgnoreCase("aabaabaa", "b")  = 2
-     * StringUtils.indexOfIgnoreCase("aabaabaa", "ab") = 1
+     * indexOfIgnoreCase(null, *)          = -1
+     * indexOfIgnoreCase(*, null)          = -1
+     * indexOfIgnoreCase("", "")           = 0
+     * indexOfIgnoreCase("aabaabaa", "a")  = 0
+     * indexOfIgnoreCase("aabaabaa", "b")  = 2
+     * indexOfIgnoreCase("aabaabaa", "ab") = 1
      * </pre>
      * 
      * @param str
@@ -1116,17 +1115,17 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.indexOfIgnoreCase(null, *, *)          = -1
-     * StringUtils.indexOfIgnoreCase(*, null, *)          = -1
-     * StringUtils.indexOfIgnoreCase("", "", 0)           = 0
-     * StringUtils.indexOfIgnoreCase("aabaabaa", "A", 0)  = 0
-     * StringUtils.indexOfIgnoreCase("aabaabaa", "B", 0)  = 2
-     * StringUtils.indexOfIgnoreCase("aabaabaa", "AB", 0) = 1
-     * StringUtils.indexOfIgnoreCase("aabaabaa", "B", 3)  = 5
-     * StringUtils.indexOfIgnoreCase("aabaabaa", "B", 9)  = -1
-     * StringUtils.indexOfIgnoreCase("aabaabaa", "B", -1) = 2
-     * StringUtils.indexOfIgnoreCase("aabaabaa", "", 2)   = 2
-     * StringUtils.indexOfIgnoreCase("abc", "", 9)        = 3
+     * indexOfIgnoreCase(null, *, *)          = -1
+     * indexOfIgnoreCase(*, null, *)          = -1
+     * indexOfIgnoreCase("", "", 0)           = 0
+     * indexOfIgnoreCase("aabaabaa", "A", 0)  = 0
+     * indexOfIgnoreCase("aabaabaa", "B", 0)  = 2
+     * indexOfIgnoreCase("aabaabaa", "AB", 0) = 1
+     * indexOfIgnoreCase("aabaabaa", "B", 3)  = 5
+     * indexOfIgnoreCase("aabaabaa", "B", 9)  = -1
+     * indexOfIgnoreCase("aabaabaa", "B", -1) = 2
+     * indexOfIgnoreCase("aabaabaa", "", 2)   = 2
+     * indexOfIgnoreCase("abc", "", 9)        = 3
      * </pre>
      * 
      * @param str
@@ -1175,10 +1174,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.lastIndexOf(null, *)         = -1
-     * StringUtils.lastIndexOf("", *)           = -1
-     * StringUtils.lastIndexOf("aabaabaa", 'a') = 7
-     * StringUtils.lastIndexOf("aabaabaa", 'b') = 5
+     * lastIndexOf(null, *)         = -1
+     * lastIndexOf("", *)           = -1
+     * lastIndexOf("aabaabaa", 'a') = 7
+     * lastIndexOf("aabaabaa", 'b') = 5
      * </pre>
      * 
      * @param str
@@ -1209,14 +1208,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.lastIndexOf(null, *, *)          = -1
-     * StringUtils.lastIndexOf("", *,  *)           = -1
-     * StringUtils.lastIndexOf("aabaabaa", 'b', 8)  = 5
-     * StringUtils.lastIndexOf("aabaabaa", 'b', 4)  = 2
-     * StringUtils.lastIndexOf("aabaabaa", 'b', 0)  = -1
-     * StringUtils.lastIndexOf("aabaabaa", 'b', 9)  = 5
-     * StringUtils.lastIndexOf("aabaabaa", 'b', -1) = -1
-     * StringUtils.lastIndexOf("aabaabaa", 'a', 0)  = 0
+     * lastIndexOf(null, *, *)          = -1
+     * lastIndexOf("", *,  *)           = -1
+     * lastIndexOf("aabaabaa", 'b', 8)  = 5
+     * lastIndexOf("aabaabaa", 'b', 4)  = 2
+     * lastIndexOf("aabaabaa", 'b', 0)  = -1
+     * lastIndexOf("aabaabaa", 'b', 9)  = 5
+     * lastIndexOf("aabaabaa", 'b', -1) = -1
+     * lastIndexOf("aabaabaa", 'a', 0)  = 0
      * </pre>
      * 
      * @param str
@@ -1247,13 +1246,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.lastIndexOf(null, *)          = -1
-     * StringUtils.lastIndexOf(*, null)          = -1
-     * StringUtils.lastIndexOf("", "")           = 0
-     * StringUtils.lastIndexOf("aabaabaa", "a")  = 7
-     * StringUtils.lastIndexOf("aabaabaa", "b")  = 5
-     * StringUtils.lastIndexOf("aabaabaa", "ab") = 4
-     * StringUtils.lastIndexOf("aabaabaa", "")   = 8
+     * lastIndexOf(null, *)          = -1
+     * lastIndexOf(*, null)          = -1
+     * lastIndexOf("", "")           = 0
+     * lastIndexOf("aabaabaa", "a")  = 7
+     * lastIndexOf("aabaabaa", "b")  = 5
+     * lastIndexOf("aabaabaa", "ab") = 4
+     * lastIndexOf("aabaabaa", "")   = 8
      * </pre>
      * 
      * @param str
@@ -1282,17 +1281,17 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.lastOrdinalIndexOf(null, *, *)          = -1
-     * StringUtils.lastOrdinalIndexOf(*, null, *)          = -1
-     * StringUtils.lastOrdinalIndexOf("", "", *)           = 0
-     * StringUtils.lastOrdinalIndexOf("aabaabaa", "a", 1)  = 7
-     * StringUtils.lastOrdinalIndexOf("aabaabaa", "a", 2)  = 6
-     * StringUtils.lastOrdinalIndexOf("aabaabaa", "b", 1)  = 5
-     * StringUtils.lastOrdinalIndexOf("aabaabaa", "b", 2)  = 2
-     * StringUtils.lastOrdinalIndexOf("aabaabaa", "ab", 1) = 4
-     * StringUtils.lastOrdinalIndexOf("aabaabaa", "ab", 2) = 1
-     * StringUtils.lastOrdinalIndexOf("aabaabaa", "", 1)   = 8
-     * StringUtils.lastOrdinalIndexOf("aabaabaa", "", 2)   = 8
+     * lastOrdinalIndexOf(null, *, *)          = -1
+     * lastOrdinalIndexOf(*, null, *)          = -1
+     * lastOrdinalIndexOf("", "", *)           = 0
+     * lastOrdinalIndexOf("aabaabaa", "a", 1)  = 7
+     * lastOrdinalIndexOf("aabaabaa", "a", 2)  = 6
+     * lastOrdinalIndexOf("aabaabaa", "b", 1)  = 5
+     * lastOrdinalIndexOf("aabaabaa", "b", 2)  = 2
+     * lastOrdinalIndexOf("aabaabaa", "ab", 1) = 4
+     * lastOrdinalIndexOf("aabaabaa", "ab", 2) = 1
+     * lastOrdinalIndexOf("aabaabaa", "", 1)   = 8
+     * lastOrdinalIndexOf("aabaabaa", "", 2)   = 8
      * </pre>
      * 
      * <p>
@@ -1333,15 +1332,15 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.lastIndexOf(null, *, *)          = -1
-     * StringUtils.lastIndexOf(*, null, *)          = -1
-     * StringUtils.lastIndexOf("aabaabaa", "a", 8)  = 7
-     * StringUtils.lastIndexOf("aabaabaa", "b", 8)  = 5
-     * StringUtils.lastIndexOf("aabaabaa", "ab", 8) = 4
-     * StringUtils.lastIndexOf("aabaabaa", "b", 9)  = 5
-     * StringUtils.lastIndexOf("aabaabaa", "b", -1) = -1
-     * StringUtils.lastIndexOf("aabaabaa", "a", 0)  = 0
-     * StringUtils.lastIndexOf("aabaabaa", "b", 0)  = -1
+     * lastIndexOf(null, *, *)          = -1
+     * lastIndexOf(*, null, *)          = -1
+     * lastIndexOf("aabaabaa", "a", 8)  = 7
+     * lastIndexOf("aabaabaa", "b", 8)  = 5
+     * lastIndexOf("aabaabaa", "ab", 8) = 4
+     * lastIndexOf("aabaabaa", "b", 9)  = 5
+     * lastIndexOf("aabaabaa", "b", -1) = -1
+     * lastIndexOf("aabaabaa", "a", 0)  = 0
+     * lastIndexOf("aabaabaa", "b", 0)  = -1
      * </pre>
      * 
      * @param str
@@ -1374,11 +1373,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.lastIndexOfIgnoreCase(null, *)          = -1
-     * StringUtils.lastIndexOfIgnoreCase(*, null)          = -1
-     * StringUtils.lastIndexOfIgnoreCase("aabaabaa", "A")  = 7
-     * StringUtils.lastIndexOfIgnoreCase("aabaabaa", "B")  = 5
-     * StringUtils.lastIndexOfIgnoreCase("aabaabaa", "AB") = 4
+     * lastIndexOfIgnoreCase(null, *)          = -1
+     * lastIndexOfIgnoreCase(*, null)          = -1
+     * lastIndexOfIgnoreCase("aabaabaa", "A")  = 7
+     * lastIndexOfIgnoreCase("aabaabaa", "B")  = 5
+     * lastIndexOfIgnoreCase("aabaabaa", "AB") = 4
      * </pre>
      * 
      * @param str
@@ -1410,15 +1409,15 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.lastIndexOfIgnoreCase(null, *, *)          = -1
-     * StringUtils.lastIndexOfIgnoreCase(*, null, *)          = -1
-     * StringUtils.lastIndexOfIgnoreCase("aabaabaa", "A", 8)  = 7
-     * StringUtils.lastIndexOfIgnoreCase("aabaabaa", "B", 8)  = 5
-     * StringUtils.lastIndexOfIgnoreCase("aabaabaa", "AB", 8) = 4
-     * StringUtils.lastIndexOfIgnoreCase("aabaabaa", "B", 9)  = 5
-     * StringUtils.lastIndexOfIgnoreCase("aabaabaa", "B", -1) = -1
-     * StringUtils.lastIndexOfIgnoreCase("aabaabaa", "A", 0)  = 0
-     * StringUtils.lastIndexOfIgnoreCase("aabaabaa", "B", 0)  = -1
+     * lastIndexOfIgnoreCase(null, *, *)          = -1
+     * lastIndexOfIgnoreCase(*, null, *)          = -1
+     * lastIndexOfIgnoreCase("aabaabaa", "A", 8)  = 7
+     * lastIndexOfIgnoreCase("aabaabaa", "B", 8)  = 5
+     * lastIndexOfIgnoreCase("aabaabaa", "AB", 8) = 4
+     * lastIndexOfIgnoreCase("aabaabaa", "B", 9)  = 5
+     * lastIndexOfIgnoreCase("aabaabaa", "B", -1) = -1
+     * lastIndexOfIgnoreCase("aabaabaa", "A", 0)  = 0
+     * lastIndexOfIgnoreCase("aabaabaa", "B", 0)  = -1
      * </pre>
      * 
      * @param str
@@ -1467,10 +1466,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.contains(null, *)    = false
-     * StringUtils.contains("", *)      = false
-     * StringUtils.contains("abc", 'a') = true
-     * StringUtils.contains("abc", 'z') = false
+     * contains(null, *)    = false
+     * contains("", *)      = false
+     * contains("abc", 'a') = true
+     * contains("abc", 'z') = false
      * </pre>
      * 
      * @param str
@@ -1499,12 +1498,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.contains(null, *)     = false
-     * StringUtils.contains(*, null)     = false
-     * StringUtils.contains("", "")      = true
-     * StringUtils.contains("abc", "")   = true
-     * StringUtils.contains("abc", "a")  = true
-     * StringUtils.contains("abc", "z")  = false
+     * contains(null, *)     = false
+     * contains(*, null)     = false
+     * contains("", "")      = true
+     * contains("abc", "")   = true
+     * contains("abc", "a")  = true
+     * contains("abc", "z")  = false
      * </pre>
      * 
      * @param str
@@ -1533,14 +1532,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.contains(null, *) = false
-     * StringUtils.contains(*, null) = false
-     * StringUtils.contains("", "") = true
-     * StringUtils.contains("abc", "") = true
-     * StringUtils.contains("abc", "a") = true
-     * StringUtils.contains("abc", "z") = false
-     * StringUtils.contains("abc", "A") = true
-     * StringUtils.contains("abc", "Z") = false
+     * contains(null, *) = false
+     * contains(*, null) = false
+     * contains("", "") = true
+     * contains("abc", "") = true
+     * contains("abc", "a") = true
+     * contains("abc", "z") = false
+     * contains("abc", "A") = true
+     * contains("abc", "Z") = false
      * </pre>
      * 
      * @param str
@@ -1603,13 +1602,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.indexOfAny(null, *)                = -1
-     * StringUtils.indexOfAny("", *)                  = -1
-     * StringUtils.indexOfAny(*, null)                = -1
-     * StringUtils.indexOfAny(*, [])                  = -1
-     * StringUtils.indexOfAny("zzabyycdxx",['z','a']) = 0
-     * StringUtils.indexOfAny("zzabyycdxx",['b','y']) = 3
-     * StringUtils.indexOfAny("aba", ['z'])           = -1
+     * indexOfAny(null, *)                = -1
+     * indexOfAny("", *)                  = -1
+     * indexOfAny(*, null)                = -1
+     * indexOfAny(*, [])                  = -1
+     * indexOfAny("zzabyycdxx",['z','a']) = 0
+     * indexOfAny("zzabyycdxx",['b','y']) = 3
+     * indexOfAny("aba", ['z'])           = -1
      * </pre>
      * 
      * @param cs
@@ -1660,13 +1659,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.indexOfAny(null, *)            = -1
-     * StringUtils.indexOfAny("", *)              = -1
-     * StringUtils.indexOfAny(*, null)            = -1
-     * StringUtils.indexOfAny(*, "")              = -1
-     * StringUtils.indexOfAny("zzabyycdxx", "za") = 0
-     * StringUtils.indexOfAny("zzabyycdxx", "by") = 3
-     * StringUtils.indexOfAny("aba","z")          = -1
+     * indexOfAny(null, *)            = -1
+     * indexOfAny("", *)              = -1
+     * indexOfAny(*, null)            = -1
+     * indexOfAny(*, "")              = -1
+     * indexOfAny("zzabyycdxx", "za") = 0
+     * indexOfAny("zzabyycdxx", "by") = 3
+     * indexOfAny("aba","z")          = -1
      * </pre>
      * 
      * @param cs
@@ -1700,13 +1699,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.containsAny(null, *)                = false
-     * StringUtils.containsAny("", *)                  = false
-     * StringUtils.containsAny(*, null)                = false
-     * StringUtils.containsAny(*, [])                  = false
-     * StringUtils.containsAny("zzabyycdxx",['z','a']) = true
-     * StringUtils.containsAny("zzabyycdxx",['b','y']) = true
-     * StringUtils.containsAny("aba", ['z'])           = false
+     * containsAny(null, *)                = false
+     * containsAny("", *)                  = false
+     * containsAny(*, null)                = false
+     * containsAny(*, [])                  = false
+     * containsAny("zzabyycdxx",['z','a']) = true
+     * containsAny("zzabyycdxx",['b','y']) = true
+     * containsAny("aba", ['z'])           = false
      * </pre>
      * 
      * @param cs
@@ -1761,13 +1760,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.containsAny(null, *)            = false
-     * StringUtils.containsAny("", *)              = false
-     * StringUtils.containsAny(*, null)            = false
-     * StringUtils.containsAny(*, "")              = false
-     * StringUtils.containsAny("zzabyycdxx", "za") = true
-     * StringUtils.containsAny("zzabyycdxx", "by") = true
-     * StringUtils.containsAny("aba","z")          = false
+     * containsAny(null, *)            = false
+     * containsAny("", *)              = false
+     * containsAny(*, null)            = false
+     * containsAny(*, "")              = false
+     * containsAny("zzabyycdxx", "za") = true
+     * containsAny("zzabyycdxx", "by") = true
+     * containsAny("aba","z")          = false
      * </pre>
      * 
      * @param cs
@@ -1800,13 +1799,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.indexOfAnyBut(null, *)           = -1
-     * StringUtils.indexOfAnyBut("", *)             = -1
-     * StringUtils.indexOfAnyBut(*, null)           = -1
-     * StringUtils.indexOfAnyBut(*, [])             = -1
-     * StringUtils.indexOfAnyBut("zzabyycdxx",'za') = 3
-     * StringUtils.indexOfAnyBut("zzabyycdxx", '')  = 0
-     * StringUtils.indexOfAnyBut("aba", 'ab')       = -1
+     * indexOfAnyBut(null, *)           = -1
+     * indexOfAnyBut("", *)             = -1
+     * indexOfAnyBut(*, null)           = -1
+     * indexOfAnyBut(*, [])             = -1
+     * indexOfAnyBut("zzabyycdxx",'za') = 3
+     * indexOfAnyBut("zzabyycdxx", '')  = 0
+     * indexOfAnyBut("aba", 'ab')       = -1
      * </pre>
      * 
      * @param cs
@@ -1857,13 +1856,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.indexOfAnyBut(null, *)            = -1
-     * StringUtils.indexOfAnyBut("", *)              = -1
-     * StringUtils.indexOfAnyBut(*, null)            = -1
-     * StringUtils.indexOfAnyBut(*, "")              = -1
-     * StringUtils.indexOfAnyBut("zzabyycdxx", "za") = 3
-     * StringUtils.indexOfAnyBut("zzabyycdxx", "")   = 0
-     * StringUtils.indexOfAnyBut("aba","ab")         = -1
+     * indexOfAnyBut(null, *)            = -1
+     * indexOfAnyBut("", *)              = -1
+     * indexOfAnyBut(*, null)            = -1
+     * indexOfAnyBut(*, "")              = -1
+     * indexOfAnyBut("zzabyycdxx", "za") = 3
+     * indexOfAnyBut("zzabyycdxx", "")   = 0
+     * indexOfAnyBut("aba","ab")         = -1
      * </pre>
      * 
      * @param str
@@ -1909,13 +1908,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.containsOnly(null, *)       = false
-     * StringUtils.containsOnly(*, null)       = false
-     * StringUtils.containsOnly("", *)         = true
-     * StringUtils.containsOnly("ab", '')      = false
-     * StringUtils.containsOnly("abab", 'abc') = true
-     * StringUtils.containsOnly("ab1", 'abc')  = false
-     * StringUtils.containsOnly("abz", 'abc')  = false
+     * containsOnly(null, *)       = false
+     * containsOnly(*, null)       = false
+     * containsOnly("", *)         = true
+     * containsOnly("ab", '')      = false
+     * containsOnly("abab", 'abc') = true
+     * containsOnly("ab1", 'abc')  = false
+     * containsOnly("abz", 'abc')  = false
      * </pre>
      * 
      * @param cs
@@ -1952,13 +1951,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.containsOnly(null, *)       = false
-     * StringUtils.containsOnly(*, null)       = false
-     * StringUtils.containsOnly("", *)         = true
-     * StringUtils.containsOnly("ab", "")      = false
-     * StringUtils.containsOnly("abab", "abc") = true
-     * StringUtils.containsOnly("ab1", "abc")  = false
-     * StringUtils.containsOnly("abz", "abc")  = false
+     * containsOnly(null, *)       = false
+     * containsOnly(*, null)       = false
+     * containsOnly("", *)         = true
+     * containsOnly("ab", "")      = false
+     * containsOnly("abab", "abc") = true
+     * containsOnly("ab1", "abc")  = false
+     * containsOnly("abz", "abc")  = false
      * </pre>
      * 
      * @param cs
@@ -1991,13 +1990,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.containsNone(null, *)       = true
-     * StringUtils.containsNone(*, null)       = true
-     * StringUtils.containsNone("", *)         = true
-     * StringUtils.containsNone("ab", '')      = true
-     * StringUtils.containsNone("abab", 'xyz') = true
-     * StringUtils.containsNone("ab1", 'xyz')  = true
-     * StringUtils.containsNone("abz", 'xyz')  = false
+     * containsNone(null, *)       = true
+     * containsNone(*, null)       = true
+     * containsNone("", *)         = true
+     * containsNone("ab", '')      = true
+     * containsNone("abab", 'xyz') = true
+     * containsNone("ab1", 'xyz')  = true
+     * containsNone("abz", 'xyz')  = false
      * </pre>
      * 
      * @param cs
@@ -2053,13 +2052,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.containsNone(null, *)       = true
-     * StringUtils.containsNone(*, null)       = true
-     * StringUtils.containsNone("", *)         = true
-     * StringUtils.containsNone("ab", "")      = true
-     * StringUtils.containsNone("abab", "xyz") = true
-     * StringUtils.containsNone("ab1", "xyz")  = true
-     * StringUtils.containsNone("abz", "xyz")  = false
+     * containsNone(null, *)       = true
+     * containsNone(*, null)       = true
+     * containsNone("", *)         = true
+     * containsNone("ab", "")      = true
+     * containsNone("abab", "xyz") = true
+     * containsNone("ab1", "xyz")  = true
+     * containsNone("abz", "xyz")  = false
      * </pre>
      * 
      * @param cs
@@ -2094,16 +2093,16 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.indexOfAny(null, *)                     = -1
-     * StringUtils.indexOfAny(*, null)                     = -1
-     * StringUtils.indexOfAny(*, [])                       = -1
-     * StringUtils.indexOfAny("zzabyycdxx", ["ab","cd"])   = 2
-     * StringUtils.indexOfAny("zzabyycdxx", ["cd","ab"])   = 2
-     * StringUtils.indexOfAny("zzabyycdxx", ["mn","op"])   = -1
-     * StringUtils.indexOfAny("zzabyycdxx", ["zab","aby"]) = 1
-     * StringUtils.indexOfAny("zzabyycdxx", [""])          = 0
-     * StringUtils.indexOfAny("", [""])                    = 0
-     * StringUtils.indexOfAny("", ["a"])                   = -1
+     * indexOfAny(null, *)                     = -1
+     * indexOfAny(*, null)                     = -1
+     * indexOfAny(*, [])                       = -1
+     * indexOfAny("zzabyycdxx", ["ab","cd"])   = 2
+     * indexOfAny("zzabyycdxx", ["cd","ab"])   = 2
+     * indexOfAny("zzabyycdxx", ["mn","op"])   = -1
+     * indexOfAny("zzabyycdxx", ["zab","aby"]) = 1
+     * indexOfAny("zzabyycdxx", [""])          = 0
+     * indexOfAny("", [""])                    = 0
+     * indexOfAny("", ["a"])                   = -1
      * </pre>
      * 
      * @param str
@@ -2155,15 +2154,15 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.lastIndexOfAny(null, *)                   = -1
-     * StringUtils.lastIndexOfAny(*, null)                   = -1
-     * StringUtils.lastIndexOfAny(*, [])                     = -1
-     * StringUtils.lastIndexOfAny(*, [null])                 = -1
-     * StringUtils.lastIndexOfAny("zzabyycdxx", ["ab","cd"]) = 6
-     * StringUtils.lastIndexOfAny("zzabyycdxx", ["cd","ab"]) = 6
-     * StringUtils.lastIndexOfAny("zzabyycdxx", ["mn","op"]) = -1
-     * StringUtils.lastIndexOfAny("zzabyycdxx", ["mn","op"]) = -1
-     * StringUtils.lastIndexOfAny("zzabyycdxx", ["mn",""])   = 10
+     * lastIndexOfAny(null, *)                   = -1
+     * lastIndexOfAny(*, null)                   = -1
+     * lastIndexOfAny(*, [])                     = -1
+     * lastIndexOfAny(*, [null])                 = -1
+     * lastIndexOfAny("zzabyycdxx", ["ab","cd"]) = 6
+     * lastIndexOfAny("zzabyycdxx", ["cd","ab"]) = 6
+     * lastIndexOfAny("zzabyycdxx", ["mn","op"]) = -1
+     * lastIndexOfAny("zzabyycdxx", ["mn","op"]) = -1
+     * lastIndexOfAny("zzabyycdxx", ["mn",""])   = 10
      * </pre>
      * 
      * @param str
@@ -2210,13 +2209,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.substring(null, *)   = null
-     * StringUtils.substring("", *)     = ""
-     * StringUtils.substring("abc", 0)  = "abc"
-     * StringUtils.substring("abc", 2)  = "c"
-     * StringUtils.substring("abc", 4)  = ""
-     * StringUtils.substring("abc", -2) = "bc"
-     * StringUtils.substring("abc", -4) = "abc"
+     * substring(null, *)   = null
+     * substring("", *)     = ""
+     * substring("abc", 0)  = "abc"
+     * substring("abc", 2)  = "c"
+     * substring("abc", 4)  = ""
+     * substring("abc", -2) = "bc"
+     * substring("abc", -4) = "abc"
      * </pre>
      * 
      * @param str
@@ -2272,15 +2271,15 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.substring(null, *, *)    = null
-     * StringUtils.substring("", * ,  *)    = "";
-     * StringUtils.substring("abc", 0, 2)   = "ab"
-     * StringUtils.substring("abc", 2, 0)   = ""
-     * StringUtils.substring("abc", 2, 4)   = "c"
-     * StringUtils.substring("abc", 4, 6)   = ""
-     * StringUtils.substring("abc", 2, 2)   = ""
-     * StringUtils.substring("abc", -2, -1) = "b"
-     * StringUtils.substring("abc", -4, 2)  = "ab"
+     * substring(null, *, *)    = null
+     * substring("", * ,  *)    = "";
+     * substring("abc", 0, 2)   = "ab"
+     * substring("abc", 2, 0)   = ""
+     * substring("abc", 2, 4)   = "c"
+     * substring("abc", 4, 6)   = ""
+     * substring("abc", 2, 2)   = ""
+     * substring("abc", -2, -1) = "b"
+     * substring("abc", -4, 2)  = "ab"
      * </pre>
      * 
      * @param str
@@ -2341,12 +2340,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.left(null, *)    = null
-     * StringUtils.left(*, -ve)     = ""
-     * StringUtils.left("", *)      = ""
-     * StringUtils.left("abc", 0)   = ""
-     * StringUtils.left("abc", 2)   = "ab"
-     * StringUtils.left("abc", 4)   = "abc"
+     * left(null, *)    = null
+     * left(*, -ve)     = ""
+     * left("", *)      = ""
+     * left("abc", 0)   = ""
+     * left("abc", 2)   = "ab"
+     * left("abc", 4)   = "abc"
      * </pre>
      * 
      * @param str
@@ -2380,12 +2379,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.right(null, *)    = null
-     * StringUtils.right(*, -ve)     = ""
-     * StringUtils.right("", *)      = ""
-     * StringUtils.right("abc", 0)   = ""
-     * StringUtils.right("abc", 2)   = "bc"
-     * StringUtils.right("abc", 4)   = "abc"
+     * right(null, *)    = null
+     * right(*, -ve)     = ""
+     * right("", *)      = ""
+     * right("abc", 0)   = ""
+     * right("abc", 2)   = "bc"
+     * right("abc", 4)   = "abc"
      * </pre>
      * 
      * @param str
@@ -2420,14 +2419,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.mid(null, *, *)    = null
-     * StringUtils.mid(*, *, -ve)     = ""
-     * StringUtils.mid("", 0, *)      = ""
-     * StringUtils.mid("abc", 0, 2)   = "ab"
-     * StringUtils.mid("abc", 0, 4)   = "abc"
-     * StringUtils.mid("abc", 2, 4)   = "c"
-     * StringUtils.mid("abc", 4, 2)   = ""
-     * StringUtils.mid("abc", -2, 2)  = "ab"
+     * mid(null, *, *)    = null
+     * mid(*, *, -ve)     = ""
+     * mid("", 0, *)      = ""
+     * mid("abc", 0, 2)   = "ab"
+     * mid("abc", 0, 4)   = "abc"
+     * mid("abc", 2, 4)   = "c"
+     * mid("abc", 4, 2)   = ""
+     * mid("abc", -2, 2)  = "ab"
      * </pre>
      * 
      * @param str
@@ -2473,14 +2472,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.substringBefore(null, *)      = null
-     * StringUtils.substringBefore("", *)        = ""
-     * StringUtils.substringBefore("abc", "a")   = ""
-     * StringUtils.substringBefore("abcba", "b") = "a"
-     * StringUtils.substringBefore("abc", "c")   = "ab"
-     * StringUtils.substringBefore("abc", "d")   = "abc"
-     * StringUtils.substringBefore("abc", "")    = ""
-     * StringUtils.substringBefore("abc", null)  = "abc"
+     * substringBefore(null, *)      = null
+     * substringBefore("", *)        = ""
+     * substringBefore("abc", "a")   = ""
+     * substringBefore("abcba", "b") = "a"
+     * substringBefore("abc", "c")   = "ab"
+     * substringBefore("abc", "d")   = "abc"
+     * substringBefore("abc", "")    = ""
+     * substringBefore("abc", null)  = "abc"
      * </pre>
      * 
      * @param str
@@ -2523,14 +2522,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.substringAfter(null, *)      = null
-     * StringUtils.substringAfter("", *)        = ""
-     * StringUtils.substringAfter(*, null)      = ""
-     * StringUtils.substringAfter("abc", "a")   = "bc"
-     * StringUtils.substringAfter("abcba", "b") = "cba"
-     * StringUtils.substringAfter("abc", "c")   = ""
-     * StringUtils.substringAfter("abc", "d")   = ""
-     * StringUtils.substringAfter("abc", "")    = "abc"
+     * substringAfter(null, *)      = null
+     * substringAfter("", *)        = ""
+     * substringAfter(*, null)      = ""
+     * substringAfter("abc", "a")   = "bc"
+     * substringAfter("abcba", "b") = "cba"
+     * substringAfter("abc", "c")   = ""
+     * substringAfter("abc", "d")   = ""
+     * substringAfter("abc", "")    = "abc"
      * </pre>
      * 
      * @param str
@@ -2572,14 +2571,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.substringBeforeLast(null, *)      = null
-     * StringUtils.substringBeforeLast("", *)        = ""
-     * StringUtils.substringBeforeLast("abcba", "b") = "abc"
-     * StringUtils.substringBeforeLast("abc", "c")   = "ab"
-     * StringUtils.substringBeforeLast("a", "a")     = ""
-     * StringUtils.substringBeforeLast("a", "z")     = "a"
-     * StringUtils.substringBeforeLast("a", null)    = "a"
-     * StringUtils.substringBeforeLast("a", "")      = "a"
+     * substringBeforeLast(null, *)      = null
+     * substringBeforeLast("", *)        = ""
+     * substringBeforeLast("abcba", "b") = "abc"
+     * substringBeforeLast("abc", "c")   = "ab"
+     * substringBeforeLast("a", "a")     = ""
+     * substringBeforeLast("a", "z")     = "a"
+     * substringBeforeLast("a", null)    = "a"
+     * substringBeforeLast("a", "")      = "a"
      * </pre>
      * 
      * @param str
@@ -2619,15 +2618,15 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.substringAfterLast(null, *)      = null
-     * StringUtils.substringAfterLast("", *)        = ""
-     * StringUtils.substringAfterLast(*, "")        = ""
-     * StringUtils.substringAfterLast(*, null)      = ""
-     * StringUtils.substringAfterLast("abc", "a")   = "bc"
-     * StringUtils.substringAfterLast("abcba", "b") = "a"
-     * StringUtils.substringAfterLast("abc", "c")   = ""
-     * StringUtils.substringAfterLast("a", "a")     = ""
-     * StringUtils.substringAfterLast("a", "z")     = ""
+     * substringAfterLast(null, *)      = null
+     * substringAfterLast("", *)        = ""
+     * substringAfterLast(*, "")        = ""
+     * substringAfterLast(*, null)      = ""
+     * substringAfterLast("abc", "a")   = "bc"
+     * substringAfterLast("abcba", "b") = "a"
+     * substringAfterLast("abc", "c")   = ""
+     * substringAfterLast("a", "a")     = ""
+     * substringAfterLast("a", "z")     = ""
      * </pre>
      * 
      * @param str
@@ -2667,12 +2666,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.substringBetween(null, *)            = null
-     * StringUtils.substringBetween("", "")             = ""
-     * StringUtils.substringBetween("", "tag")          = null
-     * StringUtils.substringBetween("tagabctag", null)  = null
-     * StringUtils.substringBetween("tagabctag", "")    = ""
-     * StringUtils.substringBetween("tagabctag", "tag") = "abc"
+     * substringBetween(null, *)            = null
+     * substringBetween("", "")             = ""
+     * substringBetween("", "tag")          = null
+     * substringBetween("tagabctag", null)  = null
+     * substringBetween("tagabctag", "")    = ""
+     * substringBetween("tagabctag", "tag") = "abc"
      * </pre>
      * 
      * @param str
@@ -2699,16 +2698,16 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.substringBetween("wx[b]yz", "[", "]") = "b"
-     * StringUtils.substringBetween(null, *, *)          = null
-     * StringUtils.substringBetween(*, null, *)          = null
-     * StringUtils.substringBetween(*, *, null)          = null
-     * StringUtils.substringBetween("", "", "")          = ""
-     * StringUtils.substringBetween("", "", "]")         = null
-     * StringUtils.substringBetween("", "[", "]")        = null
-     * StringUtils.substringBetween("yabcz", "", "")     = ""
-     * StringUtils.substringBetween("yabcz", "y", "z")   = "abc"
-     * StringUtils.substringBetween("yabczyabcz", "y", "z")   = "abc"
+     * substringBetween("wx[b]yz", "[", "]") = "b"
+     * substringBetween(null, *, *)          = null
+     * substringBetween(*, null, *)          = null
+     * substringBetween(*, *, null)          = null
+     * substringBetween("", "", "")          = ""
+     * substringBetween("", "", "]")         = null
+     * substringBetween("", "[", "]")        = null
+     * substringBetween("yabcz", "", "")     = ""
+     * substringBetween("yabcz", "y", "z")   = "abc"
+     * substringBetween("yabczyabcz", "y", "z")   = "abc"
      * </pre>
      * 
      * @param str
@@ -2747,11 +2746,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.substringsBetween("[a][b][c]", "[", "]") = ["a","b","c"]
-     * StringUtils.substringsBetween(null, *, *)            = null
-     * StringUtils.substringsBetween(*, null, *)            = null
-     * StringUtils.substringsBetween(*, *, null)            = null
-     * StringUtils.substringsBetween("", "[", "]")          = []
+     * substringsBetween("[a][b][c]", "[", "]") = ["a","b","c"]
+     * substringsBetween(null, *, *)            = null
+     * substringsBetween(*, null, *)            = null
+     * substringsBetween(*, *, null)            = null
+     * substringsBetween("", "[", "]")          = []
      * </pre>
      * 
      * @param str
@@ -2820,11 +2819,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.split(null)       = null
-     * StringUtils.split("")         = []
-     * StringUtils.split("abc def")  = ["abc", "def"]
-     * StringUtils.split("abc  def") = ["abc", "def"]
-     * StringUtils.split(" abc ")    = ["abc"]
+     * split(null)       = null
+     * split("")         = []
+     * split("abc def")  = ["abc", "def"]
+     * split("abc  def") = ["abc", "def"]
+     * split(" abc ")    = ["abc"]
      * </pre>
      * 
      * @param str
@@ -2853,12 +2852,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.split(null, *)         = null
-     * StringUtils.split("", *)           = []
-     * StringUtils.split("a.b.c", '.')    = ["a", "b", "c"]
-     * StringUtils.split("a..b.c", '.')   = ["a", "b", "c"]
-     * StringUtils.split("a:b:c", '.')    = ["a:b:c"]
-     * StringUtils.split("a b c", ' ')    = ["a", "b", "c"]
+     * split(null, *)         = null
+     * split("", *)           = []
+     * split("a.b.c", '.')    = ["a", "b", "c"]
+     * split("a..b.c", '.')   = ["a", "b", "c"]
+     * split("a:b:c", '.')    = ["a:b:c"]
+     * split("a b c", ' ')    = ["a", "b", "c"]
      * </pre>
      * 
      * @param str
@@ -2891,12 +2890,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.split(null, *)         = null
-     * StringUtils.split("", *)           = []
-     * StringUtils.split("abc def", null) = ["abc", "def"]
-     * StringUtils.split("abc def", " ")  = ["abc", "def"]
-     * StringUtils.split("abc  def", " ") = ["abc", "def"]
-     * StringUtils.split("ab:cd:ef", ":") = ["ab", "cd", "ef"]
+     * split(null, *)         = null
+     * split("", *)           = []
+     * split("abc def", null) = ["abc", "def"]
+     * split("abc def", " ")  = ["abc", "def"]
+     * split("abc  def", " ") = ["abc", "def"]
+     * split("ab:cd:ef", ":") = ["ab", "cd", "ef"]
      * </pre>
      * 
      * @param str
@@ -2934,12 +2933,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.split(null, *, *)            = null
-     * StringUtils.split("", *, *)              = []
-     * StringUtils.split("ab de fg", null, 0)   = ["ab", "cd", "ef"]
-     * StringUtils.split("ab   de fg", null, 0) = ["ab", "cd", "ef"]
-     * StringUtils.split("ab:cd:ef", ":", 0)    = ["ab", "cd", "ef"]
-     * StringUtils.split("ab:cd:ef", ":", 2)    = ["ab", "cd:ef"]
+     * split(null, *, *)            = null
+     * split("", *, *)              = []
+     * split("ab de fg", null, 0)   = ["ab", "cd", "ef"]
+     * split("ab   de fg", null, 0) = ["ab", "cd", "ef"]
+     * split("ab:cd:ef", ":", 0)    = ["ab", "cd", "ef"]
+     * split("ab:cd:ef", ":", 2)    = ["ab", "cd:ef"]
      * </pre>
      * 
      * @param str
@@ -2973,12 +2972,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.splitByWholeSeparator(null, *)               = null
-     * StringUtils.splitByWholeSeparator("", *)                 = []
-     * StringUtils.splitByWholeSeparator("ab de fg", null)      = ["ab", "de", "fg"]
-     * StringUtils.splitByWholeSeparator("ab   de fg", null)    = ["ab", "de", "fg"]
-     * StringUtils.splitByWholeSeparator("ab:cd:ef", ":")       = ["ab", "cd", "ef"]
-     * StringUtils.splitByWholeSeparator("ab-!-cd-!-ef", "-!-") = ["ab", "cd", "ef"]
+     * splitByWholeSeparator(null, *)               = null
+     * splitByWholeSeparator("", *)                 = []
+     * splitByWholeSeparator("ab de fg", null)      = ["ab", "de", "fg"]
+     * splitByWholeSeparator("ab   de fg", null)    = ["ab", "de", "fg"]
+     * splitByWholeSeparator("ab:cd:ef", ":")       = ["ab", "cd", "ef"]
+     * splitByWholeSeparator("ab-!-cd-!-ef", "-!-") = ["ab", "cd", "ef"]
      * </pre>
      * 
      * @param str
@@ -3010,13 +3009,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.splitByWholeSeparator(null, *, *)               = null
-     * StringUtils.splitByWholeSeparator("", *, *)                 = []
-     * StringUtils.splitByWholeSeparator("ab de fg", null, 0)      = ["ab", "de", "fg"]
-     * StringUtils.splitByWholeSeparator("ab   de fg", null, 0)    = ["ab", "de", "fg"]
-     * StringUtils.splitByWholeSeparator("ab:cd:ef", ":", 2)       = ["ab", "cd:ef"]
-     * StringUtils.splitByWholeSeparator("ab-!-cd-!-ef", "-!-", 5) = ["ab", "cd", "ef"]
-     * StringUtils.splitByWholeSeparator("ab-!-cd-!-ef", "-!-", 2) = ["ab", "cd-!-ef"]
+     * splitByWholeSeparator(null, *, *)               = null
+     * splitByWholeSeparator("", *, *)                 = []
+     * splitByWholeSeparator("ab de fg", null, 0)      = ["ab", "de", "fg"]
+     * splitByWholeSeparator("ab   de fg", null, 0)    = ["ab", "de", "fg"]
+     * splitByWholeSeparator("ab:cd:ef", ":", 2)       = ["ab", "cd:ef"]
+     * splitByWholeSeparator("ab-!-cd-!-ef", "-!-", 5) = ["ab", "cd", "ef"]
+     * splitByWholeSeparator("ab-!-cd-!-ef", "-!-", 2) = ["ab", "cd-!-ef"]
      * </pre>
      * 
      * @param str
@@ -3052,12 +3051,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.splitByWholeSeparatorPreserveAllTokens(null, *)               = null
-     * StringUtils.splitByWholeSeparatorPreserveAllTokens("", *)                 = []
-     * StringUtils.splitByWholeSeparatorPreserveAllTokens("ab de fg", null)      = ["ab", "de", "fg"]
-     * StringUtils.splitByWholeSeparatorPreserveAllTokens("ab   de fg", null)    = ["ab", "", "", "de", "fg"]
-     * StringUtils.splitByWholeSeparatorPreserveAllTokens("ab:cd:ef", ":")       = ["ab", "cd", "ef"]
-     * StringUtils.splitByWholeSeparatorPreserveAllTokens("ab-!-cd-!-ef", "-!-") = ["ab", "cd", "ef"]
+     * splitByWholeSeparatorPreserveAllTokens(null, *)               = null
+     * splitByWholeSeparatorPreserveAllTokens("", *)                 = []
+     * splitByWholeSeparatorPreserveAllTokens("ab de fg", null)      = ["ab", "de", "fg"]
+     * splitByWholeSeparatorPreserveAllTokens("ab   de fg", null)    = ["ab", "", "", "de", "fg"]
+     * splitByWholeSeparatorPreserveAllTokens("ab:cd:ef", ":")       = ["ab", "cd", "ef"]
+     * splitByWholeSeparatorPreserveAllTokens("ab-!-cd-!-ef", "-!-") = ["ab", "cd", "ef"]
      * </pre>
      * 
      * @param str
@@ -3092,13 +3091,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.splitByWholeSeparatorPreserveAllTokens(null, *, *)               = null
-     * StringUtils.splitByWholeSeparatorPreserveAllTokens("", *, *)                 = []
-     * StringUtils.splitByWholeSeparatorPreserveAllTokens("ab de fg", null, 0)      = ["ab", "de", "fg"]
-     * StringUtils.splitByWholeSeparatorPreserveAllTokens("ab   de fg", null, 0)    = ["ab", "", "", "de", "fg"]
-     * StringUtils.splitByWholeSeparatorPreserveAllTokens("ab:cd:ef", ":", 2)       = ["ab", "cd:ef"]
-     * StringUtils.splitByWholeSeparatorPreserveAllTokens("ab-!-cd-!-ef", "-!-", 5) = ["ab", "cd", "ef"]
-     * StringUtils.splitByWholeSeparatorPreserveAllTokens("ab-!-cd-!-ef", "-!-", 2) = ["ab", "cd-!-ef"]
+     * splitByWholeSeparatorPreserveAllTokens(null, *, *)               = null
+     * splitByWholeSeparatorPreserveAllTokens("", *, *)                 = []
+     * splitByWholeSeparatorPreserveAllTokens("ab de fg", null, 0)      = ["ab", "de", "fg"]
+     * splitByWholeSeparatorPreserveAllTokens("ab   de fg", null, 0)    = ["ab", "", "", "de", "fg"]
+     * splitByWholeSeparatorPreserveAllTokens("ab:cd:ef", ":", 2)       = ["ab", "cd:ef"]
+     * splitByWholeSeparatorPreserveAllTokens("ab-!-cd-!-ef", "-!-", 5) = ["ab", "cd", "ef"]
+     * splitByWholeSeparatorPreserveAllTokens("ab-!-cd-!-ef", "-!-", 2) = ["ab", "cd-!-ef"]
      * </pre>
      * 
      * @param str
@@ -3228,11 +3227,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.splitPreserveAllTokens(null)       = null
-     * StringUtils.splitPreserveAllTokens("")         = []
-     * StringUtils.splitPreserveAllTokens("abc def")  = ["abc", "def"]
-     * StringUtils.splitPreserveAllTokens("abc  def") = ["abc", "", "def"]
-     * StringUtils.splitPreserveAllTokens(" abc ")    = ["", "abc", ""]
+     * splitPreserveAllTokens(null)       = null
+     * splitPreserveAllTokens("")         = []
+     * splitPreserveAllTokens("abc def")  = ["abc", "def"]
+     * splitPreserveAllTokens("abc  def") = ["abc", "", "def"]
+     * splitPreserveAllTokens(" abc ")    = ["", "abc", ""]
      * </pre>
      * 
      * @param str
@@ -3263,18 +3262,18 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.splitPreserveAllTokens(null, *)         = null
-     * StringUtils.splitPreserveAllTokens("", *)           = []
-     * StringUtils.splitPreserveAllTokens("a.b.c", '.')    = ["a", "b", "c"]
-     * StringUtils.splitPreserveAllTokens("a..b.c", '.')   = ["a", "", "b", "c"]
-     * StringUtils.splitPreserveAllTokens("a:b:c", '.')    = ["a:b:c"]
-     * StringUtils.splitPreserveAllTokens("a\tb\nc", null) = ["a", "b", "c"]
-     * StringUtils.splitPreserveAllTokens("a b c", ' ')    = ["a", "b", "c"]
-     * StringUtils.splitPreserveAllTokens("a b c ", ' ')   = ["a", "b", "c", ""]
-     * StringUtils.splitPreserveAllTokens("a b c  ", ' ')   = ["a", "b", "c", "", ""]
-     * StringUtils.splitPreserveAllTokens(" a b c", ' ')   = ["", a", "b", "c"]
-     * StringUtils.splitPreserveAllTokens("  a b c", ' ')  = ["", "", a", "b", "c"]
-     * StringUtils.splitPreserveAllTokens(" a b c ", ' ')  = ["", a", "b", "c", ""]
+     * splitPreserveAllTokens(null, *)         = null
+     * splitPreserveAllTokens("", *)           = []
+     * splitPreserveAllTokens("a.b.c", '.')    = ["a", "b", "c"]
+     * splitPreserveAllTokens("a..b.c", '.')   = ["a", "", "b", "c"]
+     * splitPreserveAllTokens("a:b:c", '.')    = ["a:b:c"]
+     * splitPreserveAllTokens("a\tb\nc", null) = ["a", "b", "c"]
+     * splitPreserveAllTokens("a b c", ' ')    = ["a", "b", "c"]
+     * splitPreserveAllTokens("a b c ", ' ')   = ["a", "b", "c", ""]
+     * splitPreserveAllTokens("a b c  ", ' ')   = ["a", "b", "c", "", ""]
+     * splitPreserveAllTokens(" a b c", ' ')   = ["", a", "b", "c"]
+     * splitPreserveAllTokens("  a b c", ' ')  = ["", "", a", "b", "c"]
+     * splitPreserveAllTokens(" a b c ", ' ')  = ["", a", "b", "c", ""]
      * </pre>
      * 
      * @param str
@@ -3360,18 +3359,18 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.splitPreserveAllTokens(null, *)           = null
-     * StringUtils.splitPreserveAllTokens("", *)             = []
-     * StringUtils.splitPreserveAllTokens("abc def", null)   = ["abc", "def"]
-     * StringUtils.splitPreserveAllTokens("abc def", " ")    = ["abc", "def"]
-     * StringUtils.splitPreserveAllTokens("abc  def", " ")   = ["abc", "", def"]
-     * StringUtils.splitPreserveAllTokens("ab:cd:ef", ":")   = ["ab", "cd", "ef"]
-     * StringUtils.splitPreserveAllTokens("ab:cd:ef:", ":")  = ["ab", "cd", "ef", ""]
-     * StringUtils.splitPreserveAllTokens("ab:cd:ef::", ":") = ["ab", "cd", "ef", "", ""]
-     * StringUtils.splitPreserveAllTokens("ab::cd:ef", ":")  = ["ab", "", cd", "ef"]
-     * StringUtils.splitPreserveAllTokens(":cd:ef", ":")     = ["", cd", "ef"]
-     * StringUtils.splitPreserveAllTokens("::cd:ef", ":")    = ["", "", cd", "ef"]
-     * StringUtils.splitPreserveAllTokens(":cd:ef:", ":")    = ["", cd", "ef", ""]
+     * splitPreserveAllTokens(null, *)           = null
+     * splitPreserveAllTokens("", *)             = []
+     * splitPreserveAllTokens("abc def", null)   = ["abc", "def"]
+     * splitPreserveAllTokens("abc def", " ")    = ["abc", "def"]
+     * splitPreserveAllTokens("abc  def", " ")   = ["abc", "", def"]
+     * splitPreserveAllTokens("ab:cd:ef", ":")   = ["ab", "cd", "ef"]
+     * splitPreserveAllTokens("ab:cd:ef:", ":")  = ["ab", "cd", "ef", ""]
+     * splitPreserveAllTokens("ab:cd:ef::", ":") = ["ab", "cd", "ef", "", ""]
+     * splitPreserveAllTokens("ab::cd:ef", ":")  = ["ab", "", cd", "ef"]
+     * splitPreserveAllTokens(":cd:ef", ":")     = ["", cd", "ef"]
+     * splitPreserveAllTokens("::cd:ef", ":")    = ["", "", cd", "ef"]
+     * splitPreserveAllTokens(":cd:ef:", ":")    = ["", cd", "ef", ""]
      * </pre>
      * 
      * @param str
@@ -3413,15 +3412,15 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.splitPreserveAllTokens(null, *, *)            = null
-     * StringUtils.splitPreserveAllTokens("", *, *)              = []
-     * StringUtils.splitPreserveAllTokens("ab de fg", null, 0)   = ["ab", "cd", "ef"]
-     * StringUtils.splitPreserveAllTokens("ab   de fg", null, 0) = ["ab", "cd", "ef"]
-     * StringUtils.splitPreserveAllTokens("ab:cd:ef", ":", 0)    = ["ab", "cd", "ef"]
-     * StringUtils.splitPreserveAllTokens("ab:cd:ef", ":", 2)    = ["ab", "cd:ef"]
-     * StringUtils.splitPreserveAllTokens("ab   de fg", null, 2) = ["ab", "  de fg"]
-     * StringUtils.splitPreserveAllTokens("ab   de fg", null, 3) = ["ab", "", " de fg"]
-     * StringUtils.splitPreserveAllTokens("ab   de fg", null, 4) = ["ab", "", "", "de fg"]
+     * splitPreserveAllTokens(null, *, *)            = null
+     * splitPreserveAllTokens("", *, *)              = []
+     * splitPreserveAllTokens("ab de fg", null, 0)   = ["ab", "cd", "ef"]
+     * splitPreserveAllTokens("ab   de fg", null, 0) = ["ab", "cd", "ef"]
+     * splitPreserveAllTokens("ab:cd:ef", ":", 0)    = ["ab", "cd", "ef"]
+     * splitPreserveAllTokens("ab:cd:ef", ":", 2)    = ["ab", "cd:ef"]
+     * splitPreserveAllTokens("ab   de fg", null, 2) = ["ab", "  de fg"]
+     * splitPreserveAllTokens("ab   de fg", null, 3) = ["ab", "", " de fg"]
+     * splitPreserveAllTokens("ab   de fg", null, 4) = ["ab", "", "", "de fg"]
      * </pre>
      * 
      * @param str
@@ -3553,15 +3552,15 @@ public final class Functions {
      * characters of the same type are returned as complete tokens.
      * 
      * <pre>
-     * StringUtils.splitByCharacterType(null)         = null
-     * StringUtils.splitByCharacterType("")           = []
-     * StringUtils.splitByCharacterType("ab de fg")   = ["ab", " ", "de", " ", "fg"]
-     * StringUtils.splitByCharacterType("ab   de fg") = ["ab", "   ", "de", " ", "fg"]
-     * StringUtils.splitByCharacterType("ab:cd:ef")   = ["ab", ":", "cd", ":", "ef"]
-     * StringUtils.splitByCharacterType("number5")    = ["number", "5"]
-     * StringUtils.splitByCharacterType("fooBar")     = ["foo", "B", "ar"]
-     * StringUtils.splitByCharacterType("foo200Bar")  = ["foo", "200", "B", "ar"]
-     * StringUtils.splitByCharacterType("ASFRules")   = ["ASFR", "ules"]
+     * splitByCharacterType(null)         = null
+     * splitByCharacterType("")           = []
+     * splitByCharacterType("ab de fg")   = ["ab", " ", "de", " ", "fg"]
+     * splitByCharacterType("ab   de fg") = ["ab", "   ", "de", " ", "fg"]
+     * splitByCharacterType("ab:cd:ef")   = ["ab", ":", "cd", ":", "ef"]
+     * splitByCharacterType("number5")    = ["number", "5"]
+     * splitByCharacterType("fooBar")     = ["foo", "B", "ar"]
+     * splitByCharacterType("foo200Bar")  = ["foo", "200", "B", "ar"]
+     * splitByCharacterType("ASFRules")   = ["ASFR", "ules"]
      * </pre>
      * 
      * @param str
@@ -3586,15 +3585,15 @@ public final class Functions {
      * <code>Character.UPPERCASE_LETTER</code> token.
      * 
      * <pre>
-     * StringUtils.splitByCharacterTypeCamelCase(null)         = null
-     * StringUtils.splitByCharacterTypeCamelCase("")           = []
-     * StringUtils.splitByCharacterTypeCamelCase("ab de fg")   = ["ab", " ", "de", " ", "fg"]
-     * StringUtils.splitByCharacterTypeCamelCase("ab   de fg") = ["ab", "   ", "de", " ", "fg"]
-     * StringUtils.splitByCharacterTypeCamelCase("ab:cd:ef")   = ["ab", ":", "cd", ":", "ef"]
-     * StringUtils.splitByCharacterTypeCamelCase("number5")    = ["number", "5"]
-     * StringUtils.splitByCharacterTypeCamelCase("fooBar")     = ["foo", "Bar"]
-     * StringUtils.splitByCharacterTypeCamelCase("foo200Bar")  = ["foo", "200", "Bar"]
-     * StringUtils.splitByCharacterTypeCamelCase("ASFRules")   = ["ASF", "Rules"]
+     * splitByCharacterTypeCamelCase(null)         = null
+     * splitByCharacterTypeCamelCase("")           = []
+     * splitByCharacterTypeCamelCase("ab de fg")   = ["ab", " ", "de", " ", "fg"]
+     * splitByCharacterTypeCamelCase("ab   de fg") = ["ab", "   ", "de", " ", "fg"]
+     * splitByCharacterTypeCamelCase("ab:cd:ef")   = ["ab", ":", "cd", ":", "ef"]
+     * splitByCharacterTypeCamelCase("number5")    = ["number", "5"]
+     * splitByCharacterTypeCamelCase("fooBar")     = ["foo", "Bar"]
+     * splitByCharacterTypeCamelCase("foo200Bar")  = ["foo", "200", "Bar"]
+     * splitByCharacterTypeCamelCase("ASFRules")   = ["ASF", "Rules"]
      * </pre>
      * 
      * @param str
@@ -3674,8 +3673,8 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.concat("a", "b", "c") = "abc"
-     * StringUtils.concat(null, "", "a") = "a"
+     * concat("a", "b", "c") = "abc"
+     * concat(null, "", "a") = "a"
      * </pre>
      * 
      * @param elements
@@ -3699,8 +3698,8 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.concatWith(".", "a", "b", "c") = "a.b.c"
-     * StringUtils.concatWith("", null, "", "a") = "a"
+     * concatWith(".", "a", "b", "c") = "a.b.c"
+     * concatWith("", null, "", "a") = "a"
      * </pre>
      * 
      * @param separator
@@ -3726,11 +3725,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.join(null)            = null
-     * StringUtils.join([])              = ""
-     * StringUtils.join([null])          = ""
-     * StringUtils.join(["a", "b", "c"]) = "abc"
-     * StringUtils.join([null, "", "a"]) = "a"
+     * join(null)            = null
+     * join([])              = ""
+     * join([null])          = ""
+     * join(["a", "b", "c"]) = "abc"
+     * join([null, "", "a"]) = "a"
      * </pre>
      * 
      * @param array
@@ -3754,12 +3753,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.join(null, *)               = null
-     * StringUtils.join([], *)                 = ""
-     * StringUtils.join([null], *)             = ""
-     * StringUtils.join(["a", "b", "c"], ';')  = "a;b;c"
-     * StringUtils.join(["a", "b", "c"], null) = "abc"
-     * StringUtils.join([null, "", "a"], ';')  = ";;a"
+     * join(null, *)               = null
+     * join([], *)                 = ""
+     * join([null], *)             = ""
+     * join(["a", "b", "c"], ';')  = "a;b;c"
+     * join(["a", "b", "c"], null) = "abc"
+     * join([null, "", "a"], ';')  = ";;a"
      * </pre>
      * 
      * @param array
@@ -3789,12 +3788,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.join(null, *)               = null
-     * StringUtils.join([], *)                 = ""
-     * StringUtils.join([null], *)             = ""
-     * StringUtils.join(["a", "b", "c"], ';')  = "a;b;c"
-     * StringUtils.join(["a", "b", "c"], null) = "abc"
-     * StringUtils.join([null, "", "a"], ';')  = ";;a"
+     * join(null, *)               = null
+     * join([], *)                 = ""
+     * join([null], *)             = ""
+     * join(["a", "b", "c"], ';')  = "a;b;c"
+     * join(["a", "b", "c"], null) = "abc"
+     * join([null, "", "a"], ';')  = ";;a"
      * </pre>
      * 
      * @param array
@@ -3848,13 +3847,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.join(null, *)                = null
-     * StringUtils.join([], *)                  = ""
-     * StringUtils.join([null], *)              = ""
-     * StringUtils.join(["a", "b", "c"], "--")  = "a--b--c"
-     * StringUtils.join(["a", "b", "c"], null)  = "abc"
-     * StringUtils.join(["a", "b", "c"], "")    = "abc"
-     * StringUtils.join([null, "", "a"], ',')   = ",,a"
+     * join(null, *)                = null
+     * join([], *)                  = ""
+     * join([null], *)              = ""
+     * join(["a", "b", "c"], "--")  = "a--b--c"
+     * join(["a", "b", "c"], null)  = "abc"
+     * join(["a", "b", "c"], "")    = "abc"
+     * join([null, "", "a"], ',')   = ",,a"
      * </pre>
      * 
      * @param array
@@ -3883,13 +3882,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.join(null, *)                = null
-     * StringUtils.join([], *)                  = ""
-     * StringUtils.join([null], *)              = ""
-     * StringUtils.join(["a", "b", "c"], "--")  = "a--b--c"
-     * StringUtils.join(["a", "b", "c"], null)  = "abc"
-     * StringUtils.join(["a", "b", "c"], "")    = "abc"
-     * StringUtils.join([null, "", "a"], ',')   = ",,a"
+     * join(null, *)                = null
+     * join([], *)                  = ""
+     * join([null], *)              = ""
+     * join(["a", "b", "c"], "--")  = "a--b--c"
+     * join(["a", "b", "c"], null)  = "abc"
+     * join(["a", "b", "c"], "")    = "abc"
+     * join([null, "", "a"], ',')   = ",,a"
      * </pre>
      * 
      * @param array
@@ -4116,10 +4115,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.deleteWhitespace(null)         = null
-     * StringUtils.deleteWhitespace("")           = ""
-     * StringUtils.deleteWhitespace("abc")        = "abc"
-     * StringUtils.deleteWhitespace("   ab  c  ") = "abc"
+     * deleteWhitespace(null)         = null
+     * deleteWhitespace("")           = ""
+     * deleteWhitespace("abc")        = "abc"
+     * deleteWhitespace("   ab  c  ") = "abc"
      * </pre>
      * 
      * @param str
@@ -4160,13 +4159,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.removeStart(null, *)      = null
-     * StringUtils.removeStart("", *)        = ""
-     * StringUtils.removeStart(*, null)      = *
-     * StringUtils.removeStart("www.domain.com", "www.")   = "domain.com"
-     * StringUtils.removeStart("domain.com", "www.")       = "domain.com"
-     * StringUtils.removeStart("www.domain.com", "domain") = "www.domain.com"
-     * StringUtils.removeStart("abc", "")    = "abc"
+     * removeStart(null, *)      = null
+     * removeStart("", *)        = ""
+     * removeStart(*, null)      = *
+     * removeStart("www.domain.com", "www.")   = "domain.com"
+     * removeStart("domain.com", "www.")       = "domain.com"
+     * removeStart("www.domain.com", "domain") = "www.domain.com"
+     * removeStart("abc", "")    = "abc"
      * </pre>
      * 
      * @param str
@@ -4200,14 +4199,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.removeStartIgnoreCase(null, *)      = null
-     * StringUtils.removeStartIgnoreCase("", *)        = ""
-     * StringUtils.removeStartIgnoreCase(*, null)      = *
-     * StringUtils.removeStartIgnoreCase("www.domain.com", "www.")   = "domain.com"
-     * StringUtils.removeStartIgnoreCase("www.domain.com", "WWW.")   = "domain.com"
-     * StringUtils.removeStartIgnoreCase("domain.com", "www.")       = "domain.com"
-     * StringUtils.removeStartIgnoreCase("www.domain.com", "domain") = "www.domain.com"
-     * StringUtils.removeStartIgnoreCase("abc", "")    = "abc"
+     * removeStartIgnoreCase(null, *)      = null
+     * removeStartIgnoreCase("", *)        = ""
+     * removeStartIgnoreCase(*, null)      = *
+     * removeStartIgnoreCase("www.domain.com", "www.")   = "domain.com"
+     * removeStartIgnoreCase("www.domain.com", "WWW.")   = "domain.com"
+     * removeStartIgnoreCase("domain.com", "www.")       = "domain.com"
+     * removeStartIgnoreCase("www.domain.com", "domain") = "www.domain.com"
+     * removeStartIgnoreCase("abc", "")    = "abc"
      * </pre>
      * 
      * @param str
@@ -4242,13 +4241,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.removeEnd(null, *)      = null
-     * StringUtils.removeEnd("", *)        = ""
-     * StringUtils.removeEnd(*, null)      = *
-     * StringUtils.removeEnd("www.domain.com", ".com.")  = "www.domain.com"
-     * StringUtils.removeEnd("www.domain.com", ".com")   = "www.domain"
-     * StringUtils.removeEnd("www.domain.com", "domain") = "www.domain.com"
-     * StringUtils.removeEnd("abc", "")    = "abc"
+     * removeEnd(null, *)      = null
+     * removeEnd("", *)        = ""
+     * removeEnd(*, null)      = *
+     * removeEnd("www.domain.com", ".com.")  = "www.domain.com"
+     * removeEnd("www.domain.com", ".com")   = "www.domain"
+     * removeEnd("www.domain.com", "domain") = "www.domain.com"
+     * removeEnd("abc", "")    = "abc"
      * </pre>
      * 
      * @param str
@@ -4282,15 +4281,15 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.removeEndIgnoreCase(null, *)      = null
-     * StringUtils.removeEndIgnoreCase("", *)        = ""
-     * StringUtils.removeEndIgnoreCase(*, null)      = *
-     * StringUtils.removeEndIgnoreCase("www.domain.com", ".com.")  = "www.domain.com"
-     * StringUtils.removeEndIgnoreCase("www.domain.com", ".com")   = "www.domain"
-     * StringUtils.removeEndIgnoreCase("www.domain.com", "domain") = "www.domain.com"
-     * StringUtils.removeEndIgnoreCase("abc", "")    = "abc"
-     * StringUtils.removeEndIgnoreCase("www.domain.com", ".COM") = "www.domain")
-     * StringUtils.removeEndIgnoreCase("www.domain.COM", ".com") = "www.domain")
+     * removeEndIgnoreCase(null, *)      = null
+     * removeEndIgnoreCase("", *)        = ""
+     * removeEndIgnoreCase(*, null)      = *
+     * removeEndIgnoreCase("www.domain.com", ".com.")  = "www.domain.com"
+     * removeEndIgnoreCase("www.domain.com", ".com")   = "www.domain"
+     * removeEndIgnoreCase("www.domain.com", "domain") = "www.domain.com"
+     * removeEndIgnoreCase("abc", "")    = "abc"
+     * removeEndIgnoreCase("www.domain.com", ".COM") = "www.domain")
+     * removeEndIgnoreCase("www.domain.COM", ".com") = "www.domain")
      * </pre>
      * 
      * @param str
@@ -4325,12 +4324,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.remove(null, *)        = null
-     * StringUtils.remove("", *)          = ""
-     * StringUtils.remove(*, null)        = *
-     * StringUtils.remove(*, "")          = *
-     * StringUtils.remove("queued", "ue") = "qd"
-     * StringUtils.remove("queued", "zz") = "queued"
+     * remove(null, *)        = null
+     * remove("", *)          = ""
+     * remove(*, null)        = *
+     * remove(*, "")          = *
+     * remove("queued", "ue") = "qd"
+     * remove("queued", "zz") = "queued"
      * </pre>
      * 
      * @param str
@@ -4359,10 +4358,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.remove(null, *)       = null
-     * StringUtils.remove("", *)         = ""
-     * StringUtils.remove("queued", 'u') = "qeed"
-     * StringUtils.remove("queued", 'z') = "queued"
+     * remove(null, *)       = null
+     * remove("", *)         = ""
+     * remove("queued", 'u') = "qeed"
+     * remove("queued", 'z') = "queued"
      * </pre>
      * 
      * @param str
@@ -4399,14 +4398,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.replaceOnce(null, *, *)        = null
-     * StringUtils.replaceOnce("", *, *)          = ""
-     * StringUtils.replaceOnce("any", null, *)    = "any"
-     * StringUtils.replaceOnce("any", *, null)    = "any"
-     * StringUtils.replaceOnce("any", "", *)      = "any"
-     * StringUtils.replaceOnce("aba", "a", null)  = "aba"
-     * StringUtils.replaceOnce("aba", "a", "")    = "ba"
-     * StringUtils.replaceOnce("aba", "a", "z")   = "zba"
+     * replaceOnce(null, *, *)        = null
+     * replaceOnce("", *, *)          = ""
+     * replaceOnce("any", null, *)    = "any"
+     * replaceOnce("any", *, null)    = "any"
+     * replaceOnce("any", "", *)      = "any"
+     * replaceOnce("aba", "a", null)  = "aba"
+     * replaceOnce("aba", "a", "")    = "ba"
+     * replaceOnce("aba", "a", "z")   = "zba"
      * </pre>
      * 
      * @see #replace(String text, String searchString, String replacement, int
@@ -4435,14 +4434,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.replace(null, *, *)        = null
-     * StringUtils.replace("", *, *)          = ""
-     * StringUtils.replace("any", null, *)    = "any"
-     * StringUtils.replace("any", *, null)    = "any"
-     * StringUtils.replace("any", "", *)      = "any"
-     * StringUtils.replace("aba", "a", null)  = "aba"
-     * StringUtils.replace("aba", "a", "")    = "b"
-     * StringUtils.replace("aba", "a", "z")   = "zbz"
+     * replace(null, *, *)        = null
+     * replace("", *, *)          = ""
+     * replace("any", null, *)    = "any"
+     * replace("any", *, null)    = "any"
+     * replace("any", "", *)      = "any"
+     * replace("aba", "a", null)  = "aba"
+     * replace("aba", "a", "")    = "b"
+     * replace("aba", "a", "z")   = "zbz"
      * </pre>
      * 
      * @see #replace(String text, String searchString, String replacement, int
@@ -4472,18 +4471,18 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.replace(null, *, *, *)         = null
-     * StringUtils.replace("", *, *, *)           = ""
-     * StringUtils.replace("any", null, *, *)     = "any"
-     * StringUtils.replace("any", *, null, *)     = "any"
-     * StringUtils.replace("any", "", *, *)       = "any"
-     * StringUtils.replace("any", *, *, 0)        = "any"
-     * StringUtils.replace("abaa", "a", null, -1) = "abaa"
-     * StringUtils.replace("abaa", "a", "", -1)   = "b"
-     * StringUtils.replace("abaa", "a", "z", 0)   = "abaa"
-     * StringUtils.replace("abaa", "a", "z", 1)   = "zbaa"
-     * StringUtils.replace("abaa", "a", "z", 2)   = "zbza"
-     * StringUtils.replace("abaa", "a", "z", -1)  = "zbzz"
+     * replace(null, *, *, *)         = null
+     * replace("", *, *, *)           = ""
+     * replace("any", null, *, *)     = "any"
+     * replace("any", *, null, *)     = "any"
+     * replace("any", "", *, *)       = "any"
+     * replace("any", *, *, 0)        = "any"
+     * replace("abaa", "a", null, -1) = "abaa"
+     * replace("abaa", "a", "", -1)   = "b"
+     * replace("abaa", "a", "z", 0)   = "abaa"
+     * replace("abaa", "a", "z", 1)   = "zbaa"
+     * replace("abaa", "a", "z", 2)   = "zbza"
+     * replace("abaa", "a", "z", -1)  = "zbzz"
      * </pre>
      * 
      * @param text
@@ -4539,17 +4538,17 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     *  StringUtils.replaceEach(null, *, *)        = null
-     *  StringUtils.replaceEach("", *, *)          = ""
-     *  StringUtils.replaceEach("aba", null, null) = "aba"
-     *  StringUtils.replaceEach("aba", new String[0], null) = "aba"
-     *  StringUtils.replaceEach("aba", null, new String[0]) = "aba"
-     *  StringUtils.replaceEach("aba", new String[]{"a"}, null)  = "aba"
-     *  StringUtils.replaceEach("aba", new String[]{"a"}, new String[]{""})  = "b"
-     *  StringUtils.replaceEach("aba", new String[]{null}, new String[]{"a"})  = "aba"
-     *  StringUtils.replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"w", "t"})  = "wcte"
+     *  replaceEach(null, *, *)        = null
+     *  replaceEach("", *, *)          = ""
+     *  replaceEach("aba", null, null) = "aba"
+     *  replaceEach("aba", new String[0], null) = "aba"
+     *  replaceEach("aba", null, new String[0]) = "aba"
+     *  replaceEach("aba", new String[]{"a"}, null)  = "aba"
+     *  replaceEach("aba", new String[]{"a"}, new String[]{""})  = "b"
+     *  replaceEach("aba", new String[]{null}, new String[]{"a"})  = "aba"
+     *  replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"w", "t"})  = "wcte"
      *  (example of how it does not repeat)
-     *  StringUtils.replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "t"})  = "dcte"
+     *  replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "t"})  = "dcte"
      * </pre>
      * 
      * @param text
@@ -4583,20 +4582,20 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     *  StringUtils.replaceEach(null, *, *, *) = null
-     *  StringUtils.replaceEach("", *, *, *) = ""
-     *  StringUtils.replaceEach("aba", null, null, *) = "aba"
-     *  StringUtils.replaceEach("aba", new String[0], null, *) = "aba"
-     *  StringUtils.replaceEach("aba", null, new String[0], *) = "aba"
-     *  StringUtils.replaceEach("aba", new String[]{"a"}, null, *) = "aba"
-     *  StringUtils.replaceEach("aba", new String[]{"a"}, new String[]{""}, *) = "b"
-     *  StringUtils.replaceEach("aba", new String[]{null}, new String[]{"a"}, *) = "aba"
-     *  StringUtils.replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"w", "t"}, *) = "wcte"
+     *  replaceEach(null, *, *, *) = null
+     *  replaceEach("", *, *, *) = ""
+     *  replaceEach("aba", null, null, *) = "aba"
+     *  replaceEach("aba", new String[0], null, *) = "aba"
+     *  replaceEach("aba", null, new String[0], *) = "aba"
+     *  replaceEach("aba", new String[]{"a"}, null, *) = "aba"
+     *  replaceEach("aba", new String[]{"a"}, new String[]{""}, *) = "b"
+     *  replaceEach("aba", new String[]{null}, new String[]{"a"}, *) = "aba"
+     *  replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"w", "t"}, *) = "wcte"
      *  (example of how it repeats)
-     *  StringUtils.replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "t"}, false) = "dcte"
-     *  StringUtils.replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "t"}, true) = "tcte"
-     *  StringUtils.replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "ab"}, true) = IllegalArgumentException
-     *  StringUtils.replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "ab"}, false) = "dcabe"
+     *  replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "t"}, false) = "dcte"
+     *  replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "t"}, true) = "tcte"
+     *  replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "ab"}, true) = IllegalArgumentException
+     *  replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "ab"}, false) = "dcabe"
      * </pre>
      * 
      * @param text
@@ -4635,19 +4634,19 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     *  StringUtils.replaceEach(null, *, *, *) = null
-     *  StringUtils.replaceEach("", *, *, *) = ""
-     *  StringUtils.replaceEach("aba", null, null, *) = "aba"
-     *  StringUtils.replaceEach("aba", new String[0], null, *) = "aba"
-     *  StringUtils.replaceEach("aba", null, new String[0], *) = "aba"
-     *  StringUtils.replaceEach("aba", new String[]{"a"}, null, *) = "aba"
-     *  StringUtils.replaceEach("aba", new String[]{"a"}, new String[]{""}, *) = "b"
-     *  StringUtils.replaceEach("aba", new String[]{null}, new String[]{"a"}, *) = "aba"
-     *  StringUtils.replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"w", "t"}, *) = "wcte"
+     *  replaceEach(null, *, *, *) = null
+     *  replaceEach("", *, *, *) = ""
+     *  replaceEach("aba", null, null, *) = "aba"
+     *  replaceEach("aba", new String[0], null, *) = "aba"
+     *  replaceEach("aba", null, new String[0], *) = "aba"
+     *  replaceEach("aba", new String[]{"a"}, null, *) = "aba"
+     *  replaceEach("aba", new String[]{"a"}, new String[]{""}, *) = "b"
+     *  replaceEach("aba", new String[]{null}, new String[]{"a"}, *) = "aba"
+     *  replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"w", "t"}, *) = "wcte"
      *  (example of how it repeats)
-     *  StringUtils.replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "t"}, false) = "dcte"
-     *  StringUtils.replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "t"}, true) = "tcte"
-     *  StringUtils.replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "ab"}, *) = IllegalArgumentException
+     *  replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "t"}, false) = "dcte"
+     *  replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "t"}, true) = "tcte"
+     *  replaceEach("abcde", new String[]{"ab", "d"}, new String[]{"d", "ab"}, *) = IllegalArgumentException
      * </pre>
      * 
      * @param text
@@ -4821,10 +4820,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.replaceChars(null, *, *)        = null
-     * StringUtils.replaceChars("", *, *)          = ""
-     * StringUtils.replaceChars("abcba", 'b', 'y') = "aycya"
-     * StringUtils.replaceChars("abcba", 'z', 'y') = "abcba"
+     * replaceChars(null, *, *)        = null
+     * replaceChars("", *, *)          = ""
+     * replaceChars("abcba", 'b', 'y') = "aycya"
+     * replaceChars("abcba", 'z', 'y') = "abcba"
      * </pre>
      * 
      * @param str
@@ -4870,15 +4869,15 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.replaceChars(null, *, *)           = null
-     * StringUtils.replaceChars("", *, *)             = ""
-     * StringUtils.replaceChars("abc", null, *)       = "abc"
-     * StringUtils.replaceChars("abc", "", *)         = "abc"
-     * StringUtils.replaceChars("abc", "b", null)     = "ac"
-     * StringUtils.replaceChars("abc", "b", "")       = "ac"
-     * StringUtils.replaceChars("abcba", "bc", "yz")  = "ayzya"
-     * StringUtils.replaceChars("abcba", "bc", "y")   = "ayya"
-     * StringUtils.replaceChars("abcba", "bc", "yzx") = "ayzya"
+     * replaceChars(null, *, *)           = null
+     * replaceChars("", *, *)             = ""
+     * replaceChars("abc", null, *)       = "abc"
+     * replaceChars("abc", "", *)         = "abc"
+     * replaceChars("abc", "b", null)     = "ac"
+     * replaceChars("abc", "b", "")       = "ac"
+     * replaceChars("abcba", "bc", "yz")  = "ayzya"
+     * replaceChars("abcba", "bc", "y")   = "ayya"
+     * replaceChars("abcba", "bc", "yzx") = "ayzya"
      * </pre>
      * 
      * @param str
@@ -4935,17 +4934,17 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.overlay(null, *, *, *)            = null
-     * StringUtils.overlay("", "abc", 0, 0)          = "abc"
-     * StringUtils.overlay("abcdef", null, 2, 4)     = "abef"
-     * StringUtils.overlay("abcdef", "", 2, 4)       = "abef"
-     * StringUtils.overlay("abcdef", "", 4, 2)       = "abef"
-     * StringUtils.overlay("abcdef", "zzzz", 2, 4)   = "abzzzzef"
-     * StringUtils.overlay("abcdef", "zzzz", 4, 2)   = "abzzzzef"
-     * StringUtils.overlay("abcdef", "zzzz", -1, 4)  = "zzzzef"
-     * StringUtils.overlay("abcdef", "zzzz", 2, 8)   = "abzzzz"
-     * StringUtils.overlay("abcdef", "zzzz", -2, -3) = "zzzzabcdef"
-     * StringUtils.overlay("abcdef", "zzzz", 8, 10)  = "abcdefzzzz"
+     * overlay(null, *, *, *)            = null
+     * overlay("", "abc", 0, 0)          = "abc"
+     * overlay("abcdef", null, 2, 4)     = "abef"
+     * overlay("abcdef", "", 2, 4)       = "abef"
+     * overlay("abcdef", "", 4, 2)       = "abef"
+     * overlay("abcdef", "zzzz", 2, 4)   = "abzzzzef"
+     * overlay("abcdef", "zzzz", 4, 2)   = "abzzzzef"
+     * overlay("abcdef", "zzzz", -1, 4)  = "zzzzef"
+     * overlay("abcdef", "zzzz", 2, 8)   = "abzzzz"
+     * overlay("abcdef", "zzzz", -2, -3) = "zzzzabcdef"
+     * overlay("abcdef", "zzzz", 8, 10)  = "abcdefzzzz"
      * </pre>
      * 
      * @param str
@@ -5003,17 +5002,17 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.chomp(null)          = null
-     * StringUtils.chomp("")            = ""
-     * StringUtils.chomp("abc \r")      = "abc "
-     * StringUtils.chomp("abc\n")       = "abc"
-     * StringUtils.chomp("abc\r\n")     = "abc"
-     * StringUtils.chomp("abc\r\n\r\n") = "abc\r\n"
-     * StringUtils.chomp("abc\n\r")     = "abc\n"
-     * StringUtils.chomp("abc\n\rabc")  = "abc\n\rabc"
-     * StringUtils.chomp("\r")          = ""
-     * StringUtils.chomp("\n")          = ""
-     * StringUtils.chomp("\r\n")        = ""
+     * chomp(null)          = null
+     * chomp("")            = ""
+     * chomp("abc \r")      = "abc "
+     * chomp("abc\n")       = "abc"
+     * chomp("abc\r\n")     = "abc"
+     * chomp("abc\r\n\r\n") = "abc\r\n"
+     * chomp("abc\n\r")     = "abc\n"
+     * chomp("abc\n\rabc")  = "abc\n\rabc"
+     * chomp("\r")          = ""
+     * chomp("\n")          = ""
+     * chomp("\r\n")        = ""
      * </pre>
      * 
      * @param str
@@ -5060,16 +5059,16 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.chomp(null, *)         = null
-     * StringUtils.chomp("", *)           = ""
-     * StringUtils.chomp("foobar", "bar") = "foo"
-     * StringUtils.chomp("foobar", "baz") = "foobar"
-     * StringUtils.chomp("foo", "foo")    = ""
-     * StringUtils.chomp("foo ", "foo")   = "foo "
-     * StringUtils.chomp(" foo", "foo")   = " "
-     * StringUtils.chomp("foo", "foooo")  = "foo"
-     * StringUtils.chomp("foo", "")       = "foo"
-     * StringUtils.chomp("foo", null)     = "foo"
+     * chomp(null, *)         = null
+     * chomp("", *)           = ""
+     * chomp("foobar", "bar") = "foo"
+     * chomp("foobar", "baz") = "foobar"
+     * chomp("foo", "foo")    = ""
+     * chomp("foo ", "foo")   = "foo "
+     * chomp(" foo", "foo")   = " "
+     * chomp("foo", "foooo")  = "foo"
+     * chomp("foo", "")       = "foo"
+     * chomp("foo", null)     = "foo"
      * </pre>
      * 
      * @param str
@@ -5101,17 +5100,17 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.chop(null)          = null
-     * StringUtils.chop("")            = ""
-     * StringUtils.chop("abc \r")      = "abc "
-     * StringUtils.chop("abc\n")       = "abc"
-     * StringUtils.chop("abc\r\n")     = "abc"
-     * StringUtils.chop("abc")         = "ab"
-     * StringUtils.chop("abc\nabc")    = "abc\nab"
-     * StringUtils.chop("a")           = ""
-     * StringUtils.chop("\r")          = ""
-     * StringUtils.chop("\n")          = ""
-     * StringUtils.chop("\r\n")        = ""
+     * chop(null)          = null
+     * chop("")            = ""
+     * chop("abc \r")      = "abc "
+     * chop("abc\n")       = "abc"
+     * chop("abc\r\n")     = "abc"
+     * chop("abc")         = "ab"
+     * chop("abc\nabc")    = "abc\nab"
+     * chop("a")           = ""
+     * chop("\r")          = ""
+     * chop("\n")          = ""
+     * chop("\r\n")        = ""
      * </pre>
      * 
      * @param str
@@ -5149,12 +5148,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.repeat(null, 2) = null
-     * StringUtils.repeat("", 0)   = ""
-     * StringUtils.repeat("", 2)   = ""
-     * StringUtils.repeat("a", 3)  = "aaa"
-     * StringUtils.repeat("ab", 2) = "abab"
-     * StringUtils.repeat("a", -2) = ""
+     * repeat(null, 2) = null
+     * repeat("", 0)   = ""
+     * repeat("", 2)   = ""
+     * repeat("a", 3)  = "aaa"
+     * repeat("ab", 2) = "abab"
+     * repeat("a", -2) = ""
      * </pre>
      * 
      * @param str
@@ -5215,12 +5214,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.repeat(null, null, 2) = null
-     * StringUtils.repeat(null, "x", 2)  = null
-     * StringUtils.repeat("", null, 0)   = ""
-     * StringUtils.repeat("", "", 2)     = ""
-     * StringUtils.repeat("", "x", 3)    = "xxx"
-     * StringUtils.repeat("?", ", ", 3)  = "?, ?, ?"
+     * repeat(null, null, 2) = null
+     * repeat(null, "x", 2)  = null
+     * repeat("", null, 0)   = ""
+     * repeat("", "", 2)     = ""
+     * repeat("", "x", 3)    = "xxx"
+     * repeat("?", ", ", 3)  = "?, ?, ?"
      * </pre>
      * 
      * @param str
@@ -5250,9 +5249,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.padding(0, 'e')  = ""
-     * StringUtils.padding(3, 'e')  = "eee"
-     * StringUtils.padding(-2, 'e') = IndexOutOfBoundsException
+     * padding(0, 'e')  = ""
+     * padding(3, 'e')  = "eee"
+     * padding(-2, 'e') = IndexOutOfBoundsException
      * </pre>
      * 
      * <p>
@@ -5295,12 +5294,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.rightPad(null, *)   = null
-     * StringUtils.rightPad("", 3)     = "   "
-     * StringUtils.rightPad("bat", 3)  = "bat"
-     * StringUtils.rightPad("bat", 5)  = "bat  "
-     * StringUtils.rightPad("bat", 1)  = "bat"
-     * StringUtils.rightPad("bat", -1) = "bat"
+     * rightPad(null, *)   = null
+     * rightPad("", 3)     = "   "
+     * rightPad("bat", 3)  = "bat"
+     * rightPad("bat", 5)  = "bat  "
+     * rightPad("bat", 1)  = "bat"
+     * rightPad("bat", -1) = "bat"
      * </pre>
      * 
      * @param str
@@ -5324,12 +5323,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.rightPad(null, *, *)     = null
-     * StringUtils.rightPad("", 3, 'z')     = "zzz"
-     * StringUtils.rightPad("bat", 3, 'z')  = "bat"
-     * StringUtils.rightPad("bat", 5, 'z')  = "batzz"
-     * StringUtils.rightPad("bat", 1, 'z')  = "bat"
-     * StringUtils.rightPad("bat", -1, 'z') = "bat"
+     * rightPad(null, *, *)     = null
+     * rightPad("", 3, 'z')     = "zzz"
+     * rightPad("bat", 3, 'z')  = "bat"
+     * rightPad("bat", 5, 'z')  = "batzz"
+     * rightPad("bat", 1, 'z')  = "bat"
+     * rightPad("bat", -1, 'z') = "bat"
      * </pre>
      * 
      * @param str
@@ -5366,15 +5365,15 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.rightPad(null, *, *)      = null
-     * StringUtils.rightPad("", 3, "z")      = "zzz"
-     * StringUtils.rightPad("bat", 3, "yz")  = "bat"
-     * StringUtils.rightPad("bat", 5, "yz")  = "batyz"
-     * StringUtils.rightPad("bat", 8, "yz")  = "batyzyzy"
-     * StringUtils.rightPad("bat", 1, "yz")  = "bat"
-     * StringUtils.rightPad("bat", -1, "yz") = "bat"
-     * StringUtils.rightPad("bat", 5, null)  = "bat  "
-     * StringUtils.rightPad("bat", 5, "")    = "bat  "
+     * rightPad(null, *, *)      = null
+     * rightPad("", 3, "z")      = "zzz"
+     * rightPad("bat", 3, "yz")  = "bat"
+     * rightPad("bat", 5, "yz")  = "batyz"
+     * rightPad("bat", 8, "yz")  = "batyzyzy"
+     * rightPad("bat", 1, "yz")  = "bat"
+     * rightPad("bat", -1, "yz") = "bat"
+     * rightPad("bat", 5, null)  = "bat  "
+     * rightPad("bat", 5, "")    = "bat  "
      * </pre>
      * 
      * @param str
@@ -5427,12 +5426,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.leftPad(null, *)   = null
-     * StringUtils.leftPad("", 3)     = "   "
-     * StringUtils.leftPad("bat", 3)  = "bat"
-     * StringUtils.leftPad("bat", 5)  = "  bat"
-     * StringUtils.leftPad("bat", 1)  = "bat"
-     * StringUtils.leftPad("bat", -1) = "bat"
+     * leftPad(null, *)   = null
+     * leftPad("", 3)     = "   "
+     * leftPad("bat", 3)  = "bat"
+     * leftPad("bat", 5)  = "  bat"
+     * leftPad("bat", 1)  = "bat"
+     * leftPad("bat", -1) = "bat"
      * </pre>
      * 
      * @param str
@@ -5456,12 +5455,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.leftPad(null, *, *)     = null
-     * StringUtils.leftPad("", 3, 'z')     = "zzz"
-     * StringUtils.leftPad("bat", 3, 'z')  = "bat"
-     * StringUtils.leftPad("bat", 5, 'z')  = "zzbat"
-     * StringUtils.leftPad("bat", 1, 'z')  = "bat"
-     * StringUtils.leftPad("bat", -1, 'z') = "bat"
+     * leftPad(null, *, *)     = null
+     * leftPad("", 3, 'z')     = "zzz"
+     * leftPad("bat", 3, 'z')  = "bat"
+     * leftPad("bat", 5, 'z')  = "zzbat"
+     * leftPad("bat", 1, 'z')  = "bat"
+     * leftPad("bat", -1, 'z') = "bat"
      * </pre>
      * 
      * @param str
@@ -5498,15 +5497,15 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.leftPad(null, *, *)      = null
-     * StringUtils.leftPad("", 3, "z")      = "zzz"
-     * StringUtils.leftPad("bat", 3, "yz")  = "bat"
-     * StringUtils.leftPad("bat", 5, "yz")  = "yzbat"
-     * StringUtils.leftPad("bat", 8, "yz")  = "yzyzybat"
-     * StringUtils.leftPad("bat", 1, "yz")  = "bat"
-     * StringUtils.leftPad("bat", -1, "yz") = "bat"
-     * StringUtils.leftPad("bat", 5, null)  = "  bat"
-     * StringUtils.leftPad("bat", 5, "")    = "  bat"
+     * leftPad(null, *, *)      = null
+     * leftPad("", 3, "z")      = "zzz"
+     * leftPad("bat", 3, "yz")  = "bat"
+     * leftPad("bat", 5, "yz")  = "yzbat"
+     * leftPad("bat", 8, "yz")  = "yzyzybat"
+     * leftPad("bat", 1, "yz")  = "bat"
+     * leftPad("bat", -1, "yz") = "bat"
+     * leftPad("bat", 5, null)  = "  bat"
+     * leftPad("bat", 5, "")    = "  bat"
      * </pre>
      * 
      * @param str
@@ -5568,12 +5567,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.center(null, *)   = null
-     * StringUtils.center("", 4)     = "    "
-     * StringUtils.center("ab", -1)  = "ab"
-     * StringUtils.center("ab", 4)   = " ab "
-     * StringUtils.center("abcd", 2) = "abcd"
-     * StringUtils.center("a", 4)    = " a  "
+     * center(null, *)   = null
+     * center("", 4)     = "    "
+     * center("ab", -1)  = "ab"
+     * center("ab", 4)   = " ab "
+     * center("abcd", 2) = "abcd"
+     * center("a", 4)    = " a  "
      * </pre>
      * 
      * @param str
@@ -5599,13 +5598,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.center(null, *, *)     = null
-     * StringUtils.center("", 4, ' ')     = "    "
-     * StringUtils.center("ab", -1, ' ')  = "ab"
-     * StringUtils.center("ab", 4, ' ')   = " ab"
-     * StringUtils.center("abcd", 2, ' ') = "abcd"
-     * StringUtils.center("a", 4, ' ')    = " a  "
-     * StringUtils.center("a", 4, 'y')    = "yayy"
+     * center(null, *, *)     = null
+     * center("", 4, ' ')     = "    "
+     * center("ab", -1, ' ')  = "ab"
+     * center("ab", 4, ' ')   = " ab"
+     * center("abcd", 2, ' ') = "abcd"
+     * center("a", 4, ' ')    = " a  "
+     * center("a", 4, 'y')    = "yayy"
      * </pre>
      * 
      * @param str
@@ -5644,15 +5643,15 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.center(null, *, *)     = null
-     * StringUtils.center("", 4, " ")     = "    "
-     * StringUtils.center("ab", -1, " ")  = "ab"
-     * StringUtils.center("ab", 4, " ")   = " ab"
-     * StringUtils.center("abcd", 2, " ") = "abcd"
-     * StringUtils.center("a", 4, " ")    = " a  "
-     * StringUtils.center("a", 4, "yz")   = "yayz"
-     * StringUtils.center("abc", 7, null) = "  abc  "
-     * StringUtils.center("abc", 7, "")   = "  abc  "
+     * center(null, *, *)     = null
+     * center("", 4, " ")     = "    "
+     * center("ab", -1, " ")  = "ab"
+     * center("ab", 4, " ")   = " ab"
+     * center("abcd", 2, " ") = "abcd"
+     * center("a", 4, " ")    = " a  "
+     * center("a", 4, "yz")   = "yayz"
+     * center("abc", 7, null) = "  abc  "
+     * center("abc", 7, "")   = "  abc  "
      * </pre>
      * 
      * @param str
@@ -5695,9 +5694,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.upperCase(null)  = null
-     * StringUtils.upperCase("")    = ""
-     * StringUtils.upperCase("aBc") = "ABC"
+     * upperCase(null)  = null
+     * upperCase("")    = ""
+     * upperCase("aBc") = "ABC"
      * </pre>
      * 
      * <p>
@@ -5730,9 +5729,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.upperCase(null, Locale.ENGLISH)  = null
-     * StringUtils.upperCase("", Locale.ENGLISH)    = ""
-     * StringUtils.upperCase("aBc", Locale.ENGLISH) = "ABC"
+     * upperCase(null, Locale.ENGLISH)  = null
+     * upperCase("", Locale.ENGLISH)    = ""
+     * upperCase("aBc", Locale.ENGLISH) = "ABC"
      * </pre>
      * 
      * @param str
@@ -5760,9 +5759,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.lowerCase(null)  = null
-     * StringUtils.lowerCase("")    = ""
-     * StringUtils.lowerCase("aBc") = "abc"
+     * lowerCase(null)  = null
+     * lowerCase("")    = ""
+     * lowerCase("aBc") = "abc"
      * </pre>
      * 
      * <p>
@@ -5795,9 +5794,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.lowerCase(null, Locale.ENGLISH)  = null
-     * StringUtils.lowerCase("", Locale.ENGLISH)    = ""
-     * StringUtils.lowerCase("aBc", Locale.ENGLISH) = "abc"
+     * lowerCase(null, Locale.ENGLISH)  = null
+     * lowerCase("", Locale.ENGLISH)    = ""
+     * lowerCase("aBc", Locale.ENGLISH) = "abc"
      * </pre>
      * 
      * @param str
@@ -5828,10 +5827,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.capitalize(null)  = null
-     * StringUtils.capitalize("")    = ""
-     * StringUtils.capitalize("cat") = "Cat"
-     * StringUtils.capitalize("cAt") = "CAt"
+     * capitalize(null)  = null
+     * capitalize("")    = ""
+     * capitalize("cat") = "Cat"
+     * capitalize("cAt") = "CAt"
      * </pre>
      * 
      * @param cs
@@ -5869,10 +5868,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.uncapitalize(null)  = null
-     * StringUtils.uncapitalize("")    = ""
-     * StringUtils.uncapitalize("Cat") = "cat"
-     * StringUtils.uncapitalize("CAT") = "cAT"
+     * uncapitalize(null)  = null
+     * uncapitalize("")    = ""
+     * uncapitalize("Cat") = "cat"
+     * uncapitalize("CAT") = "cAT"
      * </pre>
      * 
      * @param cs
@@ -5916,9 +5915,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.swapCase(null)                 = null
-     * StringUtils.swapCase("")                   = ""
-     * StringUtils.swapCase("The dog has a BONE") = "tHE DOG HAS A bone"
+     * swapCase(null)                 = null
+     * swapCase("")                   = ""
+     * swapCase("The dog has a BONE") = "tHE DOG HAS A bone"
      * </pre>
      * 
      * <p>
@@ -5966,13 +5965,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.countMatches(null, *)       = 0
-     * StringUtils.countMatches("", *)         = 0
-     * StringUtils.countMatches("abba", null)  = 0
-     * StringUtils.countMatches("abba", "")    = 0
-     * StringUtils.countMatches("abba", "a")   = 2
-     * StringUtils.countMatches("abba", "ab")  = 1
-     * StringUtils.countMatches("abba", "xxx") = 0
+     * countMatches(null, *)       = 0
+     * countMatches("", *)         = 0
+     * countMatches("abba", null)  = 0
+     * countMatches("abba", "")    = 0
+     * countMatches("abba", "a")   = 2
+     * countMatches("abba", "ab")  = 1
+     * countMatches("abba", "xxx") = 0
      * </pre>
      * 
      * @param str
@@ -6008,12 +6007,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.isAlpha(null)   = false
-     * StringUtils.isAlpha("")     = true
-     * StringUtils.isAlpha("  ")   = false
-     * StringUtils.isAlpha("abc")  = true
-     * StringUtils.isAlpha("ab2c") = false
-     * StringUtils.isAlpha("ab-c") = false
+     * isAlpha(null)   = false
+     * isAlpha("")     = true
+     * isAlpha("  ")   = false
+     * isAlpha("abc")  = true
+     * isAlpha("ab2c") = false
+     * isAlpha("ab-c") = false
      * </pre>
      * 
      * @param cs
@@ -6046,13 +6045,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.isAlphaSpace(null)   = false
-     * StringUtils.isAlphaSpace("")     = true
-     * StringUtils.isAlphaSpace("  ")   = true
-     * StringUtils.isAlphaSpace("abc")  = true
-     * StringUtils.isAlphaSpace("ab c") = true
-     * StringUtils.isAlphaSpace("ab2c") = false
-     * StringUtils.isAlphaSpace("ab-c") = false
+     * isAlphaSpace(null)   = false
+     * isAlphaSpace("")     = true
+     * isAlphaSpace("  ")   = true
+     * isAlphaSpace("abc")  = true
+     * isAlphaSpace("ab c") = true
+     * isAlphaSpace("ab2c") = false
+     * isAlphaSpace("ab-c") = false
      * </pre>
      * 
      * @param cs
@@ -6087,13 +6086,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.isAlphanumeric(null)   = false
-     * StringUtils.isAlphanumeric("")     = true
-     * StringUtils.isAlphanumeric("  ")   = false
-     * StringUtils.isAlphanumeric("abc")  = true
-     * StringUtils.isAlphanumeric("ab c") = false
-     * StringUtils.isAlphanumeric("ab2c") = true
-     * StringUtils.isAlphanumeric("ab-c") = false
+     * isAlphanumeric(null)   = false
+     * isAlphanumeric("")     = true
+     * isAlphanumeric("  ")   = false
+     * isAlphanumeric("abc")  = true
+     * isAlphanumeric("ab c") = false
+     * isAlphanumeric("ab2c") = true
+     * isAlphanumeric("ab-c") = false
      * </pre>
      * 
      * @param cs
@@ -6128,13 +6127,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.isAlphanumeric(null)   = false
-     * StringUtils.isAlphanumeric("")     = true
-     * StringUtils.isAlphanumeric("  ")   = true
-     * StringUtils.isAlphanumeric("abc")  = true
-     * StringUtils.isAlphanumeric("ab c") = true
-     * StringUtils.isAlphanumeric("ab2c") = true
-     * StringUtils.isAlphanumeric("ab-c") = false
+     * isAlphanumeric(null)   = false
+     * isAlphanumeric("")     = true
+     * isAlphanumeric("  ")   = true
+     * isAlphanumeric("abc")  = true
+     * isAlphanumeric("ab c") = true
+     * isAlphanumeric("ab2c") = true
+     * isAlphanumeric("ab-c") = false
      * </pre>
      * 
      * @param cs
@@ -6169,17 +6168,17 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.isAsciiPrintable(null)     = false
-     * StringUtils.isAsciiPrintable("")       = true
-     * StringUtils.isAsciiPrintable(" ")      = true
-     * StringUtils.isAsciiPrintable("Ceki")   = true
-     * StringUtils.isAsciiPrintable("ab2c")   = true
-     * StringUtils.isAsciiPrintable("!ab-c~") = true
-     * StringUtils.isAsciiPrintable("\u0020") = true
-     * StringUtils.isAsciiPrintable("\u0021") = true
-     * StringUtils.isAsciiPrintable("\u007e") = true
-     * StringUtils.isAsciiPrintable("\u007f") = false
-     * StringUtils.isAsciiPrintable("Ceki G\u00fclc\u00fc") = false
+     * isAsciiPrintable(null)     = false
+     * isAsciiPrintable("")       = true
+     * isAsciiPrintable(" ")      = true
+     * isAsciiPrintable("Ceki")   = true
+     * isAsciiPrintable("ab2c")   = true
+     * isAsciiPrintable("!ab-c~") = true
+     * isAsciiPrintable("\u0020") = true
+     * isAsciiPrintable("\u0021") = true
+     * isAsciiPrintable("\u007e") = true
+     * isAsciiPrintable("\u007f") = false
+     * isAsciiPrintable("Ceki G\u00fclc\u00fc") = false
      * </pre>
      * 
      * @param cs
@@ -6214,14 +6213,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.isNumeric(null)   = false
-     * StringUtils.isNumeric("")     = true
-     * StringUtils.isNumeric("  ")   = false
-     * StringUtils.isNumeric("123")  = true
-     * StringUtils.isNumeric("12 3") = false
-     * StringUtils.isNumeric("ab2c") = false
-     * StringUtils.isNumeric("12-3") = false
-     * StringUtils.isNumeric("12.3") = false
+     * isNumeric(null)   = false
+     * isNumeric("")     = true
+     * isNumeric("  ")   = false
+     * isNumeric("123")  = true
+     * isNumeric("12 3") = false
+     * isNumeric("ab2c") = false
+     * isNumeric("12-3") = false
+     * isNumeric("12.3") = false
      * </pre>
      * 
      * @param cs
@@ -6256,14 +6255,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.isNumeric(null)   = false
-     * StringUtils.isNumeric("")     = true
-     * StringUtils.isNumeric("  ")   = true
-     * StringUtils.isNumeric("123")  = true
-     * StringUtils.isNumeric("12 3") = true
-     * StringUtils.isNumeric("ab2c") = false
-     * StringUtils.isNumeric("12-3") = false
-     * StringUtils.isNumeric("12.3") = false
+     * isNumeric(null)   = false
+     * isNumeric("")     = true
+     * isNumeric("  ")   = true
+     * isNumeric("123")  = true
+     * isNumeric("12 3") = true
+     * isNumeric("ab2c") = false
+     * isNumeric("12-3") = false
+     * isNumeric("12.3") = false
      * </pre>
      * 
      * @param cs
@@ -6298,12 +6297,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.isWhitespace(null)   = false
-     * StringUtils.isWhitespace("")     = true
-     * StringUtils.isWhitespace("  ")   = true
-     * StringUtils.isWhitespace("abc")  = false
-     * StringUtils.isWhitespace("ab2c") = false
-     * StringUtils.isWhitespace("ab-c") = false
+     * isWhitespace(null)   = false
+     * isWhitespace("")     = true
+     * isWhitespace("  ")   = true
+     * isWhitespace("abc")  = false
+     * isWhitespace("ab2c") = false
+     * isWhitespace("ab-c") = false
      * </pre>
      * 
      * @param cs
@@ -6337,11 +6336,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.isAllLowerCase(null)   = false
-     * StringUtils.isAllLowerCase("")     = false
-     * StringUtils.isAllLowerCase("  ")   = false
-     * StringUtils.isAllLowerCase("abc")  = true
-     * StringUtils.isAllLowerCase("abC") = false
+     * isAllLowerCase(null)   = false
+     * isAllLowerCase("")     = false
+     * isAllLowerCase("  ")   = false
+     * isAllLowerCase("abc")  = true
+     * isAllLowerCase("abC") = false
      * </pre>
      * 
      * @param cs
@@ -6376,11 +6375,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.isAllUpperCase(null)   = false
-     * StringUtils.isAllUpperCase("")     = false
-     * StringUtils.isAllUpperCase("  ")   = false
-     * StringUtils.isAllUpperCase("ABC")  = true
-     * StringUtils.isAllUpperCase("aBC") = false
+     * isAllUpperCase(null)   = false
+     * isAllUpperCase("")     = false
+     * isAllUpperCase("  ")   = false
+     * isAllUpperCase("ABC")  = true
+     * isAllUpperCase("aBC") = false
      * </pre>
      * 
      * @param cs
@@ -6413,9 +6412,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.defaultString(null)  = ""
-     * StringUtils.defaultString("")    = ""
-     * StringUtils.defaultString("bat") = "bat"
+     * defaultString(null)  = ""
+     * defaultString("")    = ""
+     * defaultString("bat") = "bat"
      * </pre>
      * 
      * @see ObjectUtils#charToString(Object)
@@ -6436,9 +6435,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.defaultString(null, "NULL")  = "NULL"
-     * StringUtils.defaultString("", "NULL")    = ""
-     * StringUtils.defaultString("bat", "NULL") = "bat"
+     * defaultString(null, "NULL")  = "NULL"
+     * defaultString("", "NULL")    = ""
+     * defaultString("bat", "NULL") = "bat"
      * </pre>
      * 
      * @see ObjectUtils#objectToString(Object,String)
@@ -6461,10 +6460,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.defaultIfEmpty(null, "NULL")  = "NULL"
-     * StringUtils.defaultIfEmpty("", "NULL")    = "NULL"
-     * StringUtils.defaultIfEmpty("bat", "NULL") = "bat"
-     * StringUtils.defaultIfEmpty("", null)      = null
+     * defaultIfEmpty(null, "NULL")  = "NULL"
+     * defaultIfEmpty("", "NULL")    = "NULL"
+     * defaultIfEmpty("bat", "NULL") = "bat"
+     * defaultIfEmpty("", null)      = null
      * </pre>
      * 
      * @param <T>
@@ -6493,9 +6492,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.reverse(null)  = null
-     * StringUtils.reverse("")    = ""
-     * StringUtils.reverse("bat") = "tab"
+     * reverse(null)  = null
+     * reverse("")    = ""
+     * reverse("bat") = "tab"
      * </pre>
      * 
      * @param str
@@ -6521,10 +6520,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.reverseDelimited(null, *)      = null
-     * StringUtils.reverseDelimited("", *)        = ""
-     * StringUtils.reverseDelimited("a.b.c", 'x') = "a.b.c"
-     * StringUtils.reverseDelimited("a.b.c", ".") = "c.b.a"
+     * reverseDelimited(null, *)      = null
+     * reverseDelimited("", *)        = ""
+     * reverseDelimited("a.b.c", 'x') = "a.b.c"
+     * reverseDelimited("a.b.c", ".") = "c.b.a"
      * </pre>
      * 
      * @param str
@@ -6568,13 +6567,13 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.abbreviate(null, *)      = null
-     * StringUtils.abbreviate("", 4)        = ""
-     * StringUtils.abbreviate("abcdefg", 6) = "abc..."
-     * StringUtils.abbreviate("abcdefg", 7) = "abcdefg"
-     * StringUtils.abbreviate("abcdefg", 8) = "abcdefg"
-     * StringUtils.abbreviate("abcdefg", 4) = "a..."
-     * StringUtils.abbreviate("abcdefg", 3) = IllegalArgumentException
+     * abbreviate(null, *)      = null
+     * abbreviate("", 4)        = ""
+     * abbreviate("abcdefg", 6) = "abc..."
+     * abbreviate("abcdefg", 7) = "abcdefg"
+     * abbreviate("abcdefg", 8) = "abcdefg"
+     * abbreviate("abcdefg", 4) = "a..."
+     * abbreviate("abcdefg", 3) = IllegalArgumentException
      * </pre>
      * 
      * @param str
@@ -6608,19 +6607,19 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.abbreviate(null, *, *)                = null
-     * StringUtils.abbreviate("", 0, 4)                  = ""
-     * StringUtils.abbreviate("abcdefghijklmno", -1, 10) = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 0, 10)  = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 1, 10)  = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 4, 10)  = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 5, 10)  = "...fghi..."
-     * StringUtils.abbreviate("abcdefghijklmno", 6, 10)  = "...ghij..."
-     * StringUtils.abbreviate("abcdefghijklmno", 8, 10)  = "...ijklmno"
-     * StringUtils.abbreviate("abcdefghijklmno", 10, 10) = "...ijklmno"
-     * StringUtils.abbreviate("abcdefghijklmno", 12, 10) = "...ijklmno"
-     * StringUtils.abbreviate("abcdefghij", 0, 3)        = IllegalArgumentException
-     * StringUtils.abbreviate("abcdefghij", 5, 6)        = IllegalArgumentException
+     * abbreviate(null, *, *)                = null
+     * abbreviate("", 0, 4)                  = ""
+     * abbreviate("abcdefghijklmno", -1, 10) = "abcdefg..."
+     * abbreviate("abcdefghijklmno", 0, 10)  = "abcdefg..."
+     * abbreviate("abcdefghijklmno", 1, 10)  = "abcdefg..."
+     * abbreviate("abcdefghijklmno", 4, 10)  = "abcdefg..."
+     * abbreviate("abcdefghijklmno", 5, 10)  = "...fghi..."
+     * abbreviate("abcdefghijklmno", 6, 10)  = "...ghij..."
+     * abbreviate("abcdefghijklmno", 8, 10)  = "...ijklmno"
+     * abbreviate("abcdefghijklmno", 10, 10) = "...ijklmno"
+     * abbreviate("abcdefghijklmno", 12, 10) = "...ijklmno"
+     * abbreviate("abcdefghij", 0, 3)        = IllegalArgumentException
+     * abbreviate("abcdefghij", 5, 6)        = IllegalArgumentException
      * </pre>
      * 
      * @param str
@@ -6689,11 +6688,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.abbreviateMiddle(null, null, 0)      = null
-     * StringUtils.abbreviateMiddle("abc", null, 0)      = "abc"
-     * StringUtils.abbreviateMiddle("abc", ".", 0)      = "abc"
-     * StringUtils.abbreviateMiddle("abc", ".", 3)      = "abc"
-     * StringUtils.abbreviateMiddle("abcdef", ".", 4)     = "ab.f"
+     * abbreviateMiddle(null, null, 0)      = null
+     * abbreviateMiddle("abc", null, 0)      = "abc"
+     * abbreviateMiddle("abc", ".", 0)      = "abc"
+     * abbreviateMiddle("abc", ".", 3)      = "abc"
+     * abbreviateMiddle("abcdef", ".", 4)     = "ab.f"
      * </pre>
      * 
      * @param str
@@ -6742,14 +6741,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.difference(null, null) = null
-     * StringUtils.difference("", "") = ""
-     * StringUtils.difference("", "abc") = "abc"
-     * StringUtils.difference("abc", "") = ""
-     * StringUtils.difference("abc", "abc") = ""
-     * StringUtils.difference("ab", "abxyz") = "xyz"
-     * StringUtils.difference("abcde", "abxyz") = "xyz"
-     * StringUtils.difference("abcde", "xyz") = "xyz"
+     * difference(null, null) = null
+     * difference("", "") = ""
+     * difference("", "abc") = "abc"
+     * difference("abc", "") = ""
+     * difference("abc", "abc") = ""
+     * difference("ab", "abxyz") = "xyz"
+     * difference("abcde", "abxyz") = "xyz"
+     * difference("abcde", "xyz") = "xyz"
      * </pre>
      * 
      * @param str1
@@ -6786,14 +6785,14 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.indexOfDifference(null, null) = -1
-     * StringUtils.indexOfDifference("", "") = -1
-     * StringUtils.indexOfDifference("", "abc") = 0
-     * StringUtils.indexOfDifference("abc", "") = 0
-     * StringUtils.indexOfDifference("abc", "abc") = -1
-     * StringUtils.indexOfDifference("ab", "abxyz") = 2
-     * StringUtils.indexOfDifference("abcde", "abxyz") = 2
-     * StringUtils.indexOfDifference("abcde", "xyz") = 0
+     * indexOfDifference(null, null) = -1
+     * indexOfDifference("", "") = -1
+     * indexOfDifference("", "abc") = 0
+     * indexOfDifference("abc", "") = 0
+     * indexOfDifference("abc", "abc") = -1
+     * indexOfDifference("ab", "abxyz") = 2
+     * indexOfDifference("abcde", "abxyz") = 2
+     * indexOfDifference("abcde", "xyz") = 0
      * </pre>
      * 
      * @param cs1
@@ -6836,23 +6835,23 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.indexOfDifference(null) = -1
-     * StringUtils.indexOfDifference(new String[] {}) = -1
-     * StringUtils.indexOfDifference(new String[] {"abc"}) = -1
-     * StringUtils.indexOfDifference(new String[] {null, null}) = -1
-     * StringUtils.indexOfDifference(new String[] {"", ""}) = -1
-     * StringUtils.indexOfDifference(new String[] {"", null}) = 0
-     * StringUtils.indexOfDifference(new String[] {"abc", null, null}) = 0
-     * StringUtils.indexOfDifference(new String[] {null, null, "abc"}) = 0
-     * StringUtils.indexOfDifference(new String[] {"", "abc"}) = 0
-     * StringUtils.indexOfDifference(new String[] {"abc", ""}) = 0
-     * StringUtils.indexOfDifference(new String[] {"abc", "abc"}) = -1
-     * StringUtils.indexOfDifference(new String[] {"abc", "a"}) = 1
-     * StringUtils.indexOfDifference(new String[] {"ab", "abxyz"}) = 2
-     * StringUtils.indexOfDifference(new String[] {"abcde", "abxyz"}) = 2
-     * StringUtils.indexOfDifference(new String[] {"abcde", "xyz"}) = 0
-     * StringUtils.indexOfDifference(new String[] {"xyz", "abcde"}) = 0
-     * StringUtils.indexOfDifference(new String[] {"i am a machine", "i am a robot"}) = 7
+     * indexOfDifference(null) = -1
+     * indexOfDifference(new String[] {}) = -1
+     * indexOfDifference(new String[] {"abc"}) = -1
+     * indexOfDifference(new String[] {null, null}) = -1
+     * indexOfDifference(new String[] {"", ""}) = -1
+     * indexOfDifference(new String[] {"", null}) = 0
+     * indexOfDifference(new String[] {"abc", null, null}) = 0
+     * indexOfDifference(new String[] {null, null, "abc"}) = 0
+     * indexOfDifference(new String[] {"", "abc"}) = 0
+     * indexOfDifference(new String[] {"abc", ""}) = 0
+     * indexOfDifference(new String[] {"abc", "abc"}) = -1
+     * indexOfDifference(new String[] {"abc", "a"}) = 1
+     * indexOfDifference(new String[] {"ab", "abxyz"}) = 2
+     * indexOfDifference(new String[] {"abcde", "abxyz"}) = 2
+     * indexOfDifference(new String[] {"abcde", "xyz"}) = 0
+     * indexOfDifference(new String[] {"xyz", "abcde"}) = 0
+     * indexOfDifference(new String[] {"i am a machine", "i am a robot"}) = 7
      * </pre>
      * 
      * @param css
@@ -6933,23 +6932,23 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.getCommonPrefix(null) = ""
-     * StringUtils.getCommonPrefix(new String[] {}) = ""
-     * StringUtils.getCommonPrefix(new String[] {"abc"}) = "abc"
-     * StringUtils.getCommonPrefix(new String[] {null, null}) = ""
-     * StringUtils.getCommonPrefix(new String[] {"", ""}) = ""
-     * StringUtils.getCommonPrefix(new String[] {"", null}) = ""
-     * StringUtils.getCommonPrefix(new String[] {"abc", null, null}) = ""
-     * StringUtils.getCommonPrefix(new String[] {null, null, "abc"}) = ""
-     * StringUtils.getCommonPrefix(new String[] {"", "abc"}) = ""
-     * StringUtils.getCommonPrefix(new String[] {"abc", ""}) = ""
-     * StringUtils.getCommonPrefix(new String[] {"abc", "abc"}) = "abc"
-     * StringUtils.getCommonPrefix(new String[] {"abc", "a"}) = "a"
-     * StringUtils.getCommonPrefix(new String[] {"ab", "abxyz"}) = "ab"
-     * StringUtils.getCommonPrefix(new String[] {"abcde", "abxyz"}) = "ab"
-     * StringUtils.getCommonPrefix(new String[] {"abcde", "xyz"}) = ""
-     * StringUtils.getCommonPrefix(new String[] {"xyz", "abcde"}) = ""
-     * StringUtils.getCommonPrefix(new String[] {"i am a machine", "i am a robot"}) = "i am a "
+     * getCommonPrefix(null) = ""
+     * getCommonPrefix(new String[] {}) = ""
+     * getCommonPrefix(new String[] {"abc"}) = "abc"
+     * getCommonPrefix(new String[] {null, null}) = ""
+     * getCommonPrefix(new String[] {"", ""}) = ""
+     * getCommonPrefix(new String[] {"", null}) = ""
+     * getCommonPrefix(new String[] {"abc", null, null}) = ""
+     * getCommonPrefix(new String[] {null, null, "abc"}) = ""
+     * getCommonPrefix(new String[] {"", "abc"}) = ""
+     * getCommonPrefix(new String[] {"abc", ""}) = ""
+     * getCommonPrefix(new String[] {"abc", "abc"}) = "abc"
+     * getCommonPrefix(new String[] {"abc", "a"}) = "a"
+     * getCommonPrefix(new String[] {"ab", "abxyz"}) = "ab"
+     * getCommonPrefix(new String[] {"abcde", "abxyz"}) = "ab"
+     * getCommonPrefix(new String[] {"abcde", "xyz"}) = ""
+     * getCommonPrefix(new String[] {"xyz", "abcde"}) = ""
+     * getCommonPrefix(new String[] {"i am a machine", "i am a robot"}) = "i am a "
      * </pre>
      * 
      * @param strs
@@ -7009,17 +7008,17 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.getLevenshteinDistance(null, *)             = IllegalArgumentException
-     * StringUtils.getLevenshteinDistance(*, null)             = IllegalArgumentException
-     * StringUtils.getLevenshteinDistance("","")               = 0
-     * StringUtils.getLevenshteinDistance("","a")              = 1
-     * StringUtils.getLevenshteinDistance("aaapppp", "")       = 7
-     * StringUtils.getLevenshteinDistance("frog", "fog")       = 1
-     * StringUtils.getLevenshteinDistance("fly", "ant")        = 3
-     * StringUtils.getLevenshteinDistance("elephant", "hippo") = 7
-     * StringUtils.getLevenshteinDistance("hippo", "elephant") = 7
-     * StringUtils.getLevenshteinDistance("hippo", "zzzzzzzz") = 8
-     * StringUtils.getLevenshteinDistance("hello", "hallo")    = 1
+     * getLevenshteinDistance(null, *)             = IllegalArgumentException
+     * getLevenshteinDistance(*, null)             = IllegalArgumentException
+     * getLevenshteinDistance("","")               = 0
+     * getLevenshteinDistance("","a")              = 1
+     * getLevenshteinDistance("aaapppp", "")       = 7
+     * getLevenshteinDistance("frog", "fog")       = 1
+     * getLevenshteinDistance("fly", "ant")        = 3
+     * getLevenshteinDistance("elephant", "hippo") = 7
+     * getLevenshteinDistance("hippo", "elephant") = 7
+     * getLevenshteinDistance("hippo", "zzzzzzzz") = 8
+     * getLevenshteinDistance("hello", "hallo")    = 1
      * </pre>
      * 
      * @param s
@@ -7128,11 +7127,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.startsWith(null, null)      = true
-     * StringUtils.startsWith(null, "abc")     = false
-     * StringUtils.startsWith("abcdef", null)  = false
-     * StringUtils.startsWith("abcdef", "abc") = true
-     * StringUtils.startsWith("ABCDEF", "abc") = false
+     * startsWith(null, null)      = true
+     * startsWith(null, "abc")     = false
+     * startsWith("abcdef", null)  = false
+     * startsWith("abcdef", "abc") = true
+     * startsWith("ABCDEF", "abc") = false
      * </pre>
      * 
      * @see java.lang.String#startsWith(String)
@@ -7160,11 +7159,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.startsWithIgnoreCase(null, null)      = true
-     * StringUtils.startsWithIgnoreCase(null, "abc")     = false
-     * StringUtils.startsWithIgnoreCase("abcdef", null)  = false
-     * StringUtils.startsWithIgnoreCase("abcdef", "abc") = true
-     * StringUtils.startsWithIgnoreCase("ABCDEF", "abc") = true
+     * startsWithIgnoreCase(null, null)      = true
+     * startsWithIgnoreCase(null, "abc")     = false
+     * startsWithIgnoreCase("abcdef", null)  = false
+     * startsWithIgnoreCase("abcdef", "abc") = true
+     * startsWithIgnoreCase("ABCDEF", "abc") = true
      * </pre>
      * 
      * @see java.lang.String#startsWith(String)
@@ -7214,12 +7213,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.startsWithAny(null, null)      = false
-     * StringUtils.startsWithAny(null, new String[] {"abc"})  = false
-     * StringUtils.startsWithAny("abcxyz", null)     = false
-     * StringUtils.startsWithAny("abcxyz", new String[] {""}) = false
-     * StringUtils.startsWithAny("abcxyz", new String[] {"abc"}) = true
-     * StringUtils.startsWithAny("abcxyz", new String[] {null, "xyz", "abc"}) = true
+     * startsWithAny(null, null)      = false
+     * startsWithAny(null, new String[] {"abc"})  = false
+     * startsWithAny("abcxyz", null)     = false
+     * startsWithAny("abcxyz", new String[] {""}) = false
+     * startsWithAny("abcxyz", new String[] {"abc"}) = true
+     * startsWithAny("abcxyz", new String[] {null, "xyz", "abc"}) = true
      * </pre>
      * 
      * @param string
@@ -7257,12 +7256,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.endsWith(null, null)      = true
-     * StringUtils.endsWith(null, "def")     = false
-     * StringUtils.endsWith("abcdef", null)  = false
-     * StringUtils.endsWith("abcdef", "def") = true
-     * StringUtils.endsWith("ABCDEF", "def") = false
-     * StringUtils.endsWith("ABCDEF", "cde") = false
+     * endsWith(null, null)      = true
+     * endsWith(null, "def")     = false
+     * endsWith("abcdef", null)  = false
+     * endsWith("abcdef", "def") = true
+     * endsWith("ABCDEF", "def") = false
+     * endsWith("ABCDEF", "cde") = false
      * </pre>
      * 
      * @see java.lang.String#endsWith(String)
@@ -7290,12 +7289,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * StringUtils.endsWithIgnoreCase(null, null)      = true
-     * StringUtils.endsWithIgnoreCase(null, "def")     = false
-     * StringUtils.endsWithIgnoreCase("abcdef", null)  = false
-     * StringUtils.endsWithIgnoreCase("abcdef", "def") = true
-     * StringUtils.endsWithIgnoreCase("ABCDEF", "def") = true
-     * StringUtils.endsWithIgnoreCase("ABCDEF", "cde") = false
+     * endsWithIgnoreCase(null, null)      = true
+     * endsWithIgnoreCase(null, "def")     = false
+     * endsWithIgnoreCase("abcdef", null)  = false
+     * endsWithIgnoreCase("abcdef", "def") = true
+     * endsWithIgnoreCase("ABCDEF", "def") = true
+     * endsWithIgnoreCase("ABCDEF", "cde") = false
      * </pre>
      * 
      * @see java.lang.String#endsWith(String)
@@ -7585,8 +7584,8 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * String[] array = ArrayUtils.toArray(&quot;1&quot;, &quot;2&quot;);
-     * String[] emptyArray = ArrayUtils.&lt;String&gt; toArray();
+     * String[] array = toArray(&quot;1&quot;, &quot;2&quot;);
+     * String[] emptyArray = &lt;String&gt; toArray();
      * </pre>
      * 
      * The method is typically used in scenarios, where the caller itself uses
@@ -7595,7 +7594,7 @@ public final class Functions {
      * Note, this method makes only sense to provide arguments of the same type
      * so that the compiler can deduce the type of the array itself. While it is
      * possible to select the type explicitly like in
-     * <code>Number[] array = ArrayUtils.<Number>toArray(new
+     * <code>Number[] array = <Number>toArray(new
      * Integer(42), new Double(Math.PI))</code>, there is no real advantage to
      * <code>new
      * Number[] {new Integer(42), new Double(Math.PI)}</code> anymore.
@@ -8360,7 +8359,7 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * Date[] someDates = (Date[]) ArrayUtils.subarray(allDates, 2, 5);
+     * Date[] someDates = (Date[]) subarray(allDates, 2, 5);
      * </pre>
      * 
      * @param array
@@ -8977,12 +8976,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.getLength(null)            = 0
-     * ArrayUtils.getLength([])              = 0
-     * ArrayUtils.getLength([null])          = 1
-     * ArrayUtils.getLength([true, false])   = 2
-     * ArrayUtils.getLength([1, 2, 3])       = 3
-     * ArrayUtils.getLength(["a", "b", "c"]) = 3
+     * getLength(null)            = 0
+     * getLength([])              = 0
+     * getLength([null])          = 1
+     * getLength([true, false])   = 2
+     * getLength([1, 2, 3])       = 3
+     * getLength(["a", "b", "c"]) = 3
      * </pre>
      * 
      * @param array
@@ -11902,12 +11901,12 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.addAll(null, null)     = null
-     * ArrayUtils.addAll(array1, null)   = cloned copy of array1
-     * ArrayUtils.addAll(null, array2)   = cloned copy of array2
-     * ArrayUtils.addAll([], [])         = []
-     * ArrayUtils.addAll([null], [null]) = [null, null]
-     * ArrayUtils.addAll(["a", "b", "c"], ["1", "2", "3"]) = ["a", "b", "c", "1", "2", "3"]
+     * addAll(null, null)     = null
+     * addAll(array1, null)   = cloned copy of array1
+     * addAll(null, array2)   = cloned copy of array2
+     * addAll([], [])         = []
+     * addAll([null], [null]) = [null, null]
+     * addAll(["a", "b", "c"], ["1", "2", "3"]) = ["a", "b", "c", "1", "2", "3"]
      * </pre>
      * 
      * @param array1
@@ -11968,9 +11967,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.addAll(array1, null)   = cloned copy of array1
-     * ArrayUtils.addAll(null, array2)   = cloned copy of array2
-     * ArrayUtils.addAll([], [])         = []
+     * addAll(array1, null)   = cloned copy of array1
+     * addAll(null, array2)   = cloned copy of array2
+     * addAll([], [])         = []
      * </pre>
      * 
      * @param array1
@@ -12003,9 +12002,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.addAll(array1, null)   = cloned copy of array1
-     * ArrayUtils.addAll(null, array2)   = cloned copy of array2
-     * ArrayUtils.addAll([], [])         = []
+     * addAll(array1, null)   = cloned copy of array1
+     * addAll(null, array2)   = cloned copy of array2
+     * addAll([], [])         = []
      * </pre>
      * 
      * @param array1
@@ -12038,9 +12037,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.addAll(array1, null)   = cloned copy of array1
-     * ArrayUtils.addAll(null, array2)   = cloned copy of array2
-     * ArrayUtils.addAll([], [])         = []
+     * addAll(array1, null)   = cloned copy of array1
+     * addAll(null, array2)   = cloned copy of array2
+     * addAll([], [])         = []
      * </pre>
      * 
      * @param array1
@@ -12073,9 +12072,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.addAll(array1, null)   = cloned copy of array1
-     * ArrayUtils.addAll(null, array2)   = cloned copy of array2
-     * ArrayUtils.addAll([], [])         = []
+     * addAll(array1, null)   = cloned copy of array1
+     * addAll(null, array2)   = cloned copy of array2
+     * addAll([], [])         = []
      * </pre>
      * 
      * @param array1
@@ -12108,9 +12107,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.addAll(array1, null)   = cloned copy of array1
-     * ArrayUtils.addAll(null, array2)   = cloned copy of array2
-     * ArrayUtils.addAll([], [])         = []
+     * addAll(array1, null)   = cloned copy of array1
+     * addAll(null, array2)   = cloned copy of array2
+     * addAll([], [])         = []
      * </pre>
      * 
      * @param array1
@@ -12143,9 +12142,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.addAll(array1, null)   = cloned copy of array1
-     * ArrayUtils.addAll(null, array2)   = cloned copy of array2
-     * ArrayUtils.addAll([], [])         = []
+     * addAll(array1, null)   = cloned copy of array1
+     * addAll(null, array2)   = cloned copy of array2
+     * addAll([], [])         = []
      * </pre>
      * 
      * @param array1
@@ -12178,9 +12177,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.addAll(array1, null)   = cloned copy of array1
-     * ArrayUtils.addAll(null, array2)   = cloned copy of array2
-     * ArrayUtils.addAll([], [])         = []
+     * addAll(array1, null)   = cloned copy of array1
+     * addAll(null, array2)   = cloned copy of array2
+     * addAll([], [])         = []
      * </pre>
      * 
      * @param array1
@@ -12213,9 +12212,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.addAll(array1, null)   = cloned copy of array1
-     * ArrayUtils.addAll(null, array2)   = cloned copy of array2
-     * ArrayUtils.addAll([], [])         = []
+     * addAll(array1, null)   = cloned copy of array1
+     * addAll(null, array2)   = cloned copy of array2
+     * addAll([], [])         = []
      * </pre>
      * 
      * @param array1
@@ -12256,11 +12255,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add(null, null)      = [null]
-     * ArrayUtils.add(null, "a")       = ["a"]
-     * ArrayUtils.add(["a"], null)     = ["a", null]
-     * ArrayUtils.add(["a"], "b")      = ["a", "b"]
-     * ArrayUtils.add(["a", "b"], "c") = ["a", "b", "c"]
+     * add(null, null)      = [null]
+     * add(null, "a")       = ["a"]
+     * add(["a"], null)     = ["a", null]
+     * add(["a"], "b")      = ["a", "b"]
+     * add(["a", "b"], "c") = ["a", "b", "c"]
      * </pre>
      * 
      * @param array
@@ -12309,9 +12308,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add(null, true)          = [true]
-     * ArrayUtils.add([true], false)       = [true, false]
-     * ArrayUtils.add([true, false], true) = [true, false, true]
+     * add(null, true)          = [true]
+     * add([true], false)       = [true, false]
+     * add([true, false], true) = [true, false, true]
      * </pre>
      * 
      * @param array
@@ -12346,9 +12345,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add(null, 0)   = [0]
-     * ArrayUtils.add([1], 0)    = [1, 0]
-     * ArrayUtils.add([1, 0], 1) = [1, 0, 1]
+     * add(null, 0)   = [0]
+     * add([1], 0)    = [1, 0]
+     * add([1, 0], 1) = [1, 0, 1]
      * </pre>
      * 
      * @param array
@@ -12383,9 +12382,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add(null, '0')       = ['0']
-     * ArrayUtils.add(['1'], '0')      = ['1', '0']
-     * ArrayUtils.add(['1', '0'], '1') = ['1', '0', '1']
+     * add(null, '0')       = ['0']
+     * add(['1'], '0')      = ['1', '0']
+     * add(['1', '0'], '1') = ['1', '0', '1']
      * </pre>
      * 
      * @param array
@@ -12420,9 +12419,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add(null, 0)   = [0]
-     * ArrayUtils.add([1], 0)    = [1, 0]
-     * ArrayUtils.add([1, 0], 1) = [1, 0, 1]
+     * add(null, 0)   = [0]
+     * add([1], 0)    = [1, 0]
+     * add([1, 0], 1) = [1, 0, 1]
      * </pre>
      * 
      * @param array
@@ -12457,9 +12456,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add(null, 0)   = [0]
-     * ArrayUtils.add([1], 0)    = [1, 0]
-     * ArrayUtils.add([1, 0], 1) = [1, 0, 1]
+     * add(null, 0)   = [0]
+     * add([1], 0)    = [1, 0]
+     * add([1, 0], 1) = [1, 0, 1]
      * </pre>
      * 
      * @param array
@@ -12494,9 +12493,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add(null, 0)   = [0]
-     * ArrayUtils.add([1], 0)    = [1, 0]
-     * ArrayUtils.add([1, 0], 1) = [1, 0, 1]
+     * add(null, 0)   = [0]
+     * add([1], 0)    = [1, 0]
+     * add([1, 0], 1) = [1, 0, 1]
      * </pre>
      * 
      * @param array
@@ -12531,9 +12530,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add(null, 0)   = [0]
-     * ArrayUtils.add([1], 0)    = [1, 0]
-     * ArrayUtils.add([1, 0], 1) = [1, 0, 1]
+     * add(null, 0)   = [0]
+     * add([1], 0)    = [1, 0]
+     * add([1, 0], 1) = [1, 0, 1]
      * </pre>
      * 
      * @param array
@@ -12568,9 +12567,9 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add(null, 0)   = [0]
-     * ArrayUtils.add([1], 0)    = [1, 0]
-     * ArrayUtils.add([1, 0], 1) = [1, 0, 1]
+     * add(null, 0)   = [0]
+     * add([1], 0)    = [1, 0]
+     * add([1, 0], 1) = [1, 0, 1]
      * </pre>
      * 
      * @param array
@@ -12629,11 +12628,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add(null, 0, null)      = [null]
-     * ArrayUtils.add(null, 0, "a")       = ["a"]
-     * ArrayUtils.add(["a"], 1, null)     = ["a", null]
-     * ArrayUtils.add(["a"], 1, "b")      = ["a", "b"]
-     * ArrayUtils.add(["a", "b"], 3, "c") = ["a", "b", "c"]
+     * add(null, 0, null)      = [null]
+     * add(null, 0, "a")       = ["a"]
+     * add(["a"], 1, null)     = ["a", null]
+     * add(["a"], 1, "b")      = ["a", "b"]
+     * add(["a", "b"], 3, "c") = ["a", "b", "c"]
      * </pre>
      * 
      * @param array
@@ -12684,10 +12683,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add(null, 0, true)          = [true]
-     * ArrayUtils.add([true], 0, false)       = [false, true]
-     * ArrayUtils.add([false], 1, true)       = [false, true]
-     * ArrayUtils.add([true, false], 1, true) = [true, true, false]
+     * add(null, 0, true)          = [true]
+     * add([true], 0, false)       = [false, true]
+     * add([false], 1, true)       = [false, true]
+     * add([true, false], 1, true) = [true, true, false]
      * </pre>
      * 
      * @param array
@@ -12725,11 +12724,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add(null, 0, 'a')            = ['a']
-     * ArrayUtils.add(['a'], 0, 'b')           = ['b', 'a']
-     * ArrayUtils.add(['a', 'b'], 0, 'c')      = ['c', 'a', 'b']
-     * ArrayUtils.add(['a', 'b'], 1, 'k')      = ['a', 'k', 'b']
-     * ArrayUtils.add(['a', 'b', 'c'], 1, 't') = ['a', 't', 'b', 'c']
+     * add(null, 0, 'a')            = ['a']
+     * add(['a'], 0, 'b')           = ['b', 'a']
+     * add(['a', 'b'], 0, 'c')      = ['c', 'a', 'b']
+     * add(['a', 'b'], 1, 'k')      = ['a', 'k', 'b']
+     * add(['a', 'b', 'c'], 1, 't') = ['a', 't', 'b', 'c']
      * </pre>
      * 
      * @param array
@@ -12767,10 +12766,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add([1], 0, 2)         = [2, 1]
-     * ArrayUtils.add([2, 6], 2, 3)      = [2, 6, 3]
-     * ArrayUtils.add([2, 6], 0, 1)      = [1, 2, 6]
-     * ArrayUtils.add([2, 6, 3], 2, 1)   = [2, 6, 1, 3]
+     * add([1], 0, 2)         = [2, 1]
+     * add([2, 6], 2, 3)      = [2, 6, 3]
+     * add([2, 6], 0, 1)      = [1, 2, 6]
+     * add([2, 6, 3], 2, 1)   = [2, 6, 1, 3]
      * </pre>
      * 
      * @param array
@@ -12807,10 +12806,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add([1], 0, 2)         = [2, 1]
-     * ArrayUtils.add([2, 6], 2, 10)     = [2, 6, 10]
-     * ArrayUtils.add([2, 6], 0, -4)     = [-4, 2, 6]
-     * ArrayUtils.add([2, 6, 3], 2, 1)   = [2, 6, 1, 3]
+     * add([1], 0, 2)         = [2, 1]
+     * add([2, 6], 2, 10)     = [2, 6, 10]
+     * add([2, 6], 0, -4)     = [-4, 2, 6]
+     * add([2, 6, 3], 2, 1)   = [2, 6, 1, 3]
      * </pre>
      * 
      * @param array
@@ -12847,10 +12846,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add([1], 0, 2)         = [2, 1]
-     * ArrayUtils.add([2, 6], 2, 10)     = [2, 6, 10]
-     * ArrayUtils.add([2, 6], 0, -4)     = [-4, 2, 6]
-     * ArrayUtils.add([2, 6, 3], 2, 1)   = [2, 6, 1, 3]
+     * add([1], 0, 2)         = [2, 1]
+     * add([2, 6], 2, 10)     = [2, 6, 10]
+     * add([2, 6], 0, -4)     = [-4, 2, 6]
+     * add([2, 6, 3], 2, 1)   = [2, 6, 1, 3]
      * </pre>
      * 
      * @param array
@@ -12887,10 +12886,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add([1L], 0, 2L)           = [2L, 1L]
-     * ArrayUtils.add([2L, 6L], 2, 10L)      = [2L, 6L, 10L]
-     * ArrayUtils.add([2L, 6L], 0, -4L)      = [-4L, 2L, 6L]
-     * ArrayUtils.add([2L, 6L, 3L], 2, 1L)   = [2L, 6L, 1L, 3L]
+     * add([1L], 0, 2L)           = [2L, 1L]
+     * add([2L, 6L], 2, 10L)      = [2L, 6L, 10L]
+     * add([2L, 6L], 0, -4L)      = [-4L, 2L, 6L]
+     * add([2L, 6L, 3L], 2, 1L)   = [2L, 6L, 1L, 3L]
      * </pre>
      * 
      * @param array
@@ -12927,10 +12926,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add([1.1f], 0, 2.2f)               = [2.2f, 1.1f]
-     * ArrayUtils.add([2.3f, 6.4f], 2, 10.5f)        = [2.3f, 6.4f, 10.5f]
-     * ArrayUtils.add([2.6f, 6.7f], 0, -4.8f)        = [-4.8f, 2.6f, 6.7f]
-     * ArrayUtils.add([2.9f, 6.0f, 0.3f], 2, 1.0f)   = [2.9f, 6.0f, 1.0f, 0.3f]
+     * add([1.1f], 0, 2.2f)               = [2.2f, 1.1f]
+     * add([2.3f, 6.4f], 2, 10.5f)        = [2.3f, 6.4f, 10.5f]
+     * add([2.6f, 6.7f], 0, -4.8f)        = [-4.8f, 2.6f, 6.7f]
+     * add([2.9f, 6.0f, 0.3f], 2, 1.0f)   = [2.9f, 6.0f, 1.0f, 0.3f]
      * </pre>
      * 
      * @param array
@@ -12967,10 +12966,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.add([1.1], 0, 2.2)              = [2.2, 1.1]
-     * ArrayUtils.add([2.3, 6.4], 2, 10.5)        = [2.3, 6.4, 10.5]
-     * ArrayUtils.add([2.6, 6.7], 0, -4.8)        = [-4.8, 2.6, 6.7]
-     * ArrayUtils.add([2.9, 6.0, 0.3], 2, 1.0)    = [2.9, 6.0, 1.0, 0.3]
+     * add([1.1], 0, 2.2)              = [2.2, 1.1]
+     * add([2.3, 6.4], 2, 10.5)        = [2.3, 6.4, 10.5]
+     * add([2.6, 6.7], 0, -4.8)        = [-4.8, 2.6, 6.7]
+     * add([2.9, 6.0, 0.3], 2, 1.0)    = [2.9, 6.0, 1.0, 0.3]
      * </pre>
      * 
      * @param array
@@ -13048,10 +13047,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.remove(["a"], 0)           = []
-     * ArrayUtils.remove(["a", "b"], 0)      = ["b"]
-     * ArrayUtils.remove(["a", "b"], 1)      = ["a"]
-     * ArrayUtils.remove(["a", "b", "c"], 1) = ["a", "c"]
+     * remove(["a"], 0)           = []
+     * remove(["a", "b"], 0)      = ["b"]
+     * remove(["a", "b"], 1)      = ["a"]
+     * remove(["a", "b", "c"], 1) = ["a", "c"]
      * </pre>
      * 
      * @param array
@@ -13087,11 +13086,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.removeElement(null, "a")            = null
-     * ArrayUtils.removeElement([], "a")              = []
-     * ArrayUtils.removeElement(["a"], "b")           = ["a"]
-     * ArrayUtils.removeElement(["a", "b"], "a")      = ["b"]
-     * ArrayUtils.removeElement(["a", "b", "a"], "a") = ["b", "a"]
+     * removeElement(null, "a")            = null
+     * removeElement([], "a")              = []
+     * removeElement(["a"], "b")           = ["a"]
+     * removeElement(["a", "b"], "a")      = ["b"]
+     * removeElement(["a", "b", "a"], "a") = ["b", "a"]
      * </pre>
      * 
      * @param array
@@ -13129,10 +13128,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.remove([true], 0)              = []
-     * ArrayUtils.remove([true, false], 0)       = [false]
-     * ArrayUtils.remove([true, false], 1)       = [true]
-     * ArrayUtils.remove([true, true, false], 1) = [true, false]
+     * remove([true], 0)              = []
+     * remove([true, false], 0)       = [false]
+     * remove([true, false], 1)       = [true]
+     * remove([true, true, false], 1) = [true, false]
      * </pre>
      * 
      * @param array
@@ -13166,11 +13165,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.removeElement(null, true)                = null
-     * ArrayUtils.removeElement([], true)                  = []
-     * ArrayUtils.removeElement([true], false)             = [true]
-     * ArrayUtils.removeElement([true, false], false)      = [true]
-     * ArrayUtils.removeElement([true, false, true], true) = [false, true]
+     * removeElement(null, true)                = null
+     * removeElement([], true)                  = []
+     * removeElement([true], false)             = [true]
+     * removeElement([true, false], false)      = [true]
+     * removeElement([true, false, true], true) = [false, true]
      * </pre>
      * 
      * @param array
@@ -13208,10 +13207,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.remove([1], 0)          = []
-     * ArrayUtils.remove([1, 0], 0)       = [0]
-     * ArrayUtils.remove([1, 0], 1)       = [1]
-     * ArrayUtils.remove([1, 0, 1], 1)    = [1, 1]
+     * remove([1], 0)          = []
+     * remove([1, 0], 0)       = [0]
+     * remove([1, 0], 1)       = [1]
+     * remove([1, 0, 1], 1)    = [1, 1]
      * </pre>
      * 
      * @param array
@@ -13245,11 +13244,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.removeElement(null, 1)        = null
-     * ArrayUtils.removeElement([], 1)          = []
-     * ArrayUtils.removeElement([1], 0)         = [1]
-     * ArrayUtils.removeElement([1, 0], 0)      = [1]
-     * ArrayUtils.removeElement([1, 0, 1], 1)   = [0, 1]
+     * removeElement(null, 1)        = null
+     * removeElement([], 1)          = []
+     * removeElement([1], 0)         = [1]
+     * removeElement([1, 0], 0)      = [1]
+     * removeElement([1, 0, 1], 1)   = [0, 1]
      * </pre>
      * 
      * @param array
@@ -13287,10 +13286,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.remove(['a'], 0)           = []
-     * ArrayUtils.remove(['a', 'b'], 0)      = ['b']
-     * ArrayUtils.remove(['a', 'b'], 1)      = ['a']
-     * ArrayUtils.remove(['a', 'b', 'c'], 1) = ['a', 'c']
+     * remove(['a'], 0)           = []
+     * remove(['a', 'b'], 0)      = ['b']
+     * remove(['a', 'b'], 1)      = ['a']
+     * remove(['a', 'b', 'c'], 1) = ['a', 'c']
      * </pre>
      * 
      * @param array
@@ -13324,11 +13323,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.removeElement(null, 'a')            = null
-     * ArrayUtils.removeElement([], 'a')              = []
-     * ArrayUtils.removeElement(['a'], 'b')           = ['a']
-     * ArrayUtils.removeElement(['a', 'b'], 'a')      = ['b']
-     * ArrayUtils.removeElement(['a', 'b', 'a'], 'a') = ['b', 'a']
+     * removeElement(null, 'a')            = null
+     * removeElement([], 'a')              = []
+     * removeElement(['a'], 'b')           = ['a']
+     * removeElement(['a', 'b'], 'a')      = ['b']
+     * removeElement(['a', 'b', 'a'], 'a') = ['b', 'a']
      * </pre>
      * 
      * @param array
@@ -13366,10 +13365,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.remove([1.1], 0)           = []
-     * ArrayUtils.remove([2.5, 6.0], 0)      = [6.0]
-     * ArrayUtils.remove([2.5, 6.0], 1)      = [2.5]
-     * ArrayUtils.remove([2.5, 6.0, 3.8], 1) = [2.5, 3.8]
+     * remove([1.1], 0)           = []
+     * remove([2.5, 6.0], 0)      = [6.0]
+     * remove([2.5, 6.0], 1)      = [2.5]
+     * remove([2.5, 6.0, 3.8], 1) = [2.5, 3.8]
      * </pre>
      * 
      * @param array
@@ -13403,11 +13402,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.removeElement(null, 1.1)            = null
-     * ArrayUtils.removeElement([], 1.1)              = []
-     * ArrayUtils.removeElement([1.1], 1.2)           = [1.1]
-     * ArrayUtils.removeElement([1.1, 2.3], 1.1)      = [2.3]
-     * ArrayUtils.removeElement([1.1, 2.3, 1.1], 1.1) = [2.3, 1.1]
+     * removeElement(null, 1.1)            = null
+     * removeElement([], 1.1)              = []
+     * removeElement([1.1], 1.2)           = [1.1]
+     * removeElement([1.1, 2.3], 1.1)      = [2.3]
+     * removeElement([1.1, 2.3, 1.1], 1.1) = [2.3, 1.1]
      * </pre>
      * 
      * @param array
@@ -13445,10 +13444,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.remove([1.1], 0)           = []
-     * ArrayUtils.remove([2.5, 6.0], 0)      = [6.0]
-     * ArrayUtils.remove([2.5, 6.0], 1)      = [2.5]
-     * ArrayUtils.remove([2.5, 6.0, 3.8], 1) = [2.5, 3.8]
+     * remove([1.1], 0)           = []
+     * remove([2.5, 6.0], 0)      = [6.0]
+     * remove([2.5, 6.0], 1)      = [2.5]
+     * remove([2.5, 6.0, 3.8], 1) = [2.5, 3.8]
      * </pre>
      * 
      * @param array
@@ -13482,11 +13481,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.removeElement(null, 1.1)            = null
-     * ArrayUtils.removeElement([], 1.1)              = []
-     * ArrayUtils.removeElement([1.1], 1.2)           = [1.1]
-     * ArrayUtils.removeElement([1.1, 2.3], 1.1)      = [2.3]
-     * ArrayUtils.removeElement([1.1, 2.3, 1.1], 1.1) = [2.3, 1.1]
+     * removeElement(null, 1.1)            = null
+     * removeElement([], 1.1)              = []
+     * removeElement([1.1], 1.2)           = [1.1]
+     * removeElement([1.1, 2.3], 1.1)      = [2.3]
+     * removeElement([1.1, 2.3, 1.1], 1.1) = [2.3, 1.1]
      * </pre>
      * 
      * @param array
@@ -13524,10 +13523,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.remove([1], 0)         = []
-     * ArrayUtils.remove([2, 6], 0)      = [6]
-     * ArrayUtils.remove([2, 6], 1)      = [2]
-     * ArrayUtils.remove([2, 6, 3], 1)   = [2, 3]
+     * remove([1], 0)         = []
+     * remove([2, 6], 0)      = [6]
+     * remove([2, 6], 1)      = [2]
+     * remove([2, 6, 3], 1)   = [2, 3]
      * </pre>
      * 
      * @param array
@@ -13561,11 +13560,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.removeElement(null, 1)      = null
-     * ArrayUtils.removeElement([], 1)        = []
-     * ArrayUtils.removeElement([1], 2)       = [1]
-     * ArrayUtils.removeElement([1, 3], 1)    = [3]
-     * ArrayUtils.removeElement([1, 3, 1], 1) = [3, 1]
+     * removeElement(null, 1)      = null
+     * removeElement([], 1)        = []
+     * removeElement([1], 2)       = [1]
+     * removeElement([1, 3], 1)    = [3]
+     * removeElement([1, 3, 1], 1) = [3, 1]
      * </pre>
      * 
      * @param array
@@ -13603,10 +13602,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.remove([1], 0)         = []
-     * ArrayUtils.remove([2, 6], 0)      = [6]
-     * ArrayUtils.remove([2, 6], 1)      = [2]
-     * ArrayUtils.remove([2, 6, 3], 1)   = [2, 3]
+     * remove([1], 0)         = []
+     * remove([2, 6], 0)      = [6]
+     * remove([2, 6], 1)      = [2]
+     * remove([2, 6, 3], 1)   = [2, 3]
      * </pre>
      * 
      * @param array
@@ -13640,11 +13639,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.removeElement(null, 1)      = null
-     * ArrayUtils.removeElement([], 1)        = []
-     * ArrayUtils.removeElement([1], 2)       = [1]
-     * ArrayUtils.removeElement([1, 3], 1)    = [3]
-     * ArrayUtils.removeElement([1, 3, 1], 1) = [3, 1]
+     * removeElement(null, 1)      = null
+     * removeElement([], 1)        = []
+     * removeElement([1], 2)       = [1]
+     * removeElement([1, 3], 1)    = [3]
+     * removeElement([1, 3, 1], 1) = [3, 1]
      * </pre>
      * 
      * @param array
@@ -13682,10 +13681,10 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.remove([1], 0)         = []
-     * ArrayUtils.remove([2, 6], 0)      = [6]
-     * ArrayUtils.remove([2, 6], 1)      = [2]
-     * ArrayUtils.remove([2, 6, 3], 1)   = [2, 3]
+     * remove([1], 0)         = []
+     * remove([2, 6], 0)      = [6]
+     * remove([2, 6], 1)      = [2]
+     * remove([2, 6, 3], 1)   = [2, 3]
      * </pre>
      * 
      * @param array
@@ -13719,11 +13718,11 @@ public final class Functions {
      * </p>
      * 
      * <pre>
-     * ArrayUtils.removeElement(null, 1)      = null
-     * ArrayUtils.removeElement([], 1)        = []
-     * ArrayUtils.removeElement([1], 2)       = [1]
-     * ArrayUtils.removeElement([1, 3], 1)    = [3]
-     * ArrayUtils.removeElement([1, 3, 1], 1) = [3, 1]
+     * removeElement(null, 1)      = null
+     * removeElement([], 1)        = []
+     * removeElement([1], 2)       = [1]
+     * removeElement([1, 3], 1)    = [3]
+     * removeElement([1, 3, 1], 1) = [3, 1]
      * </pre>
      * 
      * @param array
@@ -35613,5 +35612,509 @@ public final class Functions {
             throw new EOFException("Bytes to skip: " + toSkip + " actual: "
                     + skipped);
         }
+    }
+
+    // ///////////////////////////////////////////
+    //
+    // EndianUtils
+    //
+    // ///////////////////////////////////////////
+
+    /**
+     * Converts a "short" value between endian systems.
+     * 
+     * @param value
+     *            value to convert
+     * @return the converted value
+     */
+    public static short swapShort(short value) {
+        return (short) ((((value >> 0) & 0xff) << 8) + (((value >> 8) & 0xff) << 0));
+    }
+
+    /**
+     * Converts a "int" value between endian systems.
+     * 
+     * @param value
+     *            value to convert
+     * @return the converted value
+     */
+    public static int swapInteger(int value) {
+        return (((value >> 0) & 0xff) << 24) + (((value >> 8) & 0xff) << 16)
+                + (((value >> 16) & 0xff) << 8) + (((value >> 24) & 0xff) << 0);
+    }
+
+    /**
+     * Converts a "long" value between endian systems.
+     * 
+     * @param value
+     *            value to convert
+     * @return the converted value
+     */
+    public static long swapLong(long value) {
+        return (((value >> 0) & 0xff) << 56) + (((value >> 8) & 0xff) << 48)
+                + (((value >> 16) & 0xff) << 40)
+                + (((value >> 24) & 0xff) << 32)
+                + (((value >> 32) & 0xff) << 24)
+                + (((value >> 40) & 0xff) << 16)
+                + (((value >> 48) & 0xff) << 8) + (((value >> 56) & 0xff) << 0);
+    }
+
+    /**
+     * Converts a "float" value between endian systems.
+     * 
+     * @param value
+     *            value to convert
+     * @return the converted value
+     */
+    public static float swapFloat(float value) {
+        return Float.intBitsToFloat(swapInteger(Float.floatToIntBits(value)));
+    }
+
+    /**
+     * Converts a "double" value between endian systems.
+     * 
+     * @param value
+     *            value to convert
+     * @return the converted value
+     */
+    public static double swapDouble(double value) {
+        return Double
+                .longBitsToDouble(swapLong(Double.doubleToLongBits(value)));
+    }
+
+    // ========================================== Swapping read/write routines
+
+    /**
+     * Writes a "short" value to a byte array at a given offset. The value is
+     * converted to the opposed endian system while writing.
+     * 
+     * @param data
+     *            target byte array
+     * @param offset
+     *            starting offset in the byte array
+     * @param value
+     *            value to write
+     */
+    public static void writeSwappedShort(byte[] data, int offset, short value) {
+        data[offset + 0] = (byte) ((value >> 0) & 0xff);
+        data[offset + 1] = (byte) ((value >> 8) & 0xff);
+    }
+
+    /**
+     * Reads a "short" value from a byte array at a given offset. The value is
+     * converted to the opposed endian system while reading.
+     * 
+     * @param data
+     *            source byte array
+     * @param offset
+     *            starting offset in the byte array
+     * @return the value read
+     */
+    public static short readSwappedShort(byte[] data, int offset) {
+        return (short) (((data[offset + 0] & 0xff) << 0) + ((data[offset + 1] & 0xff) << 8));
+    }
+
+    /**
+     * Reads an unsigned short (16-bit) value from a byte array at a given
+     * offset. The value is converted to the opposed endian system while
+     * reading.
+     * 
+     * @param data
+     *            source byte array
+     * @param offset
+     *            starting offset in the byte array
+     * @return the value read
+     */
+    public static int readSwappedUnsignedShort(byte[] data, int offset) {
+        return (((data[offset + 0] & 0xff) << 0) + ((data[offset + 1] & 0xff) << 8));
+    }
+
+    /**
+     * Writes a "int" value to a byte array at a given offset. The value is
+     * converted to the opposed endian system while writing.
+     * 
+     * @param data
+     *            target byte array
+     * @param offset
+     *            starting offset in the byte array
+     * @param value
+     *            value to write
+     */
+    public static void writeSwappedInteger(byte[] data, int offset, int value) {
+        data[offset + 0] = (byte) ((value >> 0) & 0xff);
+        data[offset + 1] = (byte) ((value >> 8) & 0xff);
+        data[offset + 2] = (byte) ((value >> 16) & 0xff);
+        data[offset + 3] = (byte) ((value >> 24) & 0xff);
+    }
+
+    /**
+     * Reads a "int" value from a byte array at a given offset. The value is
+     * converted to the opposed endian system while reading.
+     * 
+     * @param data
+     *            source byte array
+     * @param offset
+     *            starting offset in the byte array
+     * @return the value read
+     */
+    public static int readSwappedInteger(byte[] data, int offset) {
+        return (((data[offset + 0] & 0xff) << 0)
+                + ((data[offset + 1] & 0xff) << 8)
+                + ((data[offset + 2] & 0xff) << 16) + ((data[offset + 3] & 0xff) << 24));
+    }
+
+    /**
+     * Reads an unsigned integer (32-bit) value from a byte array at a given
+     * offset. The value is converted to the opposed endian system while
+     * reading.
+     * 
+     * @param data
+     *            source byte array
+     * @param offset
+     *            starting offset in the byte array
+     * @return the value read
+     */
+    public static long readSwappedUnsignedInteger(byte[] data, int offset) {
+        long low = (((data[offset + 0] & 0xff) << 0)
+                + ((data[offset + 1] & 0xff) << 8) + ((data[offset + 2] & 0xff) << 16));
+
+        long high = data[offset + 3] & 0xff;
+
+        return (high << 24) + (0xffffffffL & low);
+    }
+
+    /**
+     * Writes a "long" value to a byte array at a given offset. The value is
+     * converted to the opposed endian system while writing.
+     * 
+     * @param data
+     *            target byte array
+     * @param offset
+     *            starting offset in the byte array
+     * @param value
+     *            value to write
+     */
+    public static void writeSwappedLong(byte[] data, int offset, long value) {
+        data[offset + 0] = (byte) ((value >> 0) & 0xff);
+        data[offset + 1] = (byte) ((value >> 8) & 0xff);
+        data[offset + 2] = (byte) ((value >> 16) & 0xff);
+        data[offset + 3] = (byte) ((value >> 24) & 0xff);
+        data[offset + 4] = (byte) ((value >> 32) & 0xff);
+        data[offset + 5] = (byte) ((value >> 40) & 0xff);
+        data[offset + 6] = (byte) ((value >> 48) & 0xff);
+        data[offset + 7] = (byte) ((value >> 56) & 0xff);
+    }
+
+    /**
+     * Reads a "long" value from a byte array at a given offset. The value is
+     * converted to the opposed endian system while reading.
+     * 
+     * @param data
+     *            source byte array
+     * @param offset
+     *            starting offset in the byte array
+     * @return the value read
+     */
+    public static long readSwappedLong(byte[] data, int offset) {
+        long low = ((data[offset + 0] & 0xff) << 0)
+                + ((data[offset + 1] & 0xff) << 8)
+                + ((data[offset + 2] & 0xff) << 16)
+                + ((data[offset + 3] & 0xff) << 24);
+        long high = ((data[offset + 4] & 0xff) << 0)
+                + ((data[offset + 5] & 0xff) << 8)
+                + ((data[offset + 6] & 0xff) << 16)
+                + ((data[offset + 7] & 0xff) << 24);
+        return (high << 32) + (0xffffffffL & low);
+    }
+
+    /**
+     * Writes a "float" value to a byte array at a given offset. The value is
+     * converted to the opposed endian system while writing.
+     * 
+     * @param data
+     *            target byte array
+     * @param offset
+     *            starting offset in the byte array
+     * @param value
+     *            value to write
+     */
+    public static void writeSwappedFloat(byte[] data, int offset, float value) {
+        writeSwappedInteger(data, offset, Float.floatToIntBits(value));
+    }
+
+    /**
+     * Reads a "float" value from a byte array at a given offset. The value is
+     * converted to the opposed endian system while reading.
+     * 
+     * @param data
+     *            source byte array
+     * @param offset
+     *            starting offset in the byte array
+     * @return the value read
+     */
+    public static float readSwappedFloat(byte[] data, int offset) {
+        return Float.intBitsToFloat(readSwappedInteger(data, offset));
+    }
+
+    /**
+     * Writes a "double" value to a byte array at a given offset. The value is
+     * converted to the opposed endian system while writing.
+     * 
+     * @param data
+     *            target byte array
+     * @param offset
+     *            starting offset in the byte array
+     * @param value
+     *            value to write
+     */
+    public static void writeSwappedDouble(byte[] data, int offset, double value) {
+        writeSwappedLong(data, offset, Double.doubleToLongBits(value));
+    }
+
+    /**
+     * Reads a "double" value from a byte array at a given offset. The value is
+     * converted to the opposed endian system while reading.
+     * 
+     * @param data
+     *            source byte array
+     * @param offset
+     *            starting offset in the byte array
+     * @return the value read
+     */
+    public static double readSwappedDouble(byte[] data, int offset) {
+        return Double.longBitsToDouble(readSwappedLong(data, offset));
+    }
+
+    /**
+     * Writes a "short" value to an OutputStream. The value is converted to the
+     * opposed endian system while writing.
+     * 
+     * @param output
+     *            target OutputStream
+     * @param value
+     *            value to write
+     * @throws IOException
+     *             in case of an I/O problem
+     */
+    public static void writeSwappedShort(OutputStream output, short value)
+            throws IOException {
+        output.write((byte) ((value >> 0) & 0xff));
+        output.write((byte) ((value >> 8) & 0xff));
+    }
+
+    /**
+     * Reads a "short" value from an InputStream. The value is converted to the
+     * opposed endian system while reading.
+     * 
+     * @param input
+     *            source InputStream
+     * @return the value just read
+     * @throws IOException
+     *             in case of an I/O problem
+     */
+    public static short readSwappedShort(InputStream input) throws IOException {
+        return (short) (((readInternal(input) & 0xff) << 0) + ((readInternal(input) & 0xff) << 8));
+    }
+
+    /**
+     * Reads a unsigned short (16-bit) from an InputStream. The value is
+     * converted to the opposed endian system while reading.
+     * 
+     * @param input
+     *            source InputStream
+     * @return the value just read
+     * @throws IOException
+     *             in case of an I/O problem
+     */
+    public static int readSwappedUnsignedShort(InputStream input)
+            throws IOException {
+        int value1 = readInternal(input);
+        int value2 = readInternal(input);
+
+        return (((value1 & 0xff) << 0) + ((value2 & 0xff) << 8));
+    }
+
+    /**
+     * Writes a "int" value to an OutputStream. The value is converted to the
+     * opposed endian system while writing.
+     * 
+     * @param output
+     *            target OutputStream
+     * @param value
+     *            value to write
+     * @throws IOException
+     *             in case of an I/O problem
+     */
+    public static void writeSwappedInteger(OutputStream output, int value)
+            throws IOException {
+        output.write((byte) ((value >> 0) & 0xff));
+        output.write((byte) ((value >> 8) & 0xff));
+        output.write((byte) ((value >> 16) & 0xff));
+        output.write((byte) ((value >> 24) & 0xff));
+    }
+
+    /**
+     * Reads a "int" value from an InputStream. The value is converted to the
+     * opposed endian system while reading.
+     * 
+     * @param input
+     *            source InputStream
+     * @return the value just read
+     * @throws IOException
+     *             in case of an I/O problem
+     */
+    public static int readSwappedInteger(InputStream input) throws IOException {
+        int value1 = readInternal(input);
+        int value2 = readInternal(input);
+        int value3 = readInternal(input);
+        int value4 = readInternal(input);
+
+        return ((value1 & 0xff) << 0) + ((value2 & 0xff) << 8)
+                + ((value3 & 0xff) << 16) + ((value4 & 0xff) << 24);
+    }
+
+    /**
+     * Reads a unsigned integer (32-bit) from an InputStream. The value is
+     * converted to the opposed endian system while reading.
+     * 
+     * @param input
+     *            source InputStream
+     * @return the value just read
+     * @throws IOException
+     *             in case of an I/O problem
+     */
+    public static long readSwappedUnsignedInteger(InputStream input)
+            throws IOException {
+        int value1 = readInternal(input);
+        int value2 = readInternal(input);
+        int value3 = readInternal(input);
+        int value4 = readInternal(input);
+
+        long low = (((value1 & 0xff) << 0) + ((value2 & 0xff) << 8) + ((value3 & 0xff) << 16));
+
+        long high = value4 & 0xff;
+
+        return (high << 24) + (0xffffffffL & low);
+    }
+
+    /**
+     * Writes a "long" value to an OutputStream. The value is converted to the
+     * opposed endian system while writing.
+     * 
+     * @param output
+     *            target OutputStream
+     * @param value
+     *            value to write
+     * @throws IOException
+     *             in case of an I/O problem
+     */
+    public static void writeSwappedLong(OutputStream output, long value)
+            throws IOException {
+        output.write((byte) ((value >> 0) & 0xff));
+        output.write((byte) ((value >> 8) & 0xff));
+        output.write((byte) ((value >> 16) & 0xff));
+        output.write((byte) ((value >> 24) & 0xff));
+        output.write((byte) ((value >> 32) & 0xff));
+        output.write((byte) ((value >> 40) & 0xff));
+        output.write((byte) ((value >> 48) & 0xff));
+        output.write((byte) ((value >> 56) & 0xff));
+    }
+
+    /**
+     * Reads a "long" value from an InputStream. The value is converted to the
+     * opposed endian system while reading.
+     * 
+     * @param input
+     *            source InputStream
+     * @return the value just read
+     * @throws IOException
+     *             in case of an I/O problem
+     */
+    public static long readSwappedLong(InputStream input) throws IOException {
+        byte[] bytes = new byte[8];
+        for (int i = 0; i < 8; i++) {
+            bytes[i] = (byte) readInternal(input);
+        }
+        return readSwappedLong(bytes, 0);
+    }
+
+    /**
+     * Writes a "float" value to an OutputStream. The value is converted to the
+     * opposed endian system while writing.
+     * 
+     * @param output
+     *            target OutputStream
+     * @param value
+     *            value to write
+     * @throws IOException
+     *             in case of an I/O problem
+     */
+    public static void writeSwappedFloat(OutputStream output, float value)
+            throws IOException {
+        writeSwappedInteger(output, Float.floatToIntBits(value));
+    }
+
+    /**
+     * Reads a "float" value from an InputStream. The value is converted to the
+     * opposed endian system while reading.
+     * 
+     * @param input
+     *            source InputStream
+     * @return the value just read
+     * @throws IOException
+     *             in case of an I/O problem
+     */
+    public static float readSwappedFloat(InputStream input) throws IOException {
+        return Float.intBitsToFloat(readSwappedInteger(input));
+    }
+
+    /**
+     * Writes a "double" value to an OutputStream. The value is converted to the
+     * opposed endian system while writing.
+     * 
+     * @param output
+     *            target OutputStream
+     * @param value
+     *            value to write
+     * @throws IOException
+     *             in case of an I/O problem
+     */
+    public static void writeSwappedDouble(OutputStream output, double value)
+            throws IOException {
+        writeSwappedLong(output, Double.doubleToLongBits(value));
+    }
+
+    /**
+     * Reads a "double" value from an InputStream. The value is converted to the
+     * opposed endian system while reading.
+     * 
+     * @param input
+     *            source InputStream
+     * @return the value just read
+     * @throws IOException
+     *             in case of an I/O problem
+     */
+    public static double readSwappedDouble(InputStream input)
+            throws IOException {
+        return Double.longBitsToDouble(readSwappedLong(input));
+    }
+
+    /**
+     * Reads the next byte from the input stream.
+     * 
+     * @param input
+     *            the stream
+     * @return the byte
+     * @throws IOException
+     *             if the end of file is reached
+     */
+    private static int readInternal(InputStream input) throws IOException {
+        int value = input.read();
+
+        if (-1 == value) {
+            throw new EOFException("Unexpected EOF reached");
+        }
+
+        return value;
     }
 }
