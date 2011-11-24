@@ -61,6 +61,8 @@ import java.util.WeakHashMap;
  */
 public abstract class ToStringStyle implements Serializable {
 
+    private static final long serialVersionUID = -2934853005494541201L;
+
     /**
      * The default toString style. Using the Using the <code>Person</code>
      * example from {@link ToStringBuilder}, the output would look like this:

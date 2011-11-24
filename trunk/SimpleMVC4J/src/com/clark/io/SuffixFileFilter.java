@@ -34,6 +34,8 @@ import java.util.List;
 public class SuffixFileFilter extends AbstractFileFilter implements
         Serializable {
 
+    private static final long serialVersionUID = -5305906058256694172L;
+
     /** The filename suffixes to search for */
     private final String[] suffixes;
 
