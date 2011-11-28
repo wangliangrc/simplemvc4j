@@ -23,6 +23,7 @@ public class Facade {
     }
 
     private HashMap<String, Set<Function>> hashMap = new HashMap<String, Set<Function>>();
+    private UIWorker worker;
 
     synchronized void register(String name, Function function) {
         if (name != null && function != null) {
@@ -42,13 +43,31 @@ public class Facade {
         hashMap.remove(name);
     }
 
-    synchronized void notify(Notification notification) {
+    synchronized void setWorker(UIWorker worker) {
+        this.worker = worker;
+    }
+
+    synchronized void notify(final Notification notification) {
         if (notification != null) {
-            Set<Function> set = hashMap.get(notification.name);
-            if (set != null && set.size() > 0) {
-                for (Function function : set) {
-                    function.onNotification(notification);
-                }
+            if (worker != null) {
+                worker.postTask(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        notifyInternal(notification);
+                    }
+                });
+            } else {
+                notifyInternal(notification);
+            }
+        }
+    }
+
+    private void notifyInternal(Notification notification) {
+        Set<Function> set = hashMap.get(notification.name);
+        if (set != null && set.size() > 0) {
+            for (Function function : set) {
+                function.onNotification(notification);
             }
         }
     }
