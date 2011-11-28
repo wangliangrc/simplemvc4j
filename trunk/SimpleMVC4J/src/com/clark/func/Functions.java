@@ -106,7 +106,6 @@ import com.clark.lang.FastDateFormat;
 import com.clark.lang.SerializationException;
 import com.clark.lang.ToStringBuilder;
 import com.clark.lang.ToStringStyle;
-import com.sun.xml.internal.ws.util.StringUtils;
 
 public final class Functions {
 
@@ -6668,7 +6667,7 @@ public final class Functions {
      *            the default CharSequence to return if the input is empty ("")
      *            or <code>null</code>, may be null
      * @return the passed in CharSequence, or the default
-     * @see StringUtils#defaultString(String, String)
+     * @see defaultString(String, String)
      */
     public static <T extends CharSequence> T defaultIfEmpty(T str, T defaultStr) {
         return isEmpty(str) ? defaultStr : str;
@@ -16838,7 +16837,7 @@ public final class Functions {
      * ObjectUtils.toString(Boolean.TRUE) = "true"
      * </pre>
      * 
-     * @see StringUtils#defaultString(String)
+     * @see defaultString(String)
      * @see String#valueOf(Object)
      * @param obj
      *            the Object to <code>toString</code>, may be null
@@ -16864,7 +16863,7 @@ public final class Functions {
      * ObjectUtils.toString(Boolean.TRUE, "null") = "true"
      * </pre>
      * 
-     * @see StringUtils#defaultString(String,String)
+     * @see defaultString(String,String)
      * @see String#valueOf(Object)
      * @param obj
      *            the Object to <code>toString</code>, may be null
