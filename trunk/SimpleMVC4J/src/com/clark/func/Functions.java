@@ -109,9 +109,89 @@ import com.clark.lang.ToStringStyle;
 import com.sun.xml.internal.ws.util.StringUtils;
 
 public final class Functions {
+
     // ///////////////////////////////////////////
     //
-    // StringUtils
+    // Thread
+    //
+    // ///////////////////////////////////////////
+
+    public static Thread currentThread() {
+        return Thread.currentThread();
+    }
+
+    public static boolean isCurrentHoldsLock(Object lockObj) {
+        return Thread.holdsLock(lockObj);
+    }
+
+    public static void currentYield() {
+        Thread.yield();
+    }
+
+    public static void setCurrentUncaughtExceptionHandler(
+            Thread.UncaughtExceptionHandler handler) {
+        Thread.currentThread().setUncaughtExceptionHandler(handler);
+    }
+
+    public static Thread.UncaughtExceptionHandler getCurrentUncaughtExceptionHandler() {
+        return Thread.currentThread().getUncaughtExceptionHandler();
+    }
+
+    public static void currentSleep(long millis)
+            throws InterruptedException {
+        Thread.sleep(millis);
+    }
+
+    public static Thread.State getCurrentState() {
+        return Thread.currentThread().getState();
+    }
+
+    // ///////////////////////////////////////////
+    //
+    // Runtime
+    //
+    // ///////////////////////////////////////////
+
+    public static int availableProcessors() {
+        return Runtime.getRuntime().availableProcessors();
+    }
+
+    public static void loadLibraryPath(String filePath) {
+        Runtime.getRuntime().load(filePath);
+    }
+
+    public static void loadLibrary(String libName) {
+        Runtime.getRuntime().loadLibrary(libName);
+    }
+
+    public static long freeMemory() {
+        return Runtime.getRuntime().freeMemory();
+    }
+
+    public static long maxMemory() {
+        return Runtime.getRuntime().maxMemory();
+    }
+
+    public static long totalMemory() {
+        return Runtime.getRuntime().totalMemory();
+    }
+
+    public static void addShutdownHook(Thread hook) {
+        Runtime.getRuntime().addShutdownHook(hook);
+    }
+
+    public static void removeShutdownHook(Thread hook) {
+        Runtime.getRuntime().removeShutdownHook(hook);
+    }
+
+    public static Process execExternalCmd(String[] cmd, String[] envp, File dir)
+            throws IOException {
+        return Runtime.getRuntime().exec(cmd, envp, dir);
+    }
+
+    // ///////////////////////////////////////////
+    //
+    // System
     //
     // ///////////////////////////////////////////
 
@@ -189,6 +269,14 @@ public final class Functions {
 
     public static void println(Object x) {
         System.out.println(x);
+    }
+
+    public static void printf(Locale locale, String format, Object... args) {
+        System.out.printf(locale, format, args);
+    }
+
+    public static void printf(String format, Object... args) {
+        System.out.printf(format, args);
     }
 
     public static Console console() {
