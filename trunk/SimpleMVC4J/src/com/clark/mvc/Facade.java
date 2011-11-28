@@ -43,7 +43,7 @@ public class Facade {
         hashMap.remove(name);
     }
 
-    synchronized void setWorker(UIWorker worker) {
+    synchronized void setWorker1(UIWorker worker) {
         this.worker = worker;
     }
 
@@ -79,6 +79,16 @@ public class Facade {
             hashMap.put(name, set);
         }
         return set;
+    }
+
+    /**
+     * 设置UI线程执行者。
+     * 
+     * @param worker
+     *            可以为 null。如果为 null 则表示 sendNotification 方法的执行线程与调用者线程一致。
+     */
+    public static void setWorker(UIWorker worker) {
+        getInstance().setWorker1(worker);
     }
 
     /**
