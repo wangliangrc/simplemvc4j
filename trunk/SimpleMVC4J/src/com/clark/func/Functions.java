@@ -187,6 +187,10 @@ public final class Functions {
         return Runtime.getRuntime().exec(cmd, envp, dir);
     }
 
+    public static Process execExternalCmd(String... cmd) throws IOException {
+        return Runtime.getRuntime().exec(cmd);
+    }
+
     // ///////////////////////////////////////////
     //
     // System
@@ -304,7 +308,7 @@ public final class Functions {
     //
     // ///////////////////////////////////////////
 
-    public static String stringFormat(String format, Object args) {
+    public static String stringFormat(String format, Object... args) {
         return String.format(format, args);
     }
 
@@ -34466,7 +34470,8 @@ public final class Functions {
      * @throws IOException
      *             if an I/O error occurs
      */
-    public static String inputStreamToString(InputStream input) throws IOException {
+    public static String inputStreamToString(InputStream input)
+            throws IOException {
         StringBuilderWriter sw = new StringBuilderWriter();
         copy(input, sw);
         return sw.toString();
@@ -34843,7 +34848,8 @@ public final class Functions {
      *             if an I/O error occurs
      * @since Commons IO 1.1
      */
-    public static void writeToWriter(byte[] data, Writer output) throws IOException {
+    public static void writeToWriter(byte[] data, Writer output)
+            throws IOException {
         if (data != null) {
             output.write(new String(data));
         }
@@ -34899,7 +34905,8 @@ public final class Functions {
      *             if an I/O error occurs
      * @since Commons IO 1.1
      */
-    public static void writeToWriter(char[] data, Writer output) throws IOException {
+    public static void writeToWriter(char[] data, Writer output)
+            throws IOException {
         if (data != null) {
             output.write(data);
         }
@@ -34953,8 +34960,8 @@ public final class Functions {
      *             if an I/O error occurs
      * @since Commons IO 1.1
      */
-    public static void writeToOutputStream(char[] data, OutputStream output, String encoding)
-            throws IOException {
+    public static void writeToOutputStream(char[] data, OutputStream output,
+            String encoding) throws IOException {
         if (data != null) {
             if (encoding == null) {
                 writeToOutputStream(data, output);
@@ -35003,8 +35010,8 @@ public final class Functions {
      *             if an I/O error occurs
      * @since Commons IO 2.0
      */
-    public static void writeToOutputStream(CharSequence data, OutputStream output)
-            throws IOException {
+    public static void writeToOutputStream(CharSequence data,
+            OutputStream output) throws IOException {
         if (data != null) {
             writeToOutputStream(data.toString(), output);
         }
@@ -35031,8 +35038,8 @@ public final class Functions {
      *             if an I/O error occurs
      * @since Commons IO 2.0
      */
-    public static void writeToOutputStream(CharSequence data, OutputStream output,
-            String encoding) throws IOException {
+    public static void writeToOutputStream(CharSequence data,
+            OutputStream output, String encoding) throws IOException {
         if (data != null) {
             writeToOutputStream(data.toString(), output, encoding);
         }
@@ -35053,7 +35060,8 @@ public final class Functions {
      *             if an I/O error occurs
      * @since Commons IO 1.1
      */
-    public static void writeToWriter(String data, Writer output) throws IOException {
+    public static void writeToWriter(String data, Writer output)
+            throws IOException {
         if (data != null) {
             output.write(data);
         }
@@ -35104,8 +35112,8 @@ public final class Functions {
      *             if an I/O error occurs
      * @since Commons IO 1.1
      */
-    public static void writeToOutputStream(String data, OutputStream output, String encoding)
-            throws IOException {
+    public static void writeToOutputStream(String data, OutputStream output,
+            String encoding) throws IOException {
         if (data != null) {
             if (encoding == null) {
                 writeToOutputStream(data, output);
@@ -35158,8 +35166,8 @@ public final class Functions {
      * @deprecated replaced by write(CharSequence, OutputStream)
      */
     @Deprecated
-    public static void writeToOutputStream(StringBuffer data, OutputStream output)
-            throws IOException {
+    public static void writeToOutputStream(StringBuffer data,
+            OutputStream output) throws IOException {
         if (data != null) {
             output.write(data.toString().getBytes());
         }
@@ -35188,8 +35196,8 @@ public final class Functions {
      * @deprecated replaced by write(CharSequence, OutputStream, String)
      */
     @Deprecated
-    public static void writeToOutputStream(StringBuffer data, OutputStream output,
-            String encoding) throws IOException {
+    public static void writeToOutputStream(StringBuffer data,
+            OutputStream output, String encoding) throws IOException {
         if (data != null) {
             if (encoding == null) {
                 writeToOutputStream(data, output);
