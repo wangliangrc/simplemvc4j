@@ -281,6 +281,93 @@ public final class Functions {
         System.out.printf(format, args);
     }
 
+    // ////////////////////////////////////////////////////
+    public static void errPrint(boolean b) {
+        System.err.print(b);
+    }
+
+    public static void errPrint(char c) {
+        System.err.print(c);
+    }
+
+    public static void errPrint(int i) {
+        System.err.print(i);
+    }
+
+    public static void errPrint(long l) {
+        System.err.print(l);
+    }
+
+    public static void errPrint(float f) {
+        System.err.print(f);
+    }
+
+    public static void errPrint(double d) {
+        System.err.print(d);
+    }
+
+    public static void errPrint(char s[]) {
+        System.err.print(s);
+    }
+
+    public static void errPrint(String s) {
+        System.err.print(s);
+    }
+
+    public static void errPrint(Object obj) {
+        System.err.print(obj);
+    }
+
+    public static void errPrintln() {
+        System.err.println();
+    }
+
+    public static void errPrintln(boolean x) {
+        System.err.println(x);
+    }
+
+    public static void errPrintln(char x) {
+        System.err.println(x);
+    }
+
+    public static void errPrintln(int x) {
+        System.err.println(x);
+    }
+
+    public static void errPrintln(long x) {
+        System.err.println(x);
+    }
+
+    public static void errPrintln(float x) {
+        System.err.println(x);
+    }
+
+    public static void errPrintln(double x) {
+        System.err.println(x);
+    }
+
+    public static void errPrintln(char x[]) {
+        System.err.println(x);
+    }
+
+    public static void errPrintln(String x) {
+        System.err.println(x);
+    }
+
+    public static void errPrintln(Object x) {
+        System.err.println(x);
+    }
+
+    public static void errPrintf(Locale locale, String format, Object... args) {
+        System.err.printf(locale, format, args);
+    }
+
+    public static void errPrintf(String format, Object... args) {
+        System.err.printf(format, args);
+    }
+
+    // /////////////////////////////////////////////////////
+
     public static Console console() {
         return System.console();
     }
