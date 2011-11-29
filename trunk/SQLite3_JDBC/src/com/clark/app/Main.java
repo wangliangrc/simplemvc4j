@@ -1,47 +1,51 @@
 package com.clark.app;
 
+import static com.clark.func.Functions.closeQuietly;
+import static com.clark.func.Functions.print;
+import static com.clark.func.Functions.println;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
         Class.forName("org.sqlite.JDBC");
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:test.db");
+        Connection conn = DriverManager
+                .getConnection("jdbc:sqlite:sina_weibo.db");
         Statement stat = conn.createStatement();
-        // stat.executeUpdate("drop table if exists people;");
-        // stat.executeUpdate("create table people (name, occupation);");
-        // PreparedStatement prep = conn
-        // .prepareStatement("insert into people values (?, ?);");
-        //
-        // prep.setString(1, "Gandhi");
-        // prep.setString(2, "politics");
-        // prep.addBatch();
-        // prep.setString(1, "Turing");
-        // prep.setString(2, "computers");
-        // prep.addBatch();
-        // prep.setString(1, "Wittgenstein");
-        // prep.setString(2, "smartypants");
-        // prep.addBatch();
-        //
-        // conn.setAutoCommit(false);
-        // prep.executeBatch();
-        // conn.setAutoCommit(true);
-        //
-        // ResultSet rs = stat.executeQuery("select * from people;");
-        // while (rs.next()) {
-        // System.out.println("name = " + rs.getString("name"));
-        // System.out.println("job = " + rs.getString("occupation"));
-        // }
-        // rs.close();
-        ResultSet rs = stat.executeQuery("PRAGMA database_list;");
-        while(rs.next()) {
-            System.out.println(rs.getString(3));
+//        ResultSet rs = stat.executeQuery("PRAGMA database_list;");
+//        ResultSet rs = stat.executeQuery("PRAGMA index_info;");
+        ResultSet rs = stat.executeQuery("SELECT * FROM sqlite_master;");
+        ResultSetMetaData metaData = rs.getMetaData();
+        try {
+            int columnCount = metaData.getColumnCount();
+            for (int i = 1; i <= columnCount; i++) {
+                if (i > 1) {
+                    print("\t");
+                }
+                print(metaData.getColumnName(i));
+                print("(");
+                print(metaData.getColumnTypeName(i));
+                print(")");
+            }
+            println();
+            while (rs.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    if (i > 1) {
+                        print("\t");
+                    }
+                    print(rs.getString(i));
+                }
+                println();
+            }
+        } finally {
+            closeQuietly(rs);
+            closeQuietly(conn);
         }
-        rs.close();
-        conn.close();
     }
 
 }
