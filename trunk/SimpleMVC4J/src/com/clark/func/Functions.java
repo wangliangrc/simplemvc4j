@@ -136,8 +136,7 @@ public final class Functions {
         return Thread.currentThread().getUncaughtExceptionHandler();
     }
 
-    public static void currentSleep(long millis)
-            throws InterruptedException {
+    public static void currentSleep(long millis) throws InterruptedException {
         Thread.sleep(millis);
     }
 
@@ -304,6 +303,10 @@ public final class Functions {
     // StringUtils
     //
     // ///////////////////////////////////////////
+
+    public static String stringFormat(String format, Object args) {
+        return String.format(format, args);
+    }
 
     /**
      * The empty String <code>""</code>.
