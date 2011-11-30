@@ -17,9 +17,7 @@ public class Main {
         Connection conn = DriverManager
                 .getConnection("jdbc:sqlite:sina_weibo.db");
         Statement stat = conn.createStatement();
-//        ResultSet rs = stat.executeQuery("PRAGMA database_list;");
-//        ResultSet rs = stat.executeQuery("PRAGMA index_info;");
-        ResultSet rs = stat.executeQuery("SELECT * FROM sqlite_master;");
+        ResultSet rs = stat.executeQuery("PRAGMA database_list;");
         ResultSetMetaData metaData = rs.getMetaData();
         try {
             int columnCount = metaData.getColumnCount();
