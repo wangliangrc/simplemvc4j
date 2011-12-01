@@ -6,30 +6,16 @@ import java.lang.reflect.Modifier;
 
 import android.os.Bundle;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
-import android.view.View.OnKeyListener;
-import android.view.View.OnLongClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.AbsListView.RecyclerListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.clark.android.annotation.AfterAttachedWindow;
 import com.clark.android.annotation.BeforeDetachedWindow;
 import com.clark.android.annotation.ViewListener;
 import com.clark.android.annotation.ViewProperty;
 
-public abstract class Activity extends android.app.Activity implements
-        OnClickListener, OnFocusChangeListener, OnKeyListener,
-        OnLongClickListener, OnTouchListener, OnItemClickListener,
-        OnItemLongClickListener, OnItemSelectedListener, OnScrollListener,
-        RecyclerListener {
+public abstract class SimpleActivity extends android.app.Activity{
     private Class<?> thisClass;
     private volatile boolean isAttachedToWindow;
 
@@ -47,6 +33,10 @@ public abstract class Activity extends android.app.Activity implements
     }
 
     private void findViewAndSetListeners() {
+        final ListenerAdapter viewAdapter = getViewAdapter();
+        if(viewAdapter == null) {
+            throw new NullPointerException("ViewAdapter can't be null!");
+        }
         ViewProperty property = null;
         ViewListener[] listeners = null;
         View view = null;
@@ -70,37 +60,37 @@ public abstract class Activity extends android.app.Activity implements
                     for (ViewListener listener : listeners) {
                         switch (listener) {
                             case ON_CLICK:
-                                view.setOnClickListener(this);
+                                view.setOnClickListener(viewAdapter);
                                 break;
                             case ON_FOCUS_CHANGE:
-                                view.setOnFocusChangeListener(this);
+                                view.setOnFocusChangeListener(viewAdapter);
                                 break;
                             case ON_KEY:
-                                view.setOnKeyListener(this);
+                                view.setOnKeyListener(viewAdapter);
                                 break;
                             case ON_LONG_CLICK:
-                                view.setOnLongClickListener(this);
+                                view.setOnLongClickListener(viewAdapter);
                                 break;
                             case ON_TOUCH:
-                                view.setOnTouchListener(this);
+                                view.setOnTouchListener(viewAdapter);
                                 break;
                             case ON_ITEM_CLICK:
                                 ((AdapterView<?>) view)
-                                        .setOnItemClickListener(this);
+                                        .setOnItemClickListener(viewAdapter);
                                 break;
                             case ON_ITEM_LONG_CLICK:
                                 ((AdapterView<?>) view)
-                                        .setOnItemLongClickListener(this);
+                                        .setOnItemLongClickListener(viewAdapter);
                                 break;
                             case ON_ITEM_SELECTED:
                                 ((AdapterView<?>) view)
-                                        .setOnItemSelectedListener(this);
+                                        .setOnItemSelectedListener(viewAdapter);
                                 break;
                             case ON_SCROLL:
-                                ((AbsListView) view).setOnScrollListener(this);
+                                ((AbsListView) view).setOnScrollListener(viewAdapter);
                                 break;
                             case RECYCLER:
-                                ((AbsListView) view).setRecyclerListener(this);
+                                ((AbsListView) view).setRecyclerListener(viewAdapter);
                                 break;
                         }
                     }
@@ -164,6 +154,7 @@ public abstract class Activity extends android.app.Activity implements
     }
 
     protected abstract int layoutResId();
+    protected abstract ListenerAdapter getViewAdapter();
 
     @Override
     public void setContentView(View view) {

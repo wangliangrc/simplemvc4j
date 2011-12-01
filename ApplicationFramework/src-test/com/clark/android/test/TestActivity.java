@@ -1,51 +1,32 @@
 package com.clark.android.test;
 
 import static com.clark.func.Functions.println;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.Button;
 
-import com.clark.android.Activity;
 import com.clark.android.R;
+import com.clark.android.SimpleActivity;
+import com.clark.android.ListenerAdapter;
 import com.clark.android.annotation.AfterAttachedWindow;
 import com.clark.android.annotation.BeforeDetachedWindow;
 import com.clark.android.annotation.ViewListener;
 import com.clark.android.annotation.ViewProperty;
 
-public class TestActivity extends Activity {
-
+public class TestActivity extends SimpleActivity {
     @Override
-    public void onClick(View v) {
-        if (v == button) {
-            println("你点击了Button！");
-        }
-    }
+    protected ListenerAdapter getViewAdapter() {
+        return new ListenerAdapter() {
+            @Override
+            public void onClick(View v) {
+                println(v);
+            }
 
-    @Override
-    public void onFocusChange(View v, boolean hasFocus) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean onKey(View v, int keyCode, KeyEvent event) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        println("触发长按事件！");
-        return false;
-    }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        // TODO Auto-generated method stub
-        return false;
+            @Override
+            public boolean onLongClick(View v) {
+                println(v);
+                return false;
+            }
+        };
     }
 
     @Override
@@ -69,49 +50,4 @@ public class TestActivity extends Activity {
         println("testAttachedWindow");
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position,
-            long id) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view,
-            int position, long id) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position,
-            long id) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem,
-            int visibleItemCount, int totalItemCount) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void onMovedToScrapHeap(View view) {
-        // TODO Auto-generated method stub
-        
-    }
 }
