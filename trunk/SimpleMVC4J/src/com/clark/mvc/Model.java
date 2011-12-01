@@ -35,7 +35,7 @@ public class Model {
 
         String name = proxy.getProxyName();
         if (!hashMap.containsKey(name)) {
-            hashMap.put(name, proxy);
+            hashMap.put(name.intern(), proxy);
             System.out.println("register proxy: [" + proxy + "]");
         } else {
             System.err.println("Repeat registered proxy: [" + proxy + "]");

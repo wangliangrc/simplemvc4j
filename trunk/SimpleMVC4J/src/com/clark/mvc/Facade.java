@@ -76,7 +76,7 @@ public class Facade {
         Set<Function> set = hashMap.get(name);
         if (set == null) {
             set = new HashSet<Function>();
-            hashMap.put(name, set);
+            hashMap.put(name.intern(), set);
         }
         return set;
     }
