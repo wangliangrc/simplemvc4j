@@ -38,7 +38,7 @@ public abstract class SimpleActivity extends android.app.Activity {
     }
 
     private void findViewAndSetListeners() {
-        final ListenerAdapter viewAdapter = getViewAdapter();
+        final ListenerAdapter viewAdapter = getListenerAdapter();
         ViewProperty property = null;
         ViewListener[] listeners = null;
         View view = null;
@@ -161,7 +161,7 @@ public abstract class SimpleActivity extends android.app.Activity {
 
     protected abstract int layoutResId();
 
-    protected abstract ListenerAdapter getViewAdapter();
+    protected abstract ListenerAdapter getListenerAdapter();
 
     @Override
     public void setContentView(View view) {

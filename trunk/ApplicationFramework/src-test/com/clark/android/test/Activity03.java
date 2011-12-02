@@ -20,7 +20,7 @@ public class Activity03 extends SimpleActivity {
     }
 
     @Override
-    protected ListenerAdapter getViewAdapter() {
+    protected ListenerAdapter getListenerAdapter() {
         return new ListenerAdapter() {
             @Override
             public void onClick(View v) {
