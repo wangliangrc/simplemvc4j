@@ -6,10 +6,10 @@ import android.net.Uri;
 
 public final class OsHelper {
 
-    public static int match(IntentFilter filter, Intent intent) {
+    public static boolean match(IntentFilter filter, Intent intent) {
         Uri data = intent.getData();
-        String scheme = data.getScheme();
+        String scheme = data == null ? null : data.getScheme();
         return filter.match(intent.getAction(), intent.getType(), scheme, data,
-                intent.getCategories(), "OsHelper");
+                intent.getCategories(), "OsHelper") > 0;
     }
 }
