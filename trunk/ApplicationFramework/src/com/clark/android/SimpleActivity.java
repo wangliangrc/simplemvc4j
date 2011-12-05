@@ -8,11 +8,14 @@ import java.util.HashSet;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.DownloadManager;
+import android.app.FragmentManager;
 import android.app.KeyguardManager;
+import android.app.LoaderManager;
 import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.app.UiModeManager;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
@@ -120,10 +123,9 @@ public abstract class SimpleActivity extends android.app.Activity {
                         if (type == PackageManager.class) {
                             field.set(this, getPackageManager());
                         } else if (type == WindowManager.class) {
-                            field.set(this, getSystemService(WINDOW_SERVICE));
+                            field.set(this, getWindowManager());
                         } else if (type == LayoutInflater.class) {
-                            field.set(this,
-                                    getSystemService(LAYOUT_INFLATER_SERVICE));
+                            field.set(this, getLayoutInflater());
                         } else if (type == ActivityManager.class) {
                             field.set(this, getSystemService(ACTIVITY_SERVICE));
                         } else if (type == PowerManager.class) {
@@ -154,6 +156,14 @@ public abstract class SimpleActivity extends android.app.Activity {
                         } else if (Build.VERSION.SDK_INT >= 8
                                 && type == DownloadManager.class) {
                             field.set(this, getSystemService(DOWNLOAD_SERVICE));
+                        } else if (type == AssetManager.class) {
+                            field.set(this, getAssets());
+                        } else if (Build.VERSION.SDK_INT >= 11
+                                && type == FragmentManager.class) {
+                            field.set(this, getFragmentManager());
+                        } else if (Build.VERSION.SDK_INT >= 11
+                                && type == LoaderManager.class) {
+                            field.set(this, getLoaderManager());
                         }
                     } catch (Exception e) {
                         throw new IllegalStateException(e);
