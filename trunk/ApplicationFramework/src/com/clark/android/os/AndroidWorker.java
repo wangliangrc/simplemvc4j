@@ -42,7 +42,8 @@ public abstract class AndroidWorker<Params, Progress, Result> {
      */
     public static final Executor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(
             CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE, TimeUnit.SECONDS,
-            sPoolWorkQueue, sThreadFactory, new ThreadPoolExecutor.DiscardOldestPolicy());
+            sPoolWorkQueue, sThreadFactory,
+            new ThreadPoolExecutor.DiscardOldestPolicy());
 
     /**
      * An {@link Executor} that executes tasks one at a time in serial order.
@@ -419,8 +420,8 @@ public abstract class AndroidWorker<Params, Progress, Result> {
      * <p>
      * This method is typically used with {@link #THREAD_POOL_EXECUTOR} to allow
      * multiple tasks to run in parallel on a pool of threads managed by
-     * AndroidWorker, however you can also use your own {@link Executor} for custom
-     * behavior.
+     * AndroidWorker, however you can also use your own {@link Executor} for
+     * custom behavior.
      * 
      * <p>
      * <em>Warning:</em> Allowing multiple tasks to run in parallel from a

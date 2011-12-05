@@ -5,14 +5,32 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 
+import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.DownloadManager;
+import android.app.KeyguardManager;
+import android.app.NotificationManager;
+import android.app.SearchManager;
+import android.app.UiModeManager;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.os.Vibrator;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 
 import com.clark.android.annotation.AfterAttachedWindow;
 import com.clark.android.annotation.AfterInit;
+import com.clark.android.annotation.SystemManager;
 import com.clark.android.annotation.ViewListener;
 import com.clark.android.annotation.ViewProperty;
 
@@ -70,6 +88,8 @@ public abstract class SimpleActivity extends android.app.Activity {
         ViewProperty property = null;
         ViewListener[] listeners = null;
         View view = null;
+
+        SystemManager systemManager = null;
         if (fields != null) {
             for (Field field : fields) {
                 if (Modifier.isStatic(field.getModifiers())) {
@@ -90,6 +110,53 @@ public abstract class SimpleActivity extends android.app.Activity {
 
                     if (viewAdapter != null) {
                         findListeners(viewAdapter, listeners, view);
+                    }
+                }
+
+                systemManager = field.getAnnotation(SystemManager.class);
+                if (systemManager != null) {
+                    Class<?> type = field.getType();
+                    try {
+                        if (type == PackageManager.class) {
+                            field.set(this, getPackageManager());
+                        } else if (type == WindowManager.class) {
+                            field.set(this, getSystemService(WINDOW_SERVICE));
+                        } else if (type == LayoutInflater.class) {
+                            field.set(this,
+                                    getSystemService(LAYOUT_INFLATER_SERVICE));
+                        } else if (type == ActivityManager.class) {
+                            field.set(this, getSystemService(ACTIVITY_SERVICE));
+                        } else if (type == PowerManager.class) {
+                            field.set(this, getSystemService(POWER_SERVICE));
+                        } else if (type == AlarmManager.class) {
+                            field.set(this, getSystemService(ALARM_SERVICE));
+                        } else if (type == NotificationManager.class) {
+                            field.set(this,
+                                    getSystemService(NOTIFICATION_SERVICE));
+                        } else if (type == KeyguardManager.class) {
+                            field.set(this, getSystemService(KEYGUARD_SERVICE));
+                        } else if (type == LocationManager.class) {
+                            field.set(this, LOCATION_SERVICE);
+                        } else if (type == SearchManager.class) {
+                            field.set(this, getSystemService(SEARCH_SERVICE));
+                        } else if (type == Vibrator.class) {
+                            field.set(this, getSystemService(VIBRATOR_SERVICE));
+                        } else if (type == ConnectivityManager.class) {
+                            field.set(this,
+                                    getSystemService(CONNECTIVITY_SERVICE));
+                        } else if (type == WifiManager.class) {
+                            field.set(this, getSystemService(WIFI_SERVICE));
+                        } else if (type == InputMethodManager.class) {
+                            field.set(this,
+                                    getSystemService(INPUT_METHOD_SERVICE));
+                        } else if (type == UiModeManager.class) {
+                            field.set(this, getSystemService(UI_MODE_SERVICE));
+                        } else if (Build.VERSION.SDK_INT >= 8
+                                && type == DownloadManager.class) {
+                            field.set(this, getSystemService(DOWNLOAD_SERVICE));
+                        }
+                    } catch (Exception e) {
+                        throw new IllegalStateException(e);
                     }
                 }
             }
