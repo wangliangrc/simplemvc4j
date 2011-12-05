@@ -12,6 +12,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 
 import com.clark.android.annotation.AfterAttachedWindow;
+import com.clark.android.annotation.AfterInit;
 import com.clark.android.annotation.ViewListener;
 import com.clark.android.annotation.ViewProperty;
 
@@ -35,6 +36,33 @@ public abstract class SimpleActivity extends android.app.Activity {
         super.onCreate(savedInstanceState);
         setContentView(layoutResId());
         findViewAndSetListeners();
+        execOrPrepareMethods();
+    }
+
+    private void execOrPrepareMethods() {
+        if (methods != null && methods.length > 0) {
+            AfterAttachedWindow afterAttachedWindow = null;
+            AfterInit afterInit = null;
+            for (Method method : methods) {
+                if (Modifier.isStatic(method.getModifiers())) {
+                    continue;
+                }
+                afterAttachedWindow = method
+                        .getAnnotation(AfterAttachedWindow.class);
+                if (afterAttachedWindow != null) {
+                    attachedToWindowMethods.add(method);
+                }
+
+                afterInit = method.getAnnotation(AfterInit.class);
+                if (afterInit != null) {
+                    try {
+                        method.invoke(this);
+                    } catch (Exception e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+        }
     }
 
     private void findViewAndSetListeners() {
@@ -88,8 +116,7 @@ public abstract class SimpleActivity extends android.app.Activity {
                     view.setOnTouchListener(viewAdapter);
                     break;
                 case ON_ITEM_CLICK:
-                    ((AdapterView<?>) view)
-                            .setOnItemClickListener(viewAdapter);
+                    ((AdapterView<?>) view).setOnItemClickListener(viewAdapter);
                     break;
                 case ON_ITEM_LONG_CLICK:
                     ((AdapterView<?>) view)
@@ -100,12 +127,10 @@ public abstract class SimpleActivity extends android.app.Activity {
                             .setOnItemSelectedListener(viewAdapter);
                     break;
                 case ON_SCROLL:
-                    ((AbsListView) view)
-                            .setOnScrollListener(viewAdapter);
+                    ((AbsListView) view).setOnScrollListener(viewAdapter);
                     break;
                 case RECYCLER:
-                    ((AbsListView) view)
-                            .setRecyclerListener(viewAdapter);
+                    ((AbsListView) view).setRecyclerListener(viewAdapter);
                     break;
             }
         }
@@ -119,32 +144,16 @@ public abstract class SimpleActivity extends android.app.Activity {
     }
 
     private void afterAttachedWindow() {
-        if (attachedToWindowMethods.size() == 0) {
-            AfterAttachedWindow afterAttachedWindow = null;
-            if (methods != null) {
-                for (Method method : methods) {
-                    if (Modifier.isStatic(method.getModifiers())) {
-                        continue;
-                    }
-                    afterAttachedWindow = method
-                            .getAnnotation(AfterAttachedWindow.class);
-                    if (afterAttachedWindow != null) {
-                        try {
-                            attachedToWindowMethods.add(method);
-                            method.invoke(this);
-                        } catch (Exception e) {
-                            throw new IllegalStateException(e);
-                        }
-                    }
-                }
-            }
-        } else {
-            for (Method method : attachedToWindowMethods) {
-                try {
-                    method.invoke(this);
-                } catch (Exception e) {
-                    throw new IllegalStateException(e);
-                }
+        if (attachedToWindowMethods == null
+                || attachedToWindowMethods.size() == 0) {
+            return;
+        }
+
+        for (Method method : attachedToWindowMethods) {
+            try {
+                method.invoke(this);
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
             }
         }
     }
