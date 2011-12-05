@@ -163,6 +163,7 @@ public abstract class AndroidWorker<Params, Progress, Result> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Result postResult(Result result) {
         Message message = sHandler.obtainMessage(MESSAGE_POST_RESULT,
                 new AsyncTaskResult<Result>(this, result));
@@ -225,7 +226,6 @@ public abstract class AndroidWorker<Params, Progress, Result> {
      * @see #doInBackground
      * @see #onCancelled(Object)
      */
-    @SuppressWarnings({ "UnusedDeclaration" })
     protected void onPostExecute(Result result) {
     }
 
@@ -239,7 +239,6 @@ public abstract class AndroidWorker<Params, Progress, Result> {
      * @see #publishProgress
      * @see #doInBackground
      */
-    @SuppressWarnings({ "UnusedDeclaration" })
     protected void onProgressUpdate(Progress... values) {
     }
 
@@ -262,7 +261,6 @@ public abstract class AndroidWorker<Params, Progress, Result> {
      * @see #cancel(boolean)
      * @see #isCancelled()
      */
-    @SuppressWarnings({ "UnusedParameters" })
     protected void onCancelled(Result result) {
         onCancelled();
     }
@@ -517,7 +515,7 @@ public abstract class AndroidWorker<Params, Progress, Result> {
     }
 
     private static class InternalHandler extends Handler {
-        @SuppressWarnings({ "unchecked", "RawUseOfParameterizedType" })
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         @Override
         public void handleMessage(Message msg) {
             AsyncTaskResult result = (AsyncTaskResult) msg.obj;
@@ -538,11 +536,12 @@ public abstract class AndroidWorker<Params, Progress, Result> {
         Params[] mParams;
     }
 
-    @SuppressWarnings({ "RawUseOfParameterizedType" })
     private static class AsyncTaskResult<Data> {
+        @SuppressWarnings("rawtypes")
         final AndroidWorker mTask;
         final Data[] mData;
 
+        @SuppressWarnings("rawtypes")
         AsyncTaskResult(AndroidWorker task, Data... data) {
             mTask = task;
             mData = data;
