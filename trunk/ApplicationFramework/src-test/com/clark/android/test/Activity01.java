@@ -1,8 +1,6 @@
 package com.clark.android.test;
 
-import static com.clark.func.Functions.println;
-
-import java.util.Arrays;
+import java.io.Serializable;
 
 import android.widget.TextView;
 
@@ -26,71 +24,57 @@ public class Activity01 extends SimpleActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        print();
+        textView.setText(student == null ? "null" : student.toString());
 
-        i = 100;
-        iArray = new int[] { 100, 10 };
-        iInteger = new Integer(100);
+        if (student == null) {
+            student = new Student();
+        }
 
-        l = 10000;
-        lLong = new Long(10001);
-        lArray = new long[] { 10000, 10001 };
+        student.setId((int) (Math.random() * 1000));
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        StringBuilder builder = new StringBuilder();
-        builder.append("i = ").append(i).append("\n");
-        builder.append("iArray = ").append(Arrays.toString(iArray))
-                .append("\n");
-        builder.append("iInteger = ").append(iInteger).append("\n");
-
-        builder.append("l = ").append(l).append("\n");
-        builder.append("lLong = ").append(lLong).append("\n");
-        builder.append("lArray = ").append(Arrays.toString(lArray))
-                .append("\n");
-        println(builder.toString());
     }
-
-    private void print() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("i = ").append(i).append("\n");
-        builder.append("iArray = ").append(Arrays.toString(iArray))
-                .append("\n");
-        builder.append("iInteger = ").append(iInteger).append("\n");
-
-        builder.append("l = ").append(l).append("\n");
-        builder.append("lLong = ").append(lLong).append("\n");
-        builder.append("lArray = ").append(Arrays.toString(lArray))
-                .append("\n");
-
-        textView.setText(builder.toString());
-    }
-
-    @SaveInstance
-    public int i;
-
-    @SaveInstance
-    public int[] iArray;
-
-    @SaveInstance
-    public Integer iInteger;
-
-    @SaveInstance
-    public long l;
-
-    @SaveInstance
-    public Long lLong;
-
-    @SaveInstance
-    public long[] lArray;
 
     @ViewProperty(R.id.text)
     public TextView textView;
 
     @Override
     protected void onInitialize() {
-        
     }
+
+    @SaveInstance
+    public Student student;
+}
+
+class Student implements Serializable {
+
+    private static final long serialVersionUID = 5642640315222201454L;
+
+    private String name;
+    private int id;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "Student [id=" + id + ", name=" + name + "]";
+    }
+
 }

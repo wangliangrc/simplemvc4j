@@ -625,7 +625,8 @@ public abstract class SimpleActivity extends android.app.Activity {
         return isAttachedToWindow;
     }
 
-    protected abstract void onInitialize();
+    protected void onInitialize() {
+    }
 
     protected abstract int layoutResId();
 
