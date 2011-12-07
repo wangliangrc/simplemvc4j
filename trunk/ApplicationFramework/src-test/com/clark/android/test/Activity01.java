@@ -4,7 +4,6 @@ import static com.clark.func.Functions.println;
 
 import java.util.Arrays;
 
-import android.os.Bundle;
 import android.widget.TextView;
 
 import com.clark.android.ListenerAdapter;
@@ -22,11 +21,6 @@ public class Activity01 extends SimpleActivity {
     @Override
     protected int layoutResId() {
         return R.layout.main;
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -94,4 +88,9 @@ public class Activity01 extends SimpleActivity {
 
     @ViewProperty(R.id.text)
     public TextView textView;
+
+    @Override
+    protected void onInitialize() {
+        
+    }
 }

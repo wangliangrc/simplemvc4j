@@ -64,18 +64,16 @@ public abstract class SimpleActivity extends android.app.Activity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(layoutResId());
+        super.setContentView(layoutResId());
         processFields();
         processMethods();
+        onInitialize();
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        println("onRestoreInstanceState\n");
-        println(savedInstanceState);
-
         super.onRestoreInstanceState(savedInstanceState);
         if (saveInstances != null && saveInstances.size() > 0) {
             String fieldName = null;
@@ -627,6 +625,8 @@ public abstract class SimpleActivity extends android.app.Activity {
         return isAttachedToWindow;
     }
 
+    protected abstract void onInitialize();
+
     protected abstract int layoutResId();
 
     protected abstract ListenerAdapter getListenerAdapter();
@@ -638,6 +638,16 @@ public abstract class SimpleActivity extends android.app.Activity {
 
     @Override
     public void setContentView(View view, LayoutParams params) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setContentView(int layoutResID) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void addContentView(View view, LayoutParams params) {
         throw new UnsupportedOperationException();
     }
 
