@@ -1,5 +1,7 @@
 package com.clark.android;
 
+import static com.clark.func.Functions.println;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -71,14 +73,20 @@ public abstract class SimpleActivity extends android.app.Activity {
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        println("onRestoreInstanceState\n");
+        println(savedInstanceState);
+
         super.onRestoreInstanceState(savedInstanceState);
         if (saveInstances != null && saveInstances.size() > 0) {
             String fieldName = null;
             Class<?> fieldType = null;
             for (Field field : saveInstances) {
                 fieldName = field.getName();
-                fieldType = field.getType();
-                getAndSetField(fieldName, fieldType, field, savedInstanceState);
+                if (savedInstanceState.containsKey(fieldName)) {
+                    fieldType = field.getType();
+                    getAndSetField(fieldName, fieldType, field,
+                            savedInstanceState);
+                }
             }
         }
     }
@@ -93,7 +101,7 @@ public abstract class SimpleActivity extends android.app.Activity {
                 savedInstanceState.putInt(fieldName, value);
             } else if (fieldType == Integer.class) {
                 Integer value = (Integer) field.get(this);
-                if(value != null) {
+                if (value != null) {
                     savedInstanceState.putInt(fieldName, value);
                 }
             } else if (fieldType == int[].class) {
@@ -107,7 +115,7 @@ public abstract class SimpleActivity extends android.app.Activity {
                 savedInstanceState.putLong(fieldName, value);
             } else if (fieldType == Long.class) {
                 Long value = (Long) field.get(this);
-                if(value != null) {
+                if (value != null) {
                     savedInstanceState.putLong(fieldName, value);
                 }
             } else if (fieldType == long[].class) {
@@ -121,7 +129,7 @@ public abstract class SimpleActivity extends android.app.Activity {
                 savedInstanceState.putBoolean(fieldName, value);
             } else if (fieldType == Boolean.class) {
                 Boolean value = (Boolean) field.get(this);
-                if(value != null) {
+                if (value != null) {
                     savedInstanceState.putBoolean(fieldName, value);
                 }
             } else if (fieldType == boolean[].class) {
@@ -135,7 +143,7 @@ public abstract class SimpleActivity extends android.app.Activity {
                 savedInstanceState.putShort(fieldName, value);
             } else if (fieldType == Short.class) {
                 Short value = (Short) field.get(this);
-                if(value != null) {
+                if (value != null) {
                     savedInstanceState.putShort(fieldName, value);
                 }
             } else if (fieldType == short[].class) {
@@ -149,7 +157,7 @@ public abstract class SimpleActivity extends android.app.Activity {
                 savedInstanceState.putChar(fieldName, value);
             } else if (fieldType == Character.class) {
                 Character value = (Character) field.get(this);
-                if(value != null) {
+                if (value != null) {
                     savedInstanceState.putChar(fieldName, value);
                 }
             } else if (fieldType == char[].class) {
@@ -163,7 +171,7 @@ public abstract class SimpleActivity extends android.app.Activity {
                 savedInstanceState.putByte(fieldName, value);
             } else if (fieldType == Byte.class) {
                 Byte value = (Byte) field.get(this);
-                if(value != null) {
+                if (value != null) {
                     savedInstanceState.putByte(fieldName, value);
                 }
             } else if (fieldType == byte[].class) {
@@ -177,7 +185,7 @@ public abstract class SimpleActivity extends android.app.Activity {
                 savedInstanceState.putFloat(fieldName, value);
             } else if (fieldType == Float.class) {
                 Float value = (Float) field.get(this);
-                if(value != null) {
+                if (value != null) {
                     savedInstanceState.putFloat(fieldName, value);
                 }
             } else if (fieldType == float[].class) {
@@ -191,7 +199,7 @@ public abstract class SimpleActivity extends android.app.Activity {
                 savedInstanceState.putDouble(fieldName, value);
             } else if (fieldType == Double.class) {
                 Double value = (Double) field.get(this);
-                if(value != null) {
+                if (value != null) {
                     savedInstanceState.putDouble(fieldName, value);
                 }
             } else if (fieldType == double[].class) {
@@ -284,16 +292,18 @@ public abstract class SimpleActivity extends android.app.Activity {
             Class<?> type = null;
             for (Field field : saveInstances) {
                 name = field.getName();
-                if (outState.containsKey(name)) {
-                    type = field.getType();
-                    getAndPutValue(name, type, field, outState);
-                }
+                type = field.getType();
+                getAndPutValue(name, type, field, outState);
             }
         }
+
+        println("onSaveInstanceState\n");
+        println(outState);
     }
 
     private void getAndSetField(String name, Class<?> type, Field field,
             Bundle outState) {
+
         try {
             // int
             if (type == int.class) {
