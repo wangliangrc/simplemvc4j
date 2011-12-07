@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import android.widget.TextView;
 
+import com.clark.android.BaseActivity;
 import com.clark.android.ListenerAdapter;
 import com.clark.android.R;
-import com.clark.android.BaseActivity;
 import com.clark.android.annotation.SaveInstance;
 import com.clark.android.annotation.ViewProperty;
 
@@ -24,13 +24,9 @@ public class Activity01 extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        textView.setText(student == null ? "null" : student.toString());
+        textView.setText(double1 + "");
 
-        if (student == null) {
-            student = new Student();
-        }
-
-        student.setId((int) (Math.random() * 1000));
+        double1 = new Double(1000.);
     }
 
     @Override
@@ -46,7 +42,7 @@ public class Activity01 extends BaseActivity {
     }
 
     @SaveInstance
-    public Student student;
+    public Double double1;
 }
 
 class Student implements Serializable {

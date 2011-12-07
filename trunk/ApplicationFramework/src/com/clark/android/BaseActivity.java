@@ -1,7 +1,5 @@
 package com.clark.android;
 
-import static com.clark.func.Functions.println;
-
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -294,9 +292,6 @@ public abstract class BaseActivity extends android.app.Activity {
                 getAndPutValue(name, type, field, outState);
             }
         }
-
-        println("onSaveInstanceState\n");
-        println(outState);
     }
 
     private void getAndSetField(String name, Class<?> type, Field field,
