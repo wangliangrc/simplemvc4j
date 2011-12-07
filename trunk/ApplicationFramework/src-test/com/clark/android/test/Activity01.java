@@ -6,11 +6,11 @@ import android.widget.TextView;
 
 import com.clark.android.ListenerAdapter;
 import com.clark.android.R;
-import com.clark.android.SimpleActivity;
+import com.clark.android.BaseActivity;
 import com.clark.android.annotation.SaveInstance;
 import com.clark.android.annotation.ViewProperty;
 
-public class Activity01 extends SimpleActivity {
+public class Activity01 extends BaseActivity {
     @Override
     protected ListenerAdapter getListenerAdapter() {
         return null;

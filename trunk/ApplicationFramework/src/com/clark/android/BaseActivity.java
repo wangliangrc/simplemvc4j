@@ -44,8 +44,8 @@ import com.clark.android.annotation.SystemManager;
 import com.clark.android.annotation.ViewListener;
 import com.clark.android.annotation.ViewProperty;
 
-public abstract class SimpleActivity extends android.app.Activity {
-    private static final String TAG = SimpleActivity.class.getSimpleName();
+public abstract class BaseActivity extends android.app.Activity {
+    private static final String TAG = BaseActivity.class.getSimpleName();
     private Class<?> thisClass;
     private volatile boolean isAttachedToWindow;
 
@@ -57,7 +57,7 @@ public abstract class SimpleActivity extends android.app.Activity {
     private final HashSet<Method> attachedToWindowMethods = new HashSet<Method>();
     private final HashSet<Field> saveInstances = new HashSet<Field>();
 
-    protected SimpleActivity() {
+    protected BaseActivity() {
         thisClass = getClass();
         fields = thisClass.getFields();
         methods = thisClass.getMethods();
