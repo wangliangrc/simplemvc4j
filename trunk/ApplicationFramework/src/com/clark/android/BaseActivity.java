@@ -1,52 +1,25 @@
 package com.clark.android;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
-import android.app.ActivityManager;
-import android.app.AlarmManager;
-import android.app.DownloadManager;
-import android.app.FragmentManager;
-import android.app.KeyguardManager;
-import android.app.LoaderManager;
-import android.app.NotificationManager;
-import android.app.SearchManager;
-import android.app.UiModeManager;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
-import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.os.PowerManager;
-import android.os.Vibrator;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 
 import com.clark.android.annotation.AfterAttachedWindow;
 import com.clark.android.annotation.AfterInit;
-import com.clark.android.annotation.IntentExtra;
 import com.clark.android.annotation.SaveInstance;
-import com.clark.android.annotation.SystemManager;
 import com.clark.android.annotation.ViewListener;
 import com.clark.android.annotation.ViewProperty;
 
-public abstract class BaseActivity extends android.app.Activity {
+public abstract class BaseActivity extends android.app.Activity implements FieldHolder {
     private static final String TAG = BaseActivity.class.getSimpleName();
-    private Class<?> thisClass;
     private volatile boolean isAttachedToWindow;
 
     /**
@@ -54,6 +27,7 @@ public abstract class BaseActivity extends android.app.Activity {
      */
     private boolean isActivityReborn;
 
+    private Class<?> thisClass;
     private final Field[] fields;
     private final Method[] methods;
 
@@ -112,201 +86,10 @@ public abstract class BaseActivity extends android.app.Activity {
                 fieldName = field.getName();
                 if (savedInstanceState.containsKey(fieldName)) {
                     fieldType = field.getType();
-                    getAndSetField(fieldName, fieldType, field,
+                    Utils.setFieldFromBundle(this, fieldName, fieldType, field,
                             savedInstanceState);
                 }
             }
-        }
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void getAndPutValue(String fieldName, Class<?> fieldType,
-            Field field, Bundle savedInstanceState) {
-        try {
-            // int
-            if (fieldType == int.class) {
-                int value = field.getInt(this);
-                savedInstanceState.putInt(fieldName, value);
-            } else if (fieldType == Integer.class) {
-                Integer value = (Integer) field.get(this);
-                if (value != null) {
-                    savedInstanceState.putInt(fieldName, value);
-                }
-            } else if (fieldType == int[].class) {
-                int[] value = (int[]) field.get(this);
-                savedInstanceState.putIntArray(fieldName, value);
-            }
-
-            // long
-            else if (fieldType == long.class) {
-                long value = field.getLong(this);
-                savedInstanceState.putLong(fieldName, value);
-            } else if (fieldType == Long.class) {
-                Long value = (Long) field.get(this);
-                if (value != null) {
-                    savedInstanceState.putLong(fieldName, value);
-                }
-            } else if (fieldType == long[].class) {
-                long[] value = (long[]) field.get(this);
-                savedInstanceState.putLongArray(fieldName, value);
-            }
-
-            // boolean
-            else if (fieldType == boolean.class) {
-                boolean value = field.getBoolean(this);
-                savedInstanceState.putBoolean(fieldName, value);
-            } else if (fieldType == Boolean.class) {
-                Boolean value = (Boolean) field.get(this);
-                if (value != null) {
-                    savedInstanceState.putBoolean(fieldName, value);
-                }
-            } else if (fieldType == boolean[].class) {
-                boolean[] value = (boolean[]) field.get(this);
-                savedInstanceState.putBooleanArray(fieldName, value);
-            }
-
-            // short
-            else if (fieldType == short.class) {
-                short value = field.getShort(this);
-                savedInstanceState.putShort(fieldName, value);
-            } else if (fieldType == Short.class) {
-                Short value = (Short) field.get(this);
-                if (value != null) {
-                    savedInstanceState.putShort(fieldName, value);
-                }
-            } else if (fieldType == short[].class) {
-                short[] value = (short[]) field.get(this);
-                savedInstanceState.putShortArray(fieldName, value);
-            }
-
-            // char
-            else if (fieldType == char.class) {
-                char value = field.getChar(this);
-                savedInstanceState.putChar(fieldName, value);
-            } else if (fieldType == Character.class) {
-                Character value = (Character) field.get(this);
-                if (value != null) {
-                    savedInstanceState.putChar(fieldName, value);
-                }
-            } else if (fieldType == char[].class) {
-                char[] value = (char[]) field.get(this);
-                savedInstanceState.putCharArray(fieldName, value);
-            }
-
-            // byte
-            else if (fieldType == byte.class) {
-                byte value = field.getByte(this);
-                savedInstanceState.putByte(fieldName, value);
-            } else if (fieldType == Byte.class) {
-                Byte value = (Byte) field.get(this);
-                if (value != null) {
-                    savedInstanceState.putByte(fieldName, value);
-                }
-            } else if (fieldType == byte[].class) {
-                byte[] value = (byte[]) field.get(this);
-                savedInstanceState.putByteArray(fieldName, value);
-            }
-
-            // float
-            else if (fieldType == float.class) {
-                float value = field.getFloat(this);
-                savedInstanceState.putFloat(fieldName, value);
-            } else if (fieldType == Float.class) {
-                Float value = (Float) field.get(this);
-                if (value != null) {
-                    savedInstanceState.putFloat(fieldName, value);
-                }
-            } else if (fieldType == float[].class) {
-                float[] value = (float[]) field.get(this);
-                savedInstanceState.putFloatArray(fieldName, value);
-            }
-
-            // double
-            else if (fieldType == double.class) {
-                double value = field.getDouble(this);
-                savedInstanceState.putDouble(fieldName, value);
-            } else if (fieldType == Double.class) {
-                Double value = (Double) field.get(this);
-                if (value != null) {
-                    savedInstanceState.putDouble(fieldName, value);
-                }
-            } else if (fieldType == double[].class) {
-                double[] value = (double[]) field.get(this);
-                savedInstanceState.putDoubleArray(fieldName, value);
-            }
-
-            // String
-            else if (fieldType == String.class) {
-                String value = (String) field.get(this);
-                savedInstanceState.putString(fieldName, value);
-            } else if (fieldType == String[].class) {
-                String[] value = (String[]) field.get(this);
-                savedInstanceState.putStringArray(fieldName, value);
-            }
-
-            // Bundle
-            else if (fieldType == Bundle.class) {
-                Bundle value = (Bundle) field.get(this);
-                savedInstanceState.putBundle(fieldName, value);
-            }
-
-            // others
-            else {
-                Object value = field.get(this);
-
-                // CharSequence
-                if (value instanceof CharSequence) {
-                    savedInstanceState.putCharSequence(fieldName,
-                            (CharSequence) value);
-                } else if (value instanceof CharSequence[]) {
-                    savedInstanceState.putCharSequenceArray(fieldName,
-                            (CharSequence[]) value);
-                }
-
-                // Parcelable
-                else if (value instanceof Parcelable) {
-                    savedInstanceState.putParcelable(fieldName,
-                            (Parcelable) value);
-                } else if (value instanceof Parcelable[]) {
-                    savedInstanceState.putParcelableArray(fieldName,
-                            (Parcelable[]) value);
-                }
-
-                // Serializable
-                else if (value instanceof Serializable) {
-                    savedInstanceState.putSerializable(fieldName,
-                            (Serializable) value);
-                }
-
-                // List
-                else if (value instanceof ArrayList) {
-                    ArrayList list = (ArrayList) value;
-                    if (list.size() > 0) {
-                        Object e = list.get(0);
-                        if (e instanceof String) {
-                            savedInstanceState.putStringArrayList(fieldName,
-                                    (ArrayList<String>) value);
-                        } else if (e instanceof CharSequence) {
-                            savedInstanceState.putCharSequenceArrayList(
-                                    fieldName, (ArrayList<CharSequence>) value);
-                        } else if (e instanceof Parcelable) {
-                            savedInstanceState.putParcelableArrayList(
-                                    fieldName,
-                                    (ArrayList<? extends Parcelable>) value);
-                        } else if (e instanceof Integer) {
-                            savedInstanceState.putIntegerArrayList(fieldName,
-                                    (ArrayList<Integer>) value);
-                        } else {
-                            Log.w(TAG,
-                                    "save instances忽略"
-                                            + thisClass.getSimpleName() + "."
-                                            + fieldName);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
         }
     }
 
@@ -321,131 +104,14 @@ public abstract class BaseActivity extends android.app.Activity {
             for (Field field : saveInstances) {
                 name = field.getName();
                 type = field.getType();
-                getAndPutValue(name, type, field, outState);
+                Utils.getAndPutValue(this, name, type, field, outState);
             }
         }
     }
 
-    private void getAndSetField(String name, Class<?> type, Field field,
-            Bundle outState) {
-
-        try {
-            // int
-            if (type == int.class) {
-                field.setInt(this, outState.getInt(name));
-            } else if (type == Integer.class) {
-                field.set(this, outState.getInt(name));
-            } else if (type == int[].class) {
-                field.set(this, outState.getIntArray(name));
-            }
-
-            // long
-            else if (type == long.class) {
-                field.setLong(this, outState.getLong(name));
-            } else if (type == Long.class) {
-                field.set(this, outState.getLong(name));
-            } else if (type == long[].class) {
-                field.set(this, outState.getLongArray(name));
-            }
-
-            // boolean
-            else if (type == boolean.class) {
-                field.setBoolean(this, outState.getBoolean(name));
-            } else if (type == Boolean.class) {
-                field.set(this, outState.getBoolean(name));
-            } else if (type == boolean[].class) {
-                field.set(this, outState.getBooleanArray(name));
-            }
-
-            // short
-            else if (type == short.class) {
-                field.setShort(this, outState.getShort(name));
-            } else if (type == Short.class) {
-                field.set(this, outState.getShort(name));
-            } else if (type == short[].class) {
-                field.set(this, outState.getShortArray(name));
-            }
-
-            // char
-            else if (type == char.class) {
-                field.setChar(this, outState.getChar(name));
-            } else if (type == Character.class) {
-                field.set(this, outState.getChar(name));
-            } else if (type == char[].class) {
-                field.set(this, outState.getCharArray(name));
-            }
-
-            // byte
-            else if (type == byte.class) {
-                field.setByte(this, outState.getByte(name));
-            } else if (type == Byte.class) {
-                field.set(this, outState.getByte(name));
-            } else if (type == byte[].class) {
-                field.set(this, outState.getByteArray(name));
-            }
-
-            // float
-            else if (type == float.class) {
-                field.setFloat(this, outState.getFloat(name));
-            } else if (type == Float.class) {
-                field.set(this, outState.getFloat(name));
-            } else if (type == float[].class) {
-                field.set(this, outState.getFloatArray(name));
-            }
-
-            // double
-            else if (type == double.class) {
-                field.setDouble(this, outState.getDouble(name));
-            } else if (type == Double.class) {
-                field.set(this, outState.getDouble(name));
-            } else if (type == double[].class) {
-                field.set(this, outState.getDoubleArray(name));
-            }
-
-            // String
-            else if (type == String.class) {
-                field.set(this, outState.getString(name));
-            } else if (type == String[].class) {
-                field.set(this, outState.getStringArray(name));
-            }
-
-            // Bundle
-            else if (type == Bundle.class) {
-                field.set(this, outState.getBundle(name));
-            }
-
-            // CharSequence
-            else if (CharSequence.class.isAssignableFrom(type)) {
-                field.set(this, outState.getCharSequence(name));
-            } else if (CharSequence[].class.isAssignableFrom(type)) {
-                field.set(this, outState.getCharSequenceArray(name));
-            }
-
-            // Parcelable
-            else if (Parcelable.class.isAssignableFrom(type)) {
-                field.set(this, outState.getParcelable(name));
-            } else if (Parcelable[].class.isAssignableFrom(type)) {
-                field.set(this, outState.getParcelableArray(name));
-            }
-
-            // Serializable
-            else if (Serializable.class.isAssignableFrom(type)) {
-                field.set(this, outState.getSerializable(name));
-            }
-
-            // ArrayList
-            else if (ArrayList.class.isAssignableFrom(type)) {
-                field.set(this, outState.get(name));
-            }
-
-            // Log
-            else {
-                Log.w(TAG, "restore instances忽略" + thisClass.getSimpleName()
-                        + "." + name);
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
+    @Override
+    public final Set<Field> getHoldFields() {
+        return allDelegateFields;
     }
 
     private void processMethods() {
@@ -482,25 +148,9 @@ public abstract class BaseActivity extends android.app.Activity {
                     continue;
                 }
                 findViewAndListeners(getListenerAdapter(), field);
-                findSystemManager(field);
+                Utils.findSystemManager(this, field);
                 findSavedInstances(field);
-                findIntentExtra(field, getIntent());
-            }
-        }
-    }
-
-    private void findIntentExtra(Field field, Intent intent) {
-        final IntentExtra extra = field.getAnnotation(IntentExtra.class);
-        if (extra != null) {
-            String key = extra.value();
-            if (key == null || key.trim().length() == 0) {
-                key = field.getName();
-            }
-
-            Class<?> type = field.getType();
-            final Bundle extras = intent.getExtras();
-            if(extras != null && extras.containsKey(key)) {
-                getAndSetField(key, type, field, extras);
+                Utils.findIntentExtra(this, field, getIntent());
             }
         }
     }
@@ -537,62 +187,6 @@ public abstract class BaseActivity extends android.app.Activity {
 
             if (listenerAdapter != null) {
                 findListeners(listenerAdapter, viewListeners, view);
-            }
-        }
-    }
-
-    private void findSystemManager(Field field) {
-        final SystemManager systemManager = field
-                .getAnnotation(SystemManager.class);
-        if (systemManager != null) {
-            Class<?> type = field.getType();
-            try {
-                if (type == PackageManager.class) {
-                    field.set(this, getPackageManager());
-                } else if (type == WindowManager.class) {
-                    field.set(this, getWindowManager());
-                } else if (type == LayoutInflater.class) {
-                    field.set(this, getLayoutInflater());
-                } else if (type == ActivityManager.class) {
-                    field.set(this, getSystemService(ACTIVITY_SERVICE));
-                } else if (type == PowerManager.class) {
-                    field.set(this, getSystemService(POWER_SERVICE));
-                } else if (type == AlarmManager.class) {
-                    field.set(this, getSystemService(ALARM_SERVICE));
-                } else if (type == NotificationManager.class) {
-                    field.set(this, getSystemService(NOTIFICATION_SERVICE));
-                } else if (type == KeyguardManager.class) {
-                    field.set(this, getSystemService(KEYGUARD_SERVICE));
-                } else if (type == LocationManager.class) {
-                    field.set(this, LOCATION_SERVICE);
-                } else if (type == SearchManager.class) {
-                    field.set(this, getSystemService(SEARCH_SERVICE));
-                } else if (type == Vibrator.class) {
-                    field.set(this, getSystemService(VIBRATOR_SERVICE));
-                } else if (type == ConnectivityManager.class) {
-                    field.set(this, getSystemService(CONNECTIVITY_SERVICE));
-                } else if (type == WifiManager.class) {
-                    field.set(this, getSystemService(WIFI_SERVICE));
-                } else if (type == InputMethodManager.class) {
-                    field.set(this, getSystemService(INPUT_METHOD_SERVICE));
-                } else if (type == UiModeManager.class) {
-                    field.set(this, getSystemService(UI_MODE_SERVICE));
-                } else if (Build.VERSION.SDK_INT >= 8
-                        && type == DownloadManager.class) {
-                    field.set(this, getSystemService(DOWNLOAD_SERVICE));
-                } else if (type == AssetManager.class) {
-                    field.set(this, getAssets());
-                } else if (Build.VERSION.SDK_INT >= 11
-                        && type == FragmentManager.class) {
-                    field.set(this, getFragmentManager());
-                } else if (Build.VERSION.SDK_INT >= 11
-                        && type == LoaderManager.class) {
-                    field.set(this, getLoaderManager());
-                }
-
-                allDelegateFields.add(field);
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
             }
         }
     }
@@ -698,19 +292,7 @@ public abstract class BaseActivity extends android.app.Activity {
 
     @Override
     protected void onDestroy() {
-        if (allDelegateFields != null && allDelegateFields.size() > 0) {
-            Class<?> type = null;
-            for (Field field : allDelegateFields) {
-                type = field.getType();
-                if (!type.isPrimitive()) {
-                    try {
-                        field.set(this, null);
-                    } catch (Exception e) {
-                        throw new IllegalStateException(e);
-                    }
-                }
-            }
-        }
+        Utils.fieldHolderOnDestroy(this);
         super.onDestroy();
     }
 }
