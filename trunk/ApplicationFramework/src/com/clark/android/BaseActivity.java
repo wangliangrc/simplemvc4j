@@ -47,6 +47,11 @@ public abstract class BaseActivity extends android.app.Activity {
     private Class<?> thisClass;
     private volatile boolean isAttachedToWindow;
 
+    /**
+     * 用于标识 Activity 是否处于重生阶段
+     */
+    private boolean isActivityReborn;
+
     private final Field[] fields;
     private final Method[] methods;
 
@@ -65,13 +70,38 @@ public abstract class BaseActivity extends android.app.Activity {
     protected final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         super.setContentView(layoutResId());
+        isActivityReborn = savedInstanceState != null
+                && savedInstanceState.size() != 0;
+
         processFields();
         processMethods();
         onInitialize();
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    protected void onResume() {
+        super.onResume();
+        if (isActivityReborn) {
+            onRebirth();
+        } else {
+            onComeIntoBeing();
+        }
+    }
+
+    /**
+     * 第一次初始化时没有保存数据的话，应该在这个回调中初始化数据（网络、IO、数据库……）
+     */
+    protected void onComeIntoBeing() {
+    }
+
+    /**
+     * 如果定义了 @ SaveInstance 属性的话，可以在本回调中进行赋值操作
+     */
+    protected void onRebirth() {
+    }
+
+    @Override
+    protected final void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (saveInstances != null && saveInstances.size() > 0) {
             String fieldName = null;
@@ -279,7 +309,7 @@ public abstract class BaseActivity extends android.app.Activity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected final void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
         if (outState != null && outState.size() > 0 && saveInstances != null
