@@ -16,6 +16,7 @@ import android.app.LoaderManager;
 import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.app.UiModeManager;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.location.LocationManager;
@@ -37,6 +38,7 @@ import android.widget.AdapterView;
 
 import com.clark.android.annotation.AfterAttachedWindow;
 import com.clark.android.annotation.AfterInit;
+import com.clark.android.annotation.IntentExtra;
 import com.clark.android.annotation.SaveInstance;
 import com.clark.android.annotation.SystemManager;
 import com.clark.android.annotation.ViewListener;
@@ -482,6 +484,23 @@ public abstract class BaseActivity extends android.app.Activity {
                 findViewAndListeners(getListenerAdapter(), field);
                 findSystemManager(field);
                 findSavedInstances(field);
+                findIntentExtra(field, getIntent());
+            }
+        }
+    }
+
+    private void findIntentExtra(Field field, Intent intent) {
+        final IntentExtra extra = field.getAnnotation(IntentExtra.class);
+        if (extra != null) {
+            String key = extra.value();
+            if (key == null || key.trim().length() == 0) {
+                key = field.getName();
+            }
+
+            Class<?> type = field.getType();
+            final Bundle extras = intent.getExtras();
+            if(extras != null && extras.containsKey(key)) {
+                getAndSetField(key, type, field, extras);
             }
         }
     }

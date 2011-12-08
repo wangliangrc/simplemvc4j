@@ -1,19 +1,36 @@
 package com.clark.android.test;
 
-import java.io.Serializable;
-
+import android.content.Intent;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.clark.android.BaseActivity;
 import com.clark.android.ListenerAdapter;
 import com.clark.android.R;
-import com.clark.android.annotation.SaveInstance;
+import com.clark.android.annotation.IntentExtra;
+import com.clark.android.annotation.ViewListener;
 import com.clark.android.annotation.ViewProperty;
 
 public class Activity01 extends BaseActivity {
     @Override
     protected ListenerAdapter getListenerAdapter() {
-        return null;
+        return new ListenerAdapter() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.button:
+                        startActivity(new Intent().setClass(
+                                getApplicationContext(), Activity01.class)
+                                .putExtra("xxxx",
+                                        (int) (Math.random() * 1000)));
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        };
     }
 
     @Override
@@ -21,56 +38,18 @@ public class Activity01 extends BaseActivity {
         return R.layout.main;
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        textView.setText(double1 + "");
-
-        double1 = new Double(1000.);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
     @ViewProperty(R.id.text)
     public TextView textView;
 
-    @Override
-    protected void onInitialize() {
-    }
+    @IntentExtra("xxxx")
+    public int testInteger;
 
-    @SaveInstance
-    public Double double1;
-}
-
-class Student implements Serializable {
-
-    private static final long serialVersionUID = 5642640315222201454L;
-
-    private String name;
-    private int id;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
+    @ViewProperty(value = R.id.button, listeners = { ViewListener.ON_CLICK })
+    public Button button;
 
     @Override
-    public String toString() {
-        return "Student [id=" + id + ", name=" + name + "]";
+    protected void onComeIntoBeing() {
+        textView.setText("" + testInteger);
     }
 
 }
