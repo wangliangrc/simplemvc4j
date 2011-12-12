@@ -353,10 +353,7 @@ final class Utils {
             Class<?> type = field.getType();
             try {
                 if (type == PackageManager.class) {
-                    if (context instanceof Activity) {
-                        Activity activity = (Activity) context;
-                        field.set(activity, activity.getPackageManager());
-                    }
+                    field.set(context, context.getPackageManager());
                 } else if (type == WindowManager.class) {
                     field.set(context,
                             context.getSystemService(Context.WINDOW_SERVICE));
