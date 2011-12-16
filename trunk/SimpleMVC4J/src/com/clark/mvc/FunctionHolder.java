@@ -1,8 +1,8 @@
 package com.clark.mvc;
 
 class FunctionHolder {
-    public final String name;
-    public final Function function;
+    final String name;
+    final Function function;
 
     FunctionHolder(String name, Function function) {
         super();
