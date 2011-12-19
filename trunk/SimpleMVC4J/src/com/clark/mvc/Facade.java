@@ -5,22 +5,37 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Facade {
+    private static HashMap<String, Facade> facades = new HashMap<String, Facade>();
 
-    private static class Holder {
-        static Facade instance = new Facade();
+    public static synchronized Facade facade(String name) {
+        if (name == null)
+            throw new NullPointerException();
+
+        Facade facade = facades.get(name);
+        if (facade == null) {
+            facade = new Facade(name);
+            facades.put(name, facade);
+        }
+        return facade;
     }
 
-    private Facade() {
+    public static synchronized void close(String name) {
+        if (name != null) {
+            facades.remove(name);
+        }
     }
 
-    /**
-     * 获取 Facade 自身的单例。
-     * 
-     * @return Facade 自身的单例。
-     */
-    static Facade getInstance() {
-        return Holder.instance;
+    private Facade(String name) {
+        if (name == null)
+            throw new NullPointerException();
+        this.name = name;
     }
+
+    private String name;
+
+    private View view;
+    private Controller controller;
+    private Model model;
 
     private HashMap<String, Set<Function>> hashMap = new HashMap<String, Set<Function>>();
     private UIWorker worker;
@@ -81,14 +96,18 @@ public class Facade {
         return set;
     }
 
+    public String getName() {
+        return name;
+    }
+
     /**
      * 设置UI线程执行者。
      * 
      * @param worker
      *            可以为 null。如果为 null 则表示 sendNotification 方法的执行线程与调用者线程一致。
      */
-    public static void setUIWorker(UIWorker worker) {
-        getInstance().setWorker(worker);
+    public void setUIWorker(UIWorker worker) {
+        setWorker(worker);
     }
 
     /**
@@ -103,7 +122,7 @@ public class Facade {
      * @param type
      *            通知类型。
      */
-    public static void sendNotification(String notificationName, Object body,
+    public void sendNotification(String notificationName, Object body,
             String type) {
         if (notificationName == null) {
             throw new NullPointerException();
@@ -113,7 +132,7 @@ public class Facade {
             throw new IllegalArgumentException(
                     "notificationName mustn't be empty!");
         }
-        getInstance().notify(new Notification(notificationName, body, type));
+        notify(new Notification(notificationName, body, type));
     }
 
     /**
@@ -126,7 +145,7 @@ public class Facade {
      * @param body
      *            通知包含消息体。
      */
-    public static void sendNotification(String notificationName, Object body) {
+    public void sendNotification(String notificationName, Object body) {
         sendNotification(notificationName, body, null);
     }
 
@@ -138,7 +157,7 @@ public class Facade {
      * @param notificationName
      *            通知名称。不能为 null。
      */
-    public static void sendNotification(String notificationName) {
+    public void sendNotification(String notificationName) {
         sendNotification(notificationName, null);
     }
 
@@ -147,8 +166,11 @@ public class Facade {
      * 
      * @return {@link View} 单例。
      */
-    public static View view() {
-        return View.getInstance();
+    public synchronized View view() {
+        if (view == null) {
+            view = new View(this);
+        }
+        return view;
     }
 
     /**
@@ -156,8 +178,11 @@ public class Facade {
      * 
      * @return {@link Controller} 单例。
      */
-    public static Controller controller() {
-        return Controller.getInstance();
+    public synchronized Controller controller() {
+        if (controller == null) {
+            controller = new Controller(this);
+        }
+        return controller;
     }
 
     /**
@@ -165,7 +190,10 @@ public class Facade {
      * 
      * @return {@link Model} 单例。
      */
-    public static Model model() {
-        return Model.getInstance();
+    public synchronized Model model() {
+        if (model == null) {
+            model = new Model();
+        }
+        return model;
     }
 }

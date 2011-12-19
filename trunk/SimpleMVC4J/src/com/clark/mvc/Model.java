@@ -4,15 +4,7 @@ import java.util.HashMap;
 
 public class Model {
 
-    private static class Holder {
-        static Model model = new Model();
-    }
-
-    private Model() {
-    }
-
-    static Model getInstance() {
-        return Holder.model;
+    Model() {
     }
 
     private HashMap<String, Proxy> hashMap = new HashMap<String, Proxy>();

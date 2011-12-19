@@ -5,19 +5,14 @@ import java.util.HashMap;
 
 public class Controller {
 
-    private static class Holder {
-        static Controller controller = new Controller();
-    }
-
-    private Controller() {
-    }
-
-    static Controller getInstance() {
-        return Holder.controller;
+    Controller(Facade facade) {
+        this.facade = facade;
     }
 
     @SuppressWarnings("rawtypes")
     private HashMap<Class, FunctionHolder> hashMap = new HashMap<Class, FunctionHolder>();
+
+    private Facade facade;
 
     /**
      * 注册包含 {@link Command} 注解方法的 {@link Class} 对象到 Controller 注册表中。
@@ -63,7 +58,7 @@ public class Controller {
                                 }
                             }
                         };
-                        Facade.getInstance().register(name, function);
+                        facade.register(name, function);
                         hashMap.put(clazz, new FunctionHolder(name, function));
                         found = true;
                     }
@@ -96,8 +91,7 @@ public class Controller {
 
         if (hashMap.containsKey(clazz)) {
             FunctionHolder functionHolder = hashMap.get(clazz);
-            Facade.getInstance().remove(functionHolder.name,
-                    functionHolder.function);
+            facade.remove(functionHolder.name, functionHolder.function);
             hashMap.remove(clazz);
             System.out.println("remove command: [" + clazz.getCanonicalName()
                     + "]");

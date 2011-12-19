@@ -6,17 +6,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class View {
-    private static class Holder {
-        static View instance = new View();
-    }
-
-    static View getInstance() {
-        return Holder.instance;
-    }
 
     private HashMap<Object, Set<FunctionHolder>> views = new HashMap<Object, Set<FunctionHolder>>();
+    private Facade facade;
 
-    private View() {
+    View(Facade facade) {
+        this.facade = facade;
     }
 
     /**
@@ -74,7 +69,6 @@ public class View {
             return;
         }
 
-        Facade notifier = Facade.getInstance();
         Class clazz = object.getClass();
         Method[] declaredMethods = clazz.getDeclaredMethods();
         String errorString = "There is no mediator method in ["
@@ -107,7 +101,7 @@ public class View {
                                     }
                                 }
                             };
-                            notifier.register(name, function);
+                            facade.register(name, function);
                             functions = getObservers(object);
                             functions.add(new FunctionHolder(name, function));
                             found = true;
@@ -149,11 +143,10 @@ public class View {
         }
 
         if (views.containsKey(object)) {
-            Facade notifier = Facade.getInstance();
             Set<FunctionHolder> set = views.get(object);
             if (set != null && set.size() > 0) {
                 for (FunctionHolder holder : set) {
-                    notifier.remove(holder.name, holder.function);
+                    facade.remove(holder.name, holder.function);
                 }
             }
             views.remove(object);
