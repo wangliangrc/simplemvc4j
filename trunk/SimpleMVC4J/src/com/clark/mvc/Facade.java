@@ -11,7 +11,7 @@ public class Facade {
 
     private static synchronized Facade facade(String name, Facade parent) {
         if (name == null || name.length() == 0)
-            throw new NullPointerException();
+            throw new NullPointerException("Argument 'name' mustn't be empty!");
 
         Facade facade = facades.get(name);
         if (facade == null) {
@@ -60,8 +60,6 @@ public class Facade {
     }
 
     private Facade(String name, Facade parent) {
-        if (name == null || name.length() == 0)
-            throw new NullPointerException();
         this.name = name;
         if (parent == null) {
             this.parent = MAIN;
@@ -71,7 +69,7 @@ public class Facade {
     }
 
     private String name;
-    private Facade parent;
+    private volatile Facade parent;
 
     private View view;
     private Controller controller;
@@ -256,4 +254,37 @@ public class Facade {
         }
         return model;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Facade other = (Facade) obj;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Facade [name=").append(name).append("]");
+        return builder.toString();
+    }
+
 }
