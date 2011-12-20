@@ -7,23 +7,36 @@ import java.util.Set;
 public class Facade {
     private static HashMap<String, Facade> facades = new HashMap<String, Facade>();
 
-    private static synchronized Facade facade(String name) {
-        if (name == null)
+    public static final Facade MAIN = new Facade("", null);
+
+    private static synchronized Facade facade(String name, Facade parent) {
+        if (name == null || name.length() == 0)
             throw new NullPointerException();
 
         Facade facade = facades.get(name);
         if (facade == null) {
-            facade = new Facade(name);
+            facade = new Facade(name, parent);
             facades.put(name, facade);
+        }
+        if (!facade.parent.equals(parent)) {
+            facade.parent = parent;
         }
         return facade;
     }
 
     public static synchronized Facade facade(Object object) {
         if (object instanceof String) {
-            return facade((String) object);
+            return facade((String) object, null);
         } else {
-            return facade(identityObject(object));
+            return facade(identityObject(object), null);
+        }
+    }
+
+    public static synchronized Facade facade(Object object, Facade parent) {
+        if (object instanceof String) {
+            return facade((String) object, parent);
+        } else {
+            return facade(identityObject(object), parent);
         }
     }
 
@@ -46,13 +59,19 @@ public class Facade {
         }
     }
 
-    private Facade(String name) {
-        if (name == null)
+    private Facade(String name, Facade parent) {
+        if (name == null || name.length() == 0)
             throw new NullPointerException();
         this.name = name;
+        if (parent == null) {
+            this.parent = MAIN;
+        } else {
+            this.parent = parent;
+        }
     }
 
     private String name;
+    private Facade parent;
 
     private View view;
     private Controller controller;
@@ -106,6 +125,11 @@ public class Facade {
                 function.onNotification(notification);
             }
         }
+
+        // call parent's functions
+        if (parent != null) {
+            parent.notifyInternal(notification);
+        }
     }
 
     private Set<Function> getFunctions(String name) {
@@ -119,6 +143,21 @@ public class Facade {
 
     public String getName() {
         return name;
+    }
+
+    public Facade getParent() {
+        return parent;
+    }
+
+    public void setParent(Facade parent) {
+        if (parent == null) {
+            throw new NullPointerException();
+        }
+        this.parent = parent;
+    }
+
+    public void resetParent() {
+        parent = MAIN;
     }
 
     /**
