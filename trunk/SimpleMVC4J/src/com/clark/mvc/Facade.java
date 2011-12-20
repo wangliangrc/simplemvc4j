@@ -9,6 +9,10 @@ public class Facade {
 
     public static final Facade MAIN = new Facade("", null);
 
+    static {
+        facades.put(MAIN.getName(), MAIN);
+    }
+
     private static synchronized Facade facade(String name, Facade parent) {
         if (name == null || name.length() == 0)
             throw new NullPointerException("Argument 'name' mustn't be empty!");
@@ -283,7 +287,11 @@ public class Facade {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Facade [name=").append(name).append("]");
+        if (name.equals("")) {
+            builder.append("Facade [Main Facade]");
+        } else {
+            builder.append("Facade [name=").append(name).append("]");
+        }
         return builder.toString();
     }
 
