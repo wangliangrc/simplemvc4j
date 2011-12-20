@@ -58,7 +58,7 @@ public class Controller {
                                 }
                             }
                         };
-                        facade.register(name, function);
+                        facade.registerFunction(name, function);
                         hashMap.put(clazz, new FunctionHolder(name, function));
                         found = true;
                     }
@@ -91,7 +91,7 @@ public class Controller {
 
         if (hashMap.containsKey(clazz)) {
             FunctionHolder functionHolder = hashMap.get(clazz);
-            facade.remove(functionHolder.name, functionHolder.function);
+            facade.removeFunction(functionHolder.name, functionHolder.function);
             hashMap.remove(clazz);
             System.out.println("remove command: [" + clazz.getCanonicalName()
                     + "]");
@@ -99,5 +99,9 @@ public class Controller {
             System.err.println("Not found registered command: ["
                     + clazz.getCanonicalName() + "]");
         }
+    }
+
+    public synchronized boolean contains(Class<?> key) {
+        return hashMap.containsKey(key);
     }
 }

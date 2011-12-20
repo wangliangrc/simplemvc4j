@@ -70,4 +70,8 @@ public class Model {
     public synchronized Proxy get(String proxyName) {
         return hashMap.get(proxyName);
     }
+
+    public synchronized boolean contains(String proxyName) {
+        return hashMap.containsKey(proxyName);
+    }
 }

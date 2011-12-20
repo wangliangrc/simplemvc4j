@@ -101,7 +101,7 @@ public class View {
                                     }
                                 }
                             };
-                            facade.register(name, function);
+                            facade.registerFunction(name, function);
                             functions = getObservers(object);
                             functions.add(new FunctionHolder(name, function));
                             found = true;
@@ -146,7 +146,7 @@ public class View {
             Set<FunctionHolder> set = views.get(object);
             if (set != null && set.size() > 0) {
                 for (FunctionHolder holder : set) {
-                    facade.remove(holder.name, holder.function);
+                    facade.removeFunction(holder.name, holder.function);
                 }
             }
             views.remove(object);
@@ -158,4 +158,7 @@ public class View {
         }
     }
 
+    public synchronized boolean contains(Object key) {
+        return views.containsKey(key);
+    }
 }

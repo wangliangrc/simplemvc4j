@@ -7,7 +7,7 @@ import java.util.Set;
 public class Facade {
     private static HashMap<String, Facade> facades = new HashMap<String, Facade>();
 
-    public static synchronized Facade facade(String name) {
+    private static synchronized Facade facade(String name) {
         if (name == null)
             throw new NullPointerException();
 
@@ -19,9 +19,30 @@ public class Facade {
         return facade;
     }
 
-    public static synchronized void close(String name) {
+    public static synchronized Facade facade(Object object) {
+        if (object instanceof String) {
+            return facade((String) object);
+        } else {
+            return facade(identityObject(object));
+        }
+    }
+
+    private static String identityObject(Object object) {
+        return object.getClass().getCanonicalName() + "@"
+                + System.identityHashCode(object);
+    }
+
+    private static synchronized void remove(String name) {
         if (name != null) {
             facades.remove(name);
+        }
+    }
+
+    public static synchronized void remove(Object object) {
+        if (object instanceof String) {
+            remove((String) object);
+        } else {
+            remove(identityObject(object));
         }
     }
 
@@ -40,21 +61,21 @@ public class Facade {
     private HashMap<String, Set<Function>> hashMap = new HashMap<String, Set<Function>>();
     private UIWorker worker;
 
-    synchronized void register(String name, Function function) {
+    synchronized void registerFunction(String name, Function function) {
         if (name != null && function != null) {
             Set<Function> functions = getFunctions(name);
             functions.add(function);
         }
     }
 
-    synchronized void remove(String name, Function function) {
+    synchronized void removeFunction(String name, Function function) {
         if (name != null && function != null && hashMap.containsKey(name)) {
             Set<Function> set = hashMap.get(name);
             set.remove(function);
         }
     }
 
-    synchronized void remove(String name) {
+    synchronized void removeFunction(String name) {
         hashMap.remove(name);
     }
 
