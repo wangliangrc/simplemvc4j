@@ -10,7 +10,7 @@ public class Controller {
     }
 
     @SuppressWarnings("rawtypes")
-    private HashMap<Class, FunctionHolder> hashMap = new HashMap<Class, FunctionHolder>();
+    private HashMap<Class, FunctionHolder> functionHolderMap = new HashMap<Class, FunctionHolder>();
 
     private Facade facade;
 
@@ -26,7 +26,7 @@ public class Controller {
             throw new NullPointerException();
         }
 
-        if (hashMap.containsKey(clazz)) {
+        if (functionHolderMap.containsKey(clazz)) {
             System.err.println("Already registered command: "
                     + clazz.getCanonicalName());
             return;
@@ -59,7 +59,7 @@ public class Controller {
                             }
                         };
                         facade.registerFunction(name, function);
-                        hashMap.put(clazz, new FunctionHolder(name, function));
+                        functionHolderMap.put(clazz, new FunctionHolder(name, function));
                         found = true;
                     }
 
@@ -89,10 +89,10 @@ public class Controller {
             throw new NullPointerException();
         }
 
-        if (hashMap.containsKey(clazz)) {
-            FunctionHolder functionHolder = hashMap.get(clazz);
+        if (functionHolderMap.containsKey(clazz)) {
+            FunctionHolder functionHolder = functionHolderMap.get(clazz);
             facade.removeFunction(functionHolder.name, functionHolder.function);
-            hashMap.remove(clazz);
+            functionHolderMap.remove(clazz);
             System.out.println("remove command: [" + clazz.getCanonicalName()
                     + "]");
         } else {
@@ -102,6 +102,6 @@ public class Controller {
     }
 
     public synchronized boolean contains(Class<?> key) {
-        return hashMap.containsKey(key);
+        return functionHolderMap.containsKey(key);
     }
 }
