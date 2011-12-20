@@ -9,10 +9,6 @@ public class Facade {
 
     public static final Facade MAIN_FACADE = new Facade("", null);
 
-    static {
-        facades.put(MAIN_FACADE.getName(), MAIN_FACADE);
-    }
-
     private static synchronized Facade facade(String name, Facade parent) {
         if (name == null || name.length() == 0)
             throw new NullPointerException("Argument 'name' mustn't be empty!");
