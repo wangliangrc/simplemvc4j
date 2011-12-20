@@ -28,7 +28,7 @@ public class Facade {
         return facade;
     }
 
-    public static synchronized Facade facade(Object object) {
+    public static Facade facade(Object object) {
         if (object instanceof String) {
             return facade((String) object, null);
         } else {
@@ -36,7 +36,7 @@ public class Facade {
         }
     }
 
-    public static synchronized Facade facade(Object object, Facade parent) {
+    public static Facade facade(Object object, Facade parent) {
         if (object instanceof String) {
             return facade((String) object, parent);
         } else {
@@ -55,7 +55,7 @@ public class Facade {
         }
     }
 
-    public static synchronized void remove(Object object) {
+    public static void remove(Object object) {
         if (object instanceof String) {
             remove((String) object);
         } else {
@@ -72,15 +72,15 @@ public class Facade {
         }
     }
 
-    private String name;
+    private final String name;
     private volatile Facade parent;
 
-    private View view;
-    private Controller controller;
-    private Model model;
+    private final View view = new View(this);
+    private final Controller controller = new Controller(this);
+    private final Model model = new Model();
 
-    private HashMap<String, Set<Function>> hashMap = new HashMap<String, Set<Function>>();
-    private UIWorker worker;
+    private final HashMap<String, Set<Function>> hashMap = new HashMap<String, Set<Function>>();
+    private volatile UIWorker worker;
 
     synchronized void registerFunction(String name, Function function) {
         if (name != null && function != null) {
@@ -100,7 +100,7 @@ public class Facade {
         hashMap.remove(name);
     }
 
-    synchronized void setWorker(UIWorker worker) {
+    void setWorker(UIWorker worker) {
         this.worker = worker;
     }
 
@@ -228,10 +228,7 @@ public class Facade {
      * 
      * @return {@link View} 单例。
      */
-    public synchronized View view() {
-        if (view == null) {
-            view = new View(this);
-        }
+    public View view() {
         return view;
     }
 
@@ -240,10 +237,7 @@ public class Facade {
      * 
      * @return {@link Controller} 单例。
      */
-    public synchronized Controller controller() {
-        if (controller == null) {
-            controller = new Controller(this);
-        }
+    public Controller controller() {
         return controller;
     }
 
@@ -252,10 +246,7 @@ public class Facade {
      * 
      * @return {@link Model} 单例。
      */
-    public synchronized Model model() {
-        if (model == null) {
-            model = new Model();
-        }
+    public Model model() {
         return model;
     }
 
