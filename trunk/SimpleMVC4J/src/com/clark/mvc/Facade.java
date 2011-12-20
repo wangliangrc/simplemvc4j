@@ -178,19 +178,28 @@ public class Facade {
      */
     synchronized void notify(final Notification notification) {
         if (notification != null) {
-            if (uiWorker != null) {
-                uiWorker.postTask(new Runnable() {
+            UIWorker worker = findUIWorker(this);
+            if (worker != null) {
+                worker.postTask(new Runnable() {
 
                     @Override
                     public void run() {
                         notifyInternal(notification);
                     }
                 });
-            } else if (parent != null) {
-                parent.notify(notification);
             } else {
                 notifyInternal(notification);
             }
+        }
+    }
+
+    private static UIWorker findUIWorker(Facade facade) {
+        if (facade == null) {
+            return null;
+        } else if (facade.uiWorker != null) {
+            return facade.uiWorker;
+        } else {
+            return findUIWorker(facade.parent);
         }
     }
 
