@@ -2,7 +2,7 @@ package com.clark.mvc;
 
 import java.util.HashMap;
 
-public class Model {
+class Model {
 
     Model() {
     }

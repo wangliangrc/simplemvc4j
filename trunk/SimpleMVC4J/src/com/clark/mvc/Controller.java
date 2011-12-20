@@ -3,7 +3,7 @@ package com.clark.mvc;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-public class Controller {
+class Controller {
 
     Controller(Facade facade) {
         this.facade = facade;

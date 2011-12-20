@@ -7,10 +7,10 @@ import java.util.Set;
 public class Facade {
     private static HashMap<String, Facade> facades = new HashMap<String, Facade>();
 
-    public static final Facade MAIN = new Facade("", null);
+    public static final Facade MAIN_FACADE = new Facade("", null);
 
     static {
-        facades.put(MAIN.getName(), MAIN);
+        facades.put(MAIN_FACADE.getName(), MAIN_FACADE);
     }
 
     private static synchronized Facade facade(String name, Facade parent) {
@@ -18,7 +18,7 @@ public class Facade {
             throw new NullPointerException("Argument 'name' mustn't be empty!");
 
         if (parent == null) {
-            parent = MAIN;
+            parent = MAIN_FACADE;
         }
 
         // 如果之前没有 name 对应的 Facade 对象则创建一个并注册到 Facade 注册表上。
@@ -103,7 +103,7 @@ public class Facade {
      * 
      * @param object
      */
-    public static void remove(Object object) {
+    public static void removeFacade(Object object) {
         if (object instanceof CharSequence) {
             remove(object.toString());
         } else {
@@ -257,10 +257,10 @@ public class Facade {
      * 注意：MAIN Facade 对象不能调用该方法！
      */
     public void resetParent() {
-        if (equals(MAIN)) {
+        if (equals(MAIN_FACADE)) {
             throw new IllegalArgumentException("Self dependent!");
         }
-        parent = MAIN;
+        parent = MAIN_FACADE;
     }
 
     /**
@@ -324,31 +324,44 @@ public class Facade {
         sendNotification(notificationName, null);
     }
 
-    /**
-     * 获取与本 Facade 相关的 {@link View} 对象。
-     * 
-     * @return {@link View} 对象。
-     */
-    public View view() {
-        return view;
+    public void registerView(Object object) {
+        view.register(object);
     }
 
-    /**
-     * 获取与本 Facade 相关的 {@link Controller} 对象。
-     * 
-     * @return {@link Controller} 对象。
-     */
-    public Controller controller() {
-        return controller;
+    public void removeView(Object object) {
+        view.remove(object);
     }
 
-    /**
-     * 获取与本 Facade 相关的 {@link Model} 对象。
-     * 
-     * @return {@link Model} 对象。
-     */
-    public Model model() {
-        return model;
+    public boolean containsView(Object key) {
+        return view.contains(key);
+    }
+
+    public void registerController(Class<?> clazz) {
+        controller.register(clazz);
+    }
+
+    public void removeController(Class<?> clazz) {
+        controller.remove(clazz);
+    }
+
+    public boolean containsController(Class<?> key) {
+        return controller.contains(key);
+    }
+
+    public void registerProxy(Proxy proxy) {
+        model.register(proxy);
+    }
+
+    public void removeProxy(Proxy proxy) {
+        model.remove(proxy);
+    }
+
+    public Proxy getProxy(String proxyName) {
+        return model.get(proxyName);
+    }
+
+    public boolean containsProxy(String proxyName) {
+        return model.contains(proxyName);
     }
 
     /**

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-public class View {
+class View {
 
     private HashMap<Object, Set<FunctionHolder>> views = new HashMap<Object, Set<FunctionHolder>>();
     private Facade facade;
