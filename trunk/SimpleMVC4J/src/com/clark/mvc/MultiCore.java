@@ -2,17 +2,17 @@ package com.clark.mvc;
 
 import java.util.HashMap;
 
-public final class FacadeFactory {
+public final class MultiCore {
     private static HashMap<String, Facade> facades = new HashMap<String, Facade>();
 
-    public static final Facade MAIN_FACADE = new Facade("", null);
+    public static final Facade MAIN_CORE = new Facade("", null);
 
     private static synchronized Facade facade(String name, Facade parent) {
         if (name == null || name.length() == 0)
             throw new NullPointerException("Argument 'name' mustn't be empty!");
 
         if (parent == null) {
-            parent = MAIN_FACADE;
+            parent = MAIN_CORE;
         }
 
         // 如果之前没有 name 对应的 Facade 对象则创建一个并注册到 Facade 注册表上。
@@ -42,7 +42,7 @@ public final class FacadeFactory {
      * @param object
      * @return
      */
-    public static Facade facade(Object object) {
+    public static Facade newCore(Object object) {
         if (object instanceof CharSequence) {
             return facade(object.toString(), null);
         } else {
@@ -57,7 +57,7 @@ public final class FacadeFactory {
      * @param parent
      * @return
      */
-    public static Facade facade(Object object, Facade parent) {
+    public static Facade newCore(Object object, Facade parent) {
         if (object instanceof CharSequence) {
             return facade(object.toString(), parent);
         } else {
@@ -97,7 +97,7 @@ public final class FacadeFactory {
      * 
      * @param object
      */
-    public static void removeFacade(Object object) {
+    public static void removeCore(Object object) {
         if (object instanceof CharSequence) {
             remove(object.toString());
         } else {
@@ -106,60 +106,60 @@ public final class FacadeFactory {
     }
 
     public void setUIWorker(UIWorker worker) {
-        MAIN_FACADE.setUIWorker(worker);
+        MAIN_CORE.setUIWorker(worker);
     }
 
     public void sendNotification(String notificationName, Object body,
             String type) {
-        MAIN_FACADE.sendNotification(notificationName, body, type);
+        MAIN_CORE.sendNotification(notificationName, body, type);
     }
 
     public void sendNotification(String notificationName, Object body) {
-        MAIN_FACADE.sendNotification(notificationName, body);
+        MAIN_CORE.sendNotification(notificationName, body);
     }
 
     public void sendNotification(String notificationName) {
-        MAIN_FACADE.sendNotification(notificationName);
+        MAIN_CORE.sendNotification(notificationName);
     }
 
     public void registerView(Object object) {
-        MAIN_FACADE.registerView(object);
+        MAIN_CORE.registerView(object);
     }
 
     public void removeView(Object object) {
-        MAIN_FACADE.removeView(object);
+        MAIN_CORE.removeView(object);
     }
 
     public boolean containsView(Object key) {
-        return MAIN_FACADE.containsView(key);
+        return MAIN_CORE.containsView(key);
     }
 
     public void registerController(Class<?> clazz) {
-        MAIN_FACADE.registerController(clazz);
+        MAIN_CORE.registerController(clazz);
     }
 
     public void removeController(Class<?> clazz) {
-        MAIN_FACADE.removeController(clazz);
+        MAIN_CORE.removeController(clazz);
     }
 
     public boolean containsController(Class<?> key) {
-        return MAIN_FACADE.containsController(key);
+        return MAIN_CORE.containsController(key);
     }
 
     public void registerProxy(Proxy proxy) {
-        MAIN_FACADE.registerProxy(proxy);
+        MAIN_CORE.registerProxy(proxy);
     }
 
     public void removeProxy(Proxy proxy) {
-        MAIN_FACADE.removeProxy(proxy);
+        MAIN_CORE.removeProxy(proxy);
     }
 
     public Proxy getProxy(String proxyName) {
-        return MAIN_FACADE.getProxy(proxyName);
+        return MAIN_CORE.getProxy(proxyName);
     }
 
     public boolean containsProxy(String proxyName) {
-        return MAIN_FACADE.containsProxy(proxyName);
+        return MAIN_CORE.containsProxy(proxyName);
     }
 
 }
