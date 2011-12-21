@@ -2,6 +2,7 @@ package com.sina.openapi;
 
 import static com.clark.func.Functions.asserts;
 import static com.clark.func.Functions.closeQuietly;
+import static com.clark.func.Functions.isBlank;
 import static com.clark.func.Functions.isNotBlank;
 import static com.clark.func.Functions.isNotEmpty;
 
@@ -20,7 +21,6 @@ import java.util.List;
 import oauth.signpost.OAuth;
 
 import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -608,8 +608,8 @@ public class ApiRequest {
             parameters.add(new BasicNameValuePair("description", description));
         }
         try {
-            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(parameters,
-                    "UTF-8");
+            MyUrlEncodedFormEntity entity = new MyUrlEncodedFormEntity(
+                    parameters, "UTF-8");
             httpPost.setEntity(entity);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
@@ -881,6 +881,162 @@ public class ApiRequest {
             throw new RuntimeException(e);
         }
         return httpPost;
+    }
+
+    /**
+     * 删除评论。注意：只能删除登录用户自己发布的评论， 不可以删除其他人的评论。 <br>
+     * 格式：xml， json <br>
+     * POST/DELETE <br>
+     * 需要登录：true <br>
+     * 请求数限制：true
+     * 
+     * @param :id 必选参数 欲删除的评论ID，该参数为一个REST风格参数
+     * 
+     * @author
+     */
+    public static HttpUriRequest destroyMyCommentOfOneStatus(String _id) {
+        asserts(isNotBlank(_id));
+
+        HttpDelete httpDelete = new HttpDelete();
+        try {
+            URI uri = URIUtils.createURI(scheme, host, -1,
+                    "/statuses/comment_destroy/" + _id + ".json", null, null);
+            httpDelete.setURI(uri);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        return httpDelete;
+    }
+
+    /**
+     * 批量删除评论。注意：只能删除登录用户自己发布的评论， 不可以删除其他人的评论。 <br>
+     * 格式：xml， json <br>
+     * POST/DELETE <br>
+     * 需要登录：true <br>
+     * 请求数限制：true
+     * 
+     * @param ids
+     *            必选参数 欲删除的一组评论ID，用半角逗号隔开，最多20个
+     * 
+     * @author
+     */
+    public static HttpUriRequest destroyMyCommentsOfOneStatus(String... ids) {
+        asserts(isNotEmpty(ids));
+
+        HttpDelete httpDelete = new HttpDelete();
+        List<BasicNameValuePair> parameters = new ArrayList<BasicNameValuePair>();
+        StringBuilder builder = new StringBuilder();
+        for (String id : ids) {
+            if (builder.length() > 0) {
+                builder.append(",");
+            }
+            builder.append(id);
+        }
+        parameters.add(new BasicNameValuePair("ids", parameters.toString()));
+        try {
+            URI uri = URIUtils.createURI(scheme, host, -1,
+                    "/statuses/comment/destroy_batch.json",
+                    URLEncodedUtils.format(parameters, "UTF-8"), null);
+            httpDelete.setURI(uri);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        return httpDelete;
+    }
+
+    /**
+     * 回复评论。请求必须用POST方式提交。 <br>
+     * 格式：xml， json <br>
+     * POST <br>
+     * 需要登录：true <br>
+     * 请求数限制：true
+     * 
+     * @param cid
+     *            必选参数 要回复的评论ID。
+     * @param comment
+     *            必选参数 要回复的评论内容。必须做URLEncode,信息内容不超过140个汉字。
+     * @param blogId
+     *            必选参数 要评论的微博消息ID
+     * @param without_mention
+     *            1：回复中不自动加入“回复@用户名”，0：回复中自动加入“回复@用户名”.默认为0.
+     * @return rlt 评论列表
+     * 
+     * @author
+     */
+    public static HttpUriRequest replyCommentOfOneStatus(String cid,
+            String comment, String blogId, int without_mention) {
+        asserts(isNotBlank(cid));
+        asserts(isNotBlank(comment));
+        asserts(isNotBlank(blogId));
+
+        HttpPost httpPost = new HttpPost();
+        try {
+            URI uri = URIUtils.createURI(scheme, host, -1,
+                    "/statuses/reply.json", null, null);
+            httpPost.setURI(uri);
+            List<BasicNameValuePair> parameters = new ArrayList<BasicNameValuePair>();
+            parameters.add(new BasicNameValuePair("cid", cid));
+            parameters.add(new BasicNameValuePair("id", blogId));
+            parameters.add(new BasicNameValuePair("comment", comment));
+            if (without_mention >= 0 && without_mention <= 1) {
+                parameters.add(new BasicNameValuePair("without_mention", ""
+                        + without_mention));
+            }
+            MyUrlEncodedFormEntity entity = new MyUrlEncodedFormEntity(
+                    parameters, "UTF-8");
+            httpPost.setEntity(entity);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        return httpPost;
+    }
+
+    /**
+     * 按用户ID或昵称返回用户资料以及用户的最新发布的一条微博消息。 <br>
+     * 格式：xml， json <br>
+     * GET <br>
+     * 需要登录：true <br>
+     * 请求数限制：true
+     * 
+     * @param _id
+     *            可选参数 用户ID(int64)或者昵称(string)。该参数为一个REST风格参数。
+     * @param user_id
+     *            可选参数
+     *            用户ID，主要是用来区分用户ID跟微博昵称。当微博昵称为数字导致和用户ID产生歧义，特别是当微博昵称和用户ID一样的时候
+     *            ，建议使用该参数
+     * @param screen_name
+     *            可选参数 微博昵称，主要是用来区分用户UID跟微博昵称，当二者一样而产生歧义的时候，建议使用该参数
+     * @return rlt
+     * 
+     * @author
+     */
+    public static HttpUriRequest showOneUser(String _id, String user_id,
+            String screen_name) {
+        HttpGet httpGet = new HttpGet();
+        List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+        if (isNotBlank(user_id)) {
+            params.add(new BasicNameValuePair("user_id", user_id));
+        }
+        if (isNotBlank(screen_name)) {
+            params.add(new BasicNameValuePair("screen_name", screen_name));
+        }
+        String query = URLEncodedUtils.format(params, "UTF-8");
+        try {
+            URI uri;
+            if (isBlank(_id)) {
+                uri = URIUtils.createURI(scheme, host, -1, "/users/show.json",
+                        query, null);
+            } else {
+                uri = URIUtils.createURI(scheme, host, -1, "/users/show/" + _id
+                        + ".json", query, null);
+            }
+            httpGet.setURI(uri);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        return httpGet;
     }
 
     // -----------------------------------------------------------------
