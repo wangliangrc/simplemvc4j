@@ -93,7 +93,7 @@ class Controller {
             }
 
             if (found) {
-                System.out.println("register command: ["
+                System.out.println(facade + " register command: ["
                         + clazz.getCanonicalName() + "]");
             } else {
                 System.err.println(errorString);
@@ -118,7 +118,7 @@ class Controller {
             FunctionHolder functionHolder = functionHolderMap.get(clazz);
             facade.removeFunction(functionHolder.name, functionHolder.function);
             functionHolderMap.remove(clazz);
-            System.out.println("remove command: [" + clazz.getCanonicalName()
+            System.out.println(facade + " remove command: [" + clazz.getCanonicalName()
                     + "]");
         } else {
             System.err.println("Not found registered command: ["

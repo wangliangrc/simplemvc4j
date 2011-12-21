@@ -24,7 +24,7 @@ public class Facade {
 
     private final View view = new View(this);
     private final Controller controller = new Controller(this);
-    private final Model model = new Model();
+    private final Model model = new Model(this);
 
     private final HashMap<String, Set<Function>> functionMap = new HashMap<String, Set<Function>>();
     private volatile UIWorker uiWorker;

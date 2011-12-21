@@ -113,7 +113,7 @@ class View {
             }
 
             if (found) {
-                System.out.println("register mediator: [" + object + "]");
+                System.out.println(facade + " register mediator: [" + object + "]");
             } else {
                 System.err.println(errorString);
             }
@@ -150,7 +150,7 @@ class View {
                 }
             }
             views.remove(object);
-            System.out.println("remove mediator: [" + object + "]");
+            System.out.println(facade + " remove mediator: [" + object + "]");
         } else {
             String errorString = "There is no mediator which is already registered: ["
                     + object + "]";
