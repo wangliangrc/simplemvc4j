@@ -59,7 +59,7 @@ class View {
      *            一个包含 {@link Mediator} 注解方法的类的实例。不能为 null。
      */
     @SuppressWarnings("rawtypes")
-    public synchronized void register(final Object object) {
+    synchronized void register(final Object object) {
         if (object == null) {
             throw new NullPointerException("object can't be null");
         }
@@ -137,7 +137,7 @@ class View {
      * @param object
      *            一个已注册过的包含 {@link Mediator} 注解方法的类的实例。不能为 null。
      */
-    public synchronized void remove(Object object) {
+    synchronized void remove(Object object) {
         if (object == null) {
             throw new NullPointerException("object can't be null");
         }
@@ -158,7 +158,7 @@ class View {
         }
     }
 
-    public synchronized boolean contains(Object key) {
+    synchronized boolean contains(Object key) {
         return views.containsKey(key);
     }
 }

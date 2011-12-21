@@ -15,7 +15,7 @@ class Model {
      * @param proxy
      *            一个需要注册的 {@link Proxy} 实例。不能为 null。
      */
-    public synchronized void register(Proxy proxy) {
+    synchronized void register(Proxy proxy) {
         if (proxy == null) {
             throw new NullPointerException("proxy can't be null");
         }
@@ -40,7 +40,7 @@ class Model {
      * @param proxy
      *            一个已注册的 {@link Proxy} 实例。不能为 null。
      */
-    public synchronized void remove(Proxy proxy) {
+    synchronized void remove(Proxy proxy) {
         if (proxy == null) {
             throw new NullPointerException("proxy can't be null");
         }
@@ -67,11 +67,11 @@ class Model {
      *            {@link Proxy} 实例对应的键值。
      * @return 返回映射的 {@link Proxy} 实例，可能为 null。
      */
-    public synchronized Proxy get(String proxyName) {
+    synchronized Proxy get(String proxyName) {
         return hashMap.get(proxyName);
     }
 
-    public synchronized boolean contains(String proxyName) {
+    synchronized boolean contains(String proxyName) {
         return hashMap.containsKey(proxyName);
     }
 }

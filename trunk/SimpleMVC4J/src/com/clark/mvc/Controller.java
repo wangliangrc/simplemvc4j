@@ -1,7 +1,12 @@
 package com.clark.mvc;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 class Controller {
 
@@ -9,19 +14,18 @@ class Controller {
         this.facade = facade;
     }
 
-    @SuppressWarnings("rawtypes")
-    private HashMap<Class, FunctionHolder> functionHolderMap = new HashMap<Class, FunctionHolder>();
+    private HashMap<Class<?>, FunctionHolder> functionHolderMap = new HashMap<Class<?>, FunctionHolder>();
 
     private Facade facade;
 
     /**
-     * 注册包含 {@link Command} 注解方法的 {@link Class} 对象到 Controller 注册表中。
+     * 注册包含 {@link Command} 注解方法的 {@link Class} 对象到 Controller 注册表中。<br />
+     * 注意：{@link Class} 对象 clazz 中不能含有 static 非 final 域。
      * 
      * @param clazz
      *            需要注册的 {@link Class} 对象。不能为 null。
      */
-    @SuppressWarnings("rawtypes")
-    public synchronized void register(Class clazz) {
+    synchronized void register(Class<?> clazz) {
         if (clazz == null) {
             throw new NullPointerException();
         }
@@ -32,16 +36,37 @@ class Controller {
             return;
         }
 
+        // 检验 clazz 的无状态性
+        Set<Field> fields = new HashSet<Field>();
+        fields.addAll(Arrays.asList(clazz.getFields()));
+        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+        int modifier = 0;
+        for (Field field : fields) {
+            modifier = field.getModifiers();
+            if (Modifier.isStatic(modifier)) {
+                if (!Modifier.isFinal(modifier)) {
+                    throw new IllegalStateException(
+                            "Controller can't have any static-non-final field!");
+                }
+            } else {
+                continue;
+            }
+        }
+
         Method[] declaredMethods = clazz.getDeclaredMethods();
         String errorString = "Not found command method in ["
                 + clazz.getCanonicalName() + "]";
         if (declaredMethods != null) {
-
             Command cmd = null;
             String name = null;
             Function function = null;
             boolean found = false;
             for (final Method method : declaredMethods) {
+                // 只能处理 static method
+                if (!Modifier.isStatic(method.getModifiers())) {
+                    continue;
+                }
+
                 cmd = method.getAnnotation(Command.class);
                 if (cmd != null) {
 
@@ -59,7 +84,8 @@ class Controller {
                             }
                         };
                         facade.registerFunction(name, function);
-                        functionHolderMap.put(clazz, new FunctionHolder(name, function));
+                        functionHolderMap.put(clazz, new FunctionHolder(name,
+                                function));
                         found = true;
                     }
 
@@ -83,8 +109,7 @@ class Controller {
      * @param clazz
      *            将要移除的包含 {@link Command} 注解方法的 {@link Class} 对象。不能为 null。
      */
-    @SuppressWarnings("rawtypes")
-    public synchronized void remove(Class clazz) {
+    synchronized void remove(Class<?> clazz) {
         if (clazz == null) {
             throw new NullPointerException();
         }
@@ -101,7 +126,7 @@ class Controller {
         }
     }
 
-    public synchronized boolean contains(Class<?> key) {
+    synchronized boolean contains(Class<?> key) {
         return functionHolderMap.containsKey(key);
     }
 }
