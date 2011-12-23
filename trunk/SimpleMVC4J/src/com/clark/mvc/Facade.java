@@ -101,8 +101,8 @@ public class Facade {
     /**
      * 该方法会遍历 Function Map 查找处相关的 Function 对象并依次 调用它们的
      * {@link Function#onSignal(Signal)} 方法。<br />
-     * 注意：本方法还会调用 parent 属性的 {@link #signalInternal(Signal)} 方法，在 parent
-     * 不为 null 的时候。
+     * 注意：本方法还会调用 parent 属性的 {@link #signalInternal(Signal)} 方法，在 parent 不为 null
+     * 的时候。
      * 
      * @param signal
      */
@@ -178,6 +178,18 @@ public class Facade {
     }
 
     /**
+     * 使用动态代理完成回调逻辑
+     * 
+     * @param clazz
+     *            必须为 Interface 类型
+     * @param signal
+     * @return
+     */
+    public <T> T callback(Class<T> clazz, String signal) {
+        return SignalHandler.newSignal(this, clazz, signal);
+    }
+
+    /**
      * 发送 {@link Signal} 通知实例。
      * <p>
      * 注意：回调方法运行线程由该方法所在线程决定。
@@ -189,15 +201,13 @@ public class Facade {
      * @param type
      *            通知类型。
      */
-    public void sendSignal(String signalName, Object body,
-            String type) {
+    public void sendSignal(String signalName, Object body, String type) {
         if (signalName == null) {
             throw new NullPointerException();
         }
 
         if (signalName.trim().length() == 0) {
-            throw new IllegalArgumentException(
-                    "signalName mustn't be empty!");
+            throw new IllegalArgumentException("signalName mustn't be empty!");
         }
         notify(new Signal(signalName, body, type));
     }
