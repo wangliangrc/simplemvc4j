@@ -109,17 +109,17 @@ public final class MultiCore {
         MAIN_CORE.setUIWorker(worker);
     }
 
-    public void sendNotification(String notificationName, Object body,
+    public void sendSignal(String signalName, Object body,
             String type) {
-        MAIN_CORE.sendNotification(notificationName, body, type);
+        MAIN_CORE.sendSignal(signalName, body, type);
     }
 
-    public void sendNotification(String notificationName, Object body) {
-        MAIN_CORE.sendNotification(notificationName, body);
+    public void sendSignal(String signalName, Object body) {
+        MAIN_CORE.sendSignal(signalName, body);
     }
 
-    public void sendNotification(String notificationName) {
-        MAIN_CORE.sendNotification(notificationName);
+    public void sendSignal(String signalName) {
+        MAIN_CORE.sendSignal(signalName);
     }
 
     public void registerView(Object object) {

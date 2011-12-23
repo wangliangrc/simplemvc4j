@@ -75,7 +75,7 @@ class Controller {
                         function = new Function() {
 
                             @Override
-                            public void onNotification(Notification notification) {
+                            public void onSignal(Signal notification) {
                                 try {
                                     method.invoke(null, notification);
                                 } catch (Exception e) {

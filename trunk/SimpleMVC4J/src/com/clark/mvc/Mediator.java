@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * 
  * <pre>
  * &#064;Mediator(&quot;doXXX&quot;)
- * public void someMethod(Notification notification) {
+ * public void someMethod(Signal signal) {
  *     ...
  * }
  * </pre>
@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
  * <li>public 是必须的，需要保证 Java 反射机制可以找到该方法。</li>
  * <li>返回值并没有做出限制，但是有返回值的话也不会被利用，一般为 void。</li>
  * <li>方法名称没有限定。</li>
- * <li>参数列表要求只能接受一个 {@link Notification} 类型参数，参数个数类型不对会抛出非受检异常。</li>
+ * <li>参数列表要求只能接受一个 {@link Signal} 类型参数，参数个数类型不对会抛出非受检异常。</li>
  * </ol>
  * 
  * @author Clark

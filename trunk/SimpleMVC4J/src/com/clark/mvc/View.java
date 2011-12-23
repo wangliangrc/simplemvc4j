@@ -33,7 +33,7 @@ class View {
      *         mvc().view().register(mediator2);
      * 
      *         // 发送 &quot;doSomdthing&quot; 通知
-     *         mvc().sendNotification(&quot;doSomdthing&quot;);
+     *         mvc().sendSignal(&quot;doSomdthing&quot;);
      * 
      *         // 移除 Mediator
      *         mvc().view().remove(mediator1);
@@ -43,9 +43,9 @@ class View {
      *     public static class SomeMediator {
      * 
      *         &#064;Mediator(&quot;doSomdthing&quot;)
-     *         public void doSomdthing(Notification notification) {
+     *         public void doSomdthing(Signal signal) {
      *             System.out.println(&quot;SomeView.doSomdthing()\n&quot; + toString());
-     *             System.out.println(notification);
+     *             System.out.println(signal);
      *         }
      * 
      *     }
@@ -92,8 +92,8 @@ class View {
                             function = new Function() {
 
                                 @Override
-                                public void onNotification(
-                                        Notification notification) {
+                                public void onSignal(
+                                        Signal notification) {
                                     try {
                                         method.invoke(object, notification);
                                     } catch (Exception e) {

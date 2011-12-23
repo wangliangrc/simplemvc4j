@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * 
  * <pre>
  * &#064;Command(&quot;doXXX&quot;)
- * public static void someMethod(Notification notification) {
+ * public static void someMethod(Signal signal) {
  *     ...
  * }
  * </pre>
@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
  * <li>static 是必须的，需要保证实现 Command 机制的类没有实例。</li>
  * <li>返回值并没有做出限制，但是有返回值的话也不会被利用，一般为 void。</li>
  * <li>方法名称没有限定。</li>
- * <li>参数列表要求只能接受一个 {@link Notification} 类型参数，参数个数类型不对会抛出非受检异常。</li>
+ * <li>参数列表要求只能接受一个 {@link Signal} 类型参数，参数个数类型不对会抛出非受检异常。</li>
  * </ol>
  * 
  * @author clark

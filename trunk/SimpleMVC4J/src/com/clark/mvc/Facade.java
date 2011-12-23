@@ -69,21 +69,21 @@ public class Facade {
      * 注意：该方法会继承 parent 的 {@link UIWorker} 属性，即如果自身没有设置 {@link UIWorker}
      * 属性还会自动查看 parent 的 {@link UIWorker} 属性，直到 MAIN Facade 为止.
      * 
-     * @param notification
+     * @param signal
      */
-    synchronized void notify(final Notification notification) {
-        if (notification != null) {
+    synchronized void notify(final Signal signal) {
+        if (signal != null) {
             UIWorker worker = findUIWorker(this);
             if (worker != null) {
                 worker.postTask(new Runnable() {
 
                     @Override
                     public void run() {
-                        notifyInternal(notification);
+                        signalInternal(signal);
                     }
                 });
             } else {
-                notifyInternal(notification);
+                signalInternal(signal);
             }
         }
     }
@@ -100,26 +100,26 @@ public class Facade {
 
     /**
      * 该方法会遍历 Function Map 查找处相关的 Function 对象并依次 调用它们的
-     * {@link Function#onNotification(Notification)} 方法。<br />
-     * 注意：本方法还会调用 parent 属性的 {@link #notifyInternal(Notification)} 方法，在 parent
+     * {@link Function#onSignal(Signal)} 方法。<br />
+     * 注意：本方法还会调用 parent 属性的 {@link #signalInternal(Signal)} 方法，在 parent
      * 不为 null 的时候。
      * 
-     * @param notification
+     * @param signal
      */
-    private void notifyInternal(Notification notification) {
-        Set<Function> set = functionMap.get(notification.name);
+    private void signalInternal(Signal signal) {
+        Set<Function> set = functionMap.get(signal.name);
         if (set != null && set.size() > 0) {
             System.out.println(toString() + " notified at "
                     + Thread.currentThread().toString());
 
             for (Function function : set) {
-                function.onNotification(notification);
+                function.onSignal(signal);
             }
         }
 
         // call parent's functions
         if (parent != null) {
-            parent.notifyInternal(notification);
+            parent.signalInternal(signal);
         }
     }
 
@@ -178,54 +178,54 @@ public class Facade {
     }
 
     /**
-     * 发送 {@link Notification} 通知实例。
+     * 发送 {@link Signal} 通知实例。
      * <p>
      * 注意：回调方法运行线程由该方法所在线程决定。
      * 
-     * @param notificationName
+     * @param signalName
      *            通知名称。不能为 null。
      * @param body
      *            通知包含消息体。
      * @param type
      *            通知类型。
      */
-    public void sendNotification(String notificationName, Object body,
+    public void sendSignal(String signalName, Object body,
             String type) {
-        if (notificationName == null) {
+        if (signalName == null) {
             throw new NullPointerException();
         }
 
-        if (notificationName.trim().length() == 0) {
+        if (signalName.trim().length() == 0) {
             throw new IllegalArgumentException(
-                    "notificationName mustn't be empty!");
+                    "signalName mustn't be empty!");
         }
-        notify(new Notification(notificationName, body, type));
+        notify(new Signal(signalName, body, type));
     }
 
     /**
-     * 发送 {@link Notification} 通知实例。
+     * 发送 {@link Signal} 通知实例。
      * <p>
      * 注意：回调方法运行线程由该方法所在线程决定。
      * 
-     * @param notificationName
+     * @param signalName
      *            通知名称。不能为 null。
      * @param body
      *            通知包含消息体。
      */
-    public void sendNotification(String notificationName, Object body) {
-        sendNotification(notificationName, body, null);
+    public void sendSignal(String signalName, Object body) {
+        sendSignal(signalName, body, null);
     }
 
     /**
-     * 发送 {@link Notification} 通知实例。
+     * 发送 {@link Signal} 通知实例。
      * <p>
      * 注意：回调方法运行线程由该方法所在线程决定。
      * 
-     * @param notificationName
+     * @param signalName
      *            通知名称。不能为 null。
      */
-    public void sendNotification(String notificationName) {
-        sendNotification(notificationName, null);
+    public void sendSignal(String signalName) {
+        sendSignal(signalName, null);
     }
 
     public void registerView(Object object) {

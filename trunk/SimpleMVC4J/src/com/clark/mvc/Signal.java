@@ -1,12 +1,12 @@
 package com.clark.mvc;
 
-public class Notification {
+public class Signal {
 
     public final String name;
     public final Object body;
     public final String type;
 
-    Notification(String name, Object body, String type) {
+    Signal(String name, Object body, String type) {
         super();
         this.name = name;
         this.body = body;
@@ -29,7 +29,7 @@ public class Notification {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Notification other = (Notification) obj;
+        Signal other = (Signal) obj;
         if (name == null) {
             if (other.name != null)
                 return false;
@@ -40,7 +40,7 @@ public class Notification {
 
     @Override
     public String toString() {
-        return "Notification [name=" + name + ", body=" + body + ", type="
+        return "Signal [name=" + name + ", body=" + body + ", type="
                 + type + "]";
     }
 
