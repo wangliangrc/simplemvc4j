@@ -176,7 +176,7 @@ public class Facade {
     public void setUIWorker(UIWorker worker) {
         if (worker instanceof java.lang.reflect.Proxy) {
             throw new IllegalArgumentException(
-                    "Can't using callback() method in the setUIWorker(UIWorker) CALLBACK!");
+                    "Can't use callback(Class, String) method in the setUIWorker(UIWorker) CALLBACK!");
         }
         uiWorker = worker;
     }
