@@ -174,6 +174,10 @@ public class Facade {
      *            可以为 null。如果为 null 则表示 sendNotification 方法的执行线程与调用者线程一致。
      */
     public void setUIWorker(UIWorker worker) {
+        if (worker instanceof java.lang.reflect.Proxy) {
+            throw new IllegalArgumentException(
+                    "Can't using callback() method in the setUIWorker(UIWorker) CALLBACK!");
+        }
         uiWorker = worker;
     }
 
