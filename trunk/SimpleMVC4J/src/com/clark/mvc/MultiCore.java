@@ -5,14 +5,14 @@ import java.util.HashMap;
 public final class MultiCore {
     private static HashMap<String, Facade> facades = new HashMap<String, Facade>();
 
-    public static final Facade MAIN_CORE = new Facade("", null);
+    public static final Facade GLOBAL = new Facade("", null);
 
     private static synchronized Facade facade(String name, Facade parent) {
         if (name == null || name.length() == 0)
             throw new NullPointerException("Argument 'name' mustn't be empty!");
 
         if (parent == null) {
-            parent = MAIN_CORE;
+            parent = GLOBAL;
         }
 
         // 如果之前没有 name 对应的 Facade 对象则创建一个并注册到 Facade 注册表上。
@@ -106,60 +106,60 @@ public final class MultiCore {
     }
 
     public void setUIWorker(UIWorker worker) {
-        MAIN_CORE.setUIWorker(worker);
+        GLOBAL.setUIWorker(worker);
     }
 
     public void sendSignal(String signalName, Object body,
             String type) {
-        MAIN_CORE.sendSignal(signalName, body, type);
+        GLOBAL.sendSignal(signalName, body, type);
     }
 
     public void sendSignal(String signalName, Object body) {
-        MAIN_CORE.sendSignal(signalName, body);
+        GLOBAL.sendSignal(signalName, body);
     }
 
     public void sendSignal(String signalName) {
-        MAIN_CORE.sendSignal(signalName);
+        GLOBAL.sendSignal(signalName);
     }
 
     public void registerView(Object object) {
-        MAIN_CORE.registerView(object);
+        GLOBAL.registerView(object);
     }
 
     public void removeView(Object object) {
-        MAIN_CORE.removeView(object);
+        GLOBAL.removeView(object);
     }
 
     public boolean containsView(Object key) {
-        return MAIN_CORE.containsView(key);
+        return GLOBAL.containsView(key);
     }
 
     public void registerController(Class<?> clazz) {
-        MAIN_CORE.registerController(clazz);
+        GLOBAL.registerController(clazz);
     }
 
     public void removeController(Class<?> clazz) {
-        MAIN_CORE.removeController(clazz);
+        GLOBAL.removeController(clazz);
     }
 
     public boolean containsController(Class<?> key) {
-        return MAIN_CORE.containsController(key);
+        return GLOBAL.containsController(key);
     }
 
     public void registerProxy(Proxy proxy) {
-        MAIN_CORE.registerProxy(proxy);
+        GLOBAL.registerProxy(proxy);
     }
 
     public void removeProxy(Proxy proxy) {
-        MAIN_CORE.removeProxy(proxy);
+        GLOBAL.removeProxy(proxy);
     }
 
     public Proxy getProxy(String proxyName) {
-        return MAIN_CORE.getProxy(proxyName);
+        return GLOBAL.getProxy(proxyName);
     }
 
     public boolean containsProxy(String proxyName) {
-        return MAIN_CORE.containsProxy(proxyName);
+        return GLOBAL.containsProxy(proxyName);
     }
 
 }

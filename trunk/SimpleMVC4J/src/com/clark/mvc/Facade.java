@@ -161,10 +161,10 @@ public class Facade {
      * 注意：MAIN Facade 对象不能调用该方法！
      */
     public void resetParent() {
-        if (equals(MultiCore.MAIN_CORE)) {
+        if (equals(MultiCore.GLOBAL)) {
             throw new IllegalArgumentException("Self dependent!");
         }
-        parent = MultiCore.MAIN_CORE;
+        parent = MultiCore.GLOBAL;
     }
 
     /**
