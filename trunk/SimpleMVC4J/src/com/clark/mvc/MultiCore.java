@@ -86,6 +86,13 @@ public final class MultiCore {
             final Facade facade = facades.remove(name);
             if (facade != null) {
                 System.out.println("remove facade:" + facade);
+                // 将 parent 中为 name 的 Facade 删除
+                for (Facade facade2 : facades.values()) {
+                    if (facade2.parent != null
+                            && facade2.parent.getName().equals(name)) {
+                        facade2.resetParent();
+                    }
+                }
             } else {
                 System.err.println("Can't find facade named \"" + name + "\"!");
             }
@@ -109,8 +116,7 @@ public final class MultiCore {
         GLOBAL.setUIWorker(worker);
     }
 
-    public void sendSignal(String signalName, Object body,
-            String type) {
+    public void sendSignal(String signalName, Object body, String type) {
         GLOBAL.sendSignal(signalName, body, type);
     }
 
