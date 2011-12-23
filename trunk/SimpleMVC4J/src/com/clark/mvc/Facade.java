@@ -182,7 +182,8 @@ public class Facade {
     }
 
     /**
-     * 使用动态代理完成回调逻辑
+     * 使用动态代理完成回调逻辑。<br />
+     * 注意：目前只能代理没有返回值的回调方法！
      * 
      * @param clazz
      *            必须为 Interface 类型

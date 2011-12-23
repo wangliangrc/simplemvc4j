@@ -32,6 +32,9 @@ class SignalHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args)
             throws Throwable {
+        if (method.getReturnType() != Void.class) {
+            throw new IllegalArgumentException("不能代理又返回值的回调方法");
+        }
         System.out.println("***********************************");
         System.out.println("            SignalHandler          ");
         System.out.println("方法签名： " + methodToString(method));
