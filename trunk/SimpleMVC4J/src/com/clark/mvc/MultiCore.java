@@ -112,63 +112,63 @@ public final class MultiCore {
         }
     }
 
-    public void setUIWorker(UIWorker worker) {
+    public static void setUIWorker(UIWorker worker) {
         GLOBAL.setUIWorker(worker);
     }
 
-    public <T> T sendSignal(Class<T> clazz, String signal) {
+    public static <T> T sendSignal(Class<T> clazz, String signal) {
         return GLOBAL.sendSignal(clazz, signal);
     }
 
-    public void sendSignal(String signalName, Object body, String type) {
+    public static void sendSignal(String signalName, Object body, String type) {
         GLOBAL.sendSignal(signalName, body, type);
     }
 
-    public void sendSignal(String signalName, Object body) {
+    public static void sendSignal(String signalName, Object body) {
         GLOBAL.sendSignal(signalName, body);
     }
 
-    public void sendSignal(String signalName) {
+    public static void sendSignal(String signalName) {
         GLOBAL.sendSignal(signalName);
     }
 
-    public void registerView(Object object) {
+    public static void registerView(Object object) {
         GLOBAL.registerView(object);
     }
 
-    public void removeView(Object object) {
+    public static void removeView(Object object) {
         GLOBAL.removeView(object);
     }
 
-    public boolean containsView(Object key) {
+    public static boolean containsView(Object key) {
         return GLOBAL.containsView(key);
     }
 
-    public void registerController(Class<?> clazz) {
+    public static void registerController(Class<?> clazz) {
         GLOBAL.registerController(clazz);
     }
 
-    public void removeController(Class<?> clazz) {
+    public static void removeController(Class<?> clazz) {
         GLOBAL.removeController(clazz);
     }
 
-    public boolean containsController(Class<?> key) {
+    public static boolean containsController(Class<?> key) {
         return GLOBAL.containsController(key);
     }
 
-    public void registerProxy(Proxy proxy) {
+    public static void registerProxy(Proxy proxy) {
         GLOBAL.registerProxy(proxy);
     }
 
-    public void removeProxy(Proxy proxy) {
+    public static void removeProxy(Proxy proxy) {
         GLOBAL.removeProxy(proxy);
     }
 
-    public Proxy getProxy(String proxyName) {
+    public static Proxy getProxy(String proxyName) {
         return GLOBAL.getProxy(proxyName);
     }
 
-    public boolean containsProxy(String proxyName) {
+    public static boolean containsProxy(String proxyName) {
         return GLOBAL.containsProxy(proxyName);
     }
 
