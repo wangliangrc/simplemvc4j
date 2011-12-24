@@ -116,6 +116,10 @@ public final class MultiCore {
         GLOBAL.setUIWorker(worker);
     }
 
+    public <T> T sendSignal(Class<T> clazz, String signal) {
+        return GLOBAL.sendSignal(clazz, signal);
+    }
+
     public void sendSignal(String signalName, Object body, String type) {
         GLOBAL.sendSignal(signalName, body, type);
     }

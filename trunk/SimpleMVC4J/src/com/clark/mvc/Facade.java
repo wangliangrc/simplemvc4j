@@ -190,7 +190,7 @@ public class Facade {
      * @param signal
      * @return
      */
-    public <T> T callback(Class<T> clazz, String signal) {
+    public <T> T sendSignal(Class<T> clazz, String signal) {
         return SignalHandler.newSignal(this, clazz, signal);
     }
 
