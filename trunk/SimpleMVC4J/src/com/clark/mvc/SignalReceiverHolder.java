@@ -1,10 +1,10 @@
 package com.clark.mvc;
 
-class FunctionHolder {
+class SignalReceiverHolder {
     final String name;
-    final Function function;
+    final SignalReceiver function;
 
-    FunctionHolder(String name, Function function) {
+    SignalReceiverHolder(String name, SignalReceiver function) {
         super();
         this.name = name;
         this.function = function;

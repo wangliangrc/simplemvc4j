@@ -1,13 +1,14 @@
 package com.clark.mvc;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 class View {
 
-    private HashMap<Object, Set<FunctionHolder>> views = new HashMap<Object, Set<FunctionHolder>>();
+    private HashMap<Object, Set<SignalReceiverHolder>> views = new HashMap<Object, Set<SignalReceiverHolder>>();
     private Facade facade;
 
     View(Facade facade) {
@@ -58,7 +59,6 @@ class View {
      * @param object
      *            一个包含 {@link Mediator} 注解方法的类的实例。不能为 null。
      */
-    @SuppressWarnings("rawtypes")
     synchronized void register(final Object object) {
         if (object == null) {
             throw new NullPointerException("object can't be null");
@@ -69,19 +69,34 @@ class View {
             return;
         }
 
-        Class clazz = object.getClass();
-        Method[] declaredMethods = clazz.getDeclaredMethods();
+        Class<?> clazz = object.getClass();
         String errorString = "There is no mediator method in ["
-                + clazz.getCanonicalName() + "]";
-        if (declaredMethods != null) {
+                + clazz.getCanonicalName() + "] or it's super class";
 
-            Mediator annotation = null;
-            String[] names;
-            Set<FunctionHolder> functions = null;
-            Function function;
-            boolean found = false;
+        boolean found = findMediatorMethods(object, clazz);
 
+        if (found) {
+            System.out.println(facade + " register mediator: [" + object + "]");
+        } else {
+            System.err.println(errorString);
+        }
+    }
+
+    private boolean findMediatorMethods(final Object object, Class<?> clazz) {
+        Mediator annotation = null;
+        String[] names;
+        Set<SignalReceiverHolder> functions = null;
+        SignalReceiver function;
+        boolean found = false;
+
+        final Method[] declaredMethods = clazz.getDeclaredMethods();
+        if (declaredMethods != null && declaredMethods.length > 0) {
             for (final Method method : declaredMethods) {
+
+                // Mediator 只能作用于实例方法
+                if (Modifier.isStatic(method.getModifiers())) {
+                    continue;
+                }
 
                 annotation = method.getAnnotation(Mediator.class);
                 if (annotation != null) {
@@ -89,13 +104,14 @@ class View {
                     if (names != null && names.length > 0) {
 
                         for (String name : names) {
-                            function = new Function() {
+                            function = new SignalReceiver() {
 
                                 @Override
-                                public void onSignal(
-                                        Signal notification) {
+                                public void onReceive(Signal signal) {
                                     try {
-                                        method.invoke(object, notification);
+                                        // 可以调用 private、protected 方法等
+                                        method.setAccessible(true);
+                                        method.invoke(object, signal);
                                     } catch (Exception e) {
                                         throw new RuntimeException(e);
                                     }
@@ -103,7 +119,7 @@ class View {
                             };
                             facade.registerFunction(name, function);
                             functions = getObservers(object);
-                            functions.add(new FunctionHolder(name, function));
+                            functions.add(new SignalReceiverHolder(name, function));
                             found = true;
                         }
 
@@ -111,21 +127,21 @@ class View {
                 }
 
             }
-
-            if (found) {
-                System.out.println(facade + " register mediator: [" + object + "]");
-            } else {
-                System.err.println(errorString);
-            }
-        } else {
-            System.err.println(errorString);
         }
+
+        final Class<?> superclass = clazz.getSuperclass();
+        // 查找父类中的 mediator 实例方法
+        if (superclass != null) {
+            found = found | findMediatorMethods(object, superclass);
+        }
+
+        return found;
     }
 
-    private Set<FunctionHolder> getObservers(Object object) {
-        Set<FunctionHolder> set = views.get(object);
+    private Set<SignalReceiverHolder> getObservers(Object object) {
+        Set<SignalReceiverHolder> set = views.get(object);
         if (set == null) {
-            set = new HashSet<FunctionHolder>();
+            set = new HashSet<SignalReceiverHolder>();
             views.put(object, set);
         }
         return set;
@@ -143,9 +159,9 @@ class View {
         }
 
         if (views.containsKey(object)) {
-            Set<FunctionHolder> set = views.get(object);
+            Set<SignalReceiverHolder> set = views.get(object);
             if (set != null && set.size() > 0) {
-                for (FunctionHolder holder : set) {
+                for (SignalReceiverHolder holder : set) {
                     facade.removeFunction(holder.name, holder.function);
                 }
             }

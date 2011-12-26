@@ -26,37 +26,37 @@ public class Facade {
     private final Controller controller = new Controller(this);
     private final Model model = new Model(this);
 
-    private final HashMap<String, Set<Function>> functionMap = new HashMap<String, Set<Function>>();
+    private final HashMap<String, Set<SignalReceiver>> functionMap = new HashMap<String, Set<SignalReceiver>>();
     private volatile UIWorker uiWorker;
 
     /**
-     * 注册一个 {@link Function} 对象到 name 指定的 key 上。
+     * 注册一个 {@link SignalReceiver} 对象到 name 指定的 key 上。
      * 
      * @param name
      * @param function
      */
-    synchronized void registerFunction(String name, Function function) {
+    synchronized void registerFunction(String name, SignalReceiver function) {
         if (name != null && function != null) {
-            Set<Function> functions = getFunctions(name);
+            Set<SignalReceiver> functions = getFunctions(name);
             functions.add(function);
         }
     }
 
     /**
-     * 移除 name 对应的所有 {@link Set}<{@link Function}> 集合中的某一个 {@link Function} 对象。
+     * 移除 name 对应的所有 {@link Set}<{@link SignalReceiver}> 集合中的某一个 {@link SignalReceiver} 对象。
      * 
      * @param name
      * @param function
      */
-    synchronized void removeFunction(String name, Function function) {
+    synchronized void removeFunction(String name, SignalReceiver function) {
         if (name != null && function != null && functionMap.containsKey(name)) {
-            Set<Function> set = functionMap.get(name);
+            Set<SignalReceiver> set = functionMap.get(name);
             set.remove(function);
         }
     }
 
     /**
-     * 移除 name 对应的所有 {@link Set}<{@link Function}> 集合。
+     * 移除 name 对应的所有 {@link Set}<{@link SignalReceiver}> 集合。
      * 
      * @param name
      */
@@ -100,20 +100,20 @@ public class Facade {
 
     /**
      * 该方法会遍历 Function Map 查找处相关的 Function 对象并依次 调用它们的
-     * {@link Function#onSignal(Signal)} 方法。<br />
+     * {@link SignalReceiver#onReceive(Signal)} 方法。<br />
      * 注意：本方法还会调用 parent 属性的 {@link #signalInternal(Signal)} 方法，在 parent 不为 null
      * 的时候。
      * 
      * @param signal
      */
     private void signalInternal(Signal signal) {
-        Set<Function> set = functionMap.get(signal.name);
+        Set<SignalReceiver> set = functionMap.get(signal.name);
         if (set != null && set.size() > 0) {
             System.out.println(toString() + " notified at "
                     + Thread.currentThread().toString());
 
-            for (Function function : set) {
-                function.onSignal(signal);
+            for (SignalReceiver function : set) {
+                function.onReceive(signal);
             }
         }
 
@@ -123,10 +123,10 @@ public class Facade {
         }
     }
 
-    private Set<Function> getFunctions(String name) {
-        Set<Function> set = functionMap.get(name);
+    private Set<SignalReceiver> getFunctions(String name) {
+        Set<SignalReceiver> set = functionMap.get(name);
         if (set == null) {
-            set = new HashSet<Function>();
+            set = new HashSet<SignalReceiver>();
             functionMap.put(name.intern(), set);
         }
         return set;

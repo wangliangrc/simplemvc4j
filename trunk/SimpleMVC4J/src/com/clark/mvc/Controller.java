@@ -14,7 +14,7 @@ class Controller {
         this.facade = facade;
     }
 
-    private HashMap<Class<?>, FunctionHolder> functionHolderMap = new HashMap<Class<?>, FunctionHolder>();
+    private HashMap<Class<?>, SignalReceiverHolder> functionHolderMap = new HashMap<Class<?>, SignalReceiverHolder>();
 
     private Facade facade;
 
@@ -38,8 +38,21 @@ class Controller {
 
         // 检验 clazz 的无状态性
         Set<Field> fields = new HashSet<Field>();
-        fields.addAll(Arrays.asList(clazz.getFields()));
-        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+        Field[] declaredFields = clazz.getDeclaredFields();
+        if (declaredFields != null && declaredFields.length > 0) {
+            fields.addAll(Arrays.asList(declaredFields));
+        }
+
+        // 将父类的 field 也全部加入
+        Class<?> superClass = clazz.getSuperclass();
+        while (superClass != null) {
+            declaredFields = superClass.getDeclaredFields();
+            if (declaredFields != null && declaredFields.length > 0) {
+                fields.addAll(Arrays.asList(declaredFields));
+            }
+            superClass = superClass.getSuperclass();
+        }
+
         int modifier = 0;
         for (Field field : fields) {
             modifier = field.getModifiers();
@@ -53,14 +66,27 @@ class Controller {
             }
         }
 
-        Method[] declaredMethods = clazz.getDeclaredMethods();
         String errorString = "Not found command method in ["
                 + clazz.getCanonicalName() + "]";
-        if (declaredMethods != null) {
-            Command cmd = null;
-            String name = null;
-            Function function = null;
-            boolean found = false;
+
+        boolean found = findCommandMethods(clazz);
+
+        if (found) {
+            System.out.println(facade + " register command: ["
+                    + clazz.getCanonicalName() + "]");
+        } else {
+            System.err.println(errorString);
+        }
+    }
+
+    private boolean findCommandMethods(Class<?> clazz) {
+        Command cmd = null;
+        String name = null;
+        SignalReceiver function = null;
+        boolean found = false;
+        final Method[] declaredMethods = clazz.getDeclaredMethods();
+
+        if (declaredMethods != null && declaredMethods.length > 0) {
             for (final Method method : declaredMethods) {
                 // 只能处理 static method
                 if (!Modifier.isStatic(method.getModifiers())) {
@@ -72,35 +98,35 @@ class Controller {
 
                     name = cmd.value();
                     if (name != null && name.trim().length() > 0) {
-                        function = new Function() {
+                        function = new SignalReceiver() {
 
                             @Override
-                            public void onSignal(Signal notification) {
+                            public void onReceive(Signal signal) {
                                 try {
-                                    method.invoke(null, notification);
+                                    // 保证任何修饰符都可以被调用
+                                    method.setAccessible(true);
+                                    method.invoke(null, signal);
                                 } catch (Exception e) {
                                     throw new RuntimeException(e);
                                 }
                             }
                         };
                         facade.registerFunction(name, function);
-                        functionHolderMap.put(clazz, new FunctionHolder(name,
+                        functionHolderMap.put(clazz, new SignalReceiverHolder(name,
                                 function));
                         found = true;
                     }
 
                 }
             }
-
-            if (found) {
-                System.out.println(facade + " register command: ["
-                        + clazz.getCanonicalName() + "]");
-            } else {
-                System.err.println(errorString);
-            }
-        } else {
-            System.err.println(errorString);
         }
+
+        final Class<?> superClass = clazz.getSuperclass();
+        if (superClass != null) {
+            found = found | findCommandMethods(superClass);
+        }
+
+        return found;
     }
 
     /**
@@ -115,11 +141,11 @@ class Controller {
         }
 
         if (functionHolderMap.containsKey(clazz)) {
-            FunctionHolder functionHolder = functionHolderMap.get(clazz);
+            SignalReceiverHolder functionHolder = functionHolderMap.get(clazz);
             facade.removeFunction(functionHolder.name, functionHolder.function);
             functionHolderMap.remove(clazz);
-            System.out.println(facade + " remove command: [" + clazz.getCanonicalName()
-                    + "]");
+            System.out.println(facade + " remove command: ["
+                    + clazz.getCanonicalName() + "]");
         } else {
             System.err.println("Not found registered command: ["
                     + clazz.getCanonicalName() + "]");
