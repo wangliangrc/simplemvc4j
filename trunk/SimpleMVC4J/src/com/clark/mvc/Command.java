@@ -23,6 +23,7 @@ import java.lang.annotation.Target;
  * <li>返回值并没有做出限制，但是有返回值的话也不会被利用，一般为 void。</li>
  * <li>方法名称没有限定。</li>
  * <li>参数列表要求只能接受一个 {@link Signal} 类型参数，参数个数类型不对会抛出非受检异常。</li>
+ * <li>如果注册的 Class 对象有 super class 的话，并不会触发 super class 的 Command 方法。</li>
  * </ol>
  * 
  * @author clark
