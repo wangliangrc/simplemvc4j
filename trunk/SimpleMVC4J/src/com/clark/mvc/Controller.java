@@ -44,14 +44,14 @@ class Controller {
         }
 
         // 将父类的 field 也全部加入
-        Class<?> superClass = clazz.getSuperclass();
-        while (superClass != null) {
-            declaredFields = superClass.getDeclaredFields();
-            if (declaredFields != null && declaredFields.length > 0) {
-                fields.addAll(Arrays.asList(declaredFields));
-            }
-            superClass = superClass.getSuperclass();
-        }
+        // Class<?> superClass = clazz.getSuperclass();
+        // while (superClass != null) {
+        // declaredFields = superClass.getDeclaredFields();
+        // if (declaredFields != null && declaredFields.length > 0) {
+        // fields.addAll(Arrays.asList(declaredFields));
+        // }
+        // superClass = superClass.getSuperclass();
+        // }
 
         int modifier = 0;
         for (Field field : fields) {
@@ -112,8 +112,8 @@ class Controller {
                             }
                         };
                         facade.registerFunction(name, function);
-                        functionHolderMap.put(clazz, new SignalReceiverHolder(name,
-                                function));
+                        functionHolderMap.put(clazz, new SignalReceiverHolder(
+                                name, function));
                         found = true;
                     }
 
@@ -121,10 +121,10 @@ class Controller {
             }
         }
 
-        final Class<?> superClass = clazz.getSuperclass();
-        if (superClass != null) {
-            found = found | findCommandMethods(superClass);
-        }
+        // final Class<?> superClass = clazz.getSuperclass();
+        // if (superClass != null) {
+        // found = found | findCommandMethods(superClass);
+        // }
 
         return found;
     }

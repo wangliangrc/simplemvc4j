@@ -1,7 +1,6 @@
 package com.clark.mvc;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,9 +17,9 @@ class View {
     /**
      * 注册一个包含 {@link Mediator} 注解方法的类的实例到 View 注册表中。
      * <p>
-     * 所谓 Mediator 对象，实际上就是具有 {@link Mediator} 注解修饰的 public 方法的类实例而已。
-     * 注册时是基于实例的区别于 {@link Controller} 是基于 {@link Class} 对象的。 也就是说如果一个包含
-     * {@link Mediator} 注解方法的类的两个实例同时注册，那么触发回调的时候两个实例都会接到通知：
+     * 所谓 Mediator 对象，实际上就是具有 {@link Mediator} 注解修饰的方法的类实例而已。 注册时是基于实例的区别于
+     * {@link Controller} 是基于 {@link Class} 对象的。 也就是说如果一个包含 {@link Mediator}
+     * 注解方法的类的两个实例同时注册，那么触发回调的时候两个实例都会接到通知：
      * 
      * <pre>
      * public class MediatorTest {
@@ -44,7 +43,7 @@ class View {
      *     public static class SomeMediator {
      * 
      *         &#064;Mediator(&quot;doSomdthing&quot;)
-     *         public void doSomdthing(Signal signal) {
+     *         void doSomdthing(Signal signal) {
      *             System.out.println(&quot;SomeView.doSomdthing()\n&quot; + toString());
      *             System.out.println(signal);
      *         }
@@ -55,6 +54,7 @@ class View {
      * 
      * 会打印两次。
      * <p>
+     * 注意：注册一个实例的时候，实际上也会关联其父类型中可以访问的方法（protected、包）等。
      * 
      * @param object
      *            一个包含 {@link Mediator} 注解方法的类的实例。不能为 null。
@@ -83,6 +83,10 @@ class View {
     }
 
     private boolean findMediatorMethods(final Object object, Class<?> clazz) {
+        // final boolean isInSamePackage = object.getClass().getPackage()
+        // .equals(clazz.getPackage());
+        // final boolean isSelf = object.getClass() == clazz;
+
         Mediator annotation = null;
         String[] names;
         Set<SignalReceiverHolder> functions = null;
@@ -90,13 +94,30 @@ class View {
         boolean found = false;
 
         final Method[] declaredMethods = clazz.getDeclaredMethods();
+        // int modifiers = 0;
         if (declaredMethods != null && declaredMethods.length > 0) {
             for (final Method method : declaredMethods) {
 
-                // Mediator 只能作用于实例方法
-                if (Modifier.isStatic(method.getModifiers())) {
-                    continue;
-                }
+                // modifiers = method.getModifiers();
+                // // Mediator 只能作用于实例方法
+                // if (Modifier.isStatic(modifiers)) {
+                // continue;
+                // }
+                //
+                // if (isInSamePackage) {
+                // // 相同包中的父类
+                // if (!isSelf) {
+                // if (Modifier.isPrivate(modifiers)) {
+                // continue;
+                // }
+                // }
+                // } else {
+                // // 不同包中的父类
+                // if (!Modifier.isPublic(modifiers)
+                // && !Modifier.isProtected(modifiers)) {
+                // continue;
+                // }
+                // }
 
                 annotation = method.getAnnotation(Mediator.class);
                 if (annotation != null) {
@@ -119,7 +140,8 @@ class View {
                             };
                             facade.registerFunction(name, function);
                             functions = getObservers(object);
-                            functions.add(new SignalReceiverHolder(name, function));
+                            functions.add(new SignalReceiverHolder(name,
+                                    function));
                             found = true;
                         }
 
@@ -129,11 +151,11 @@ class View {
             }
         }
 
-        final Class<?> superclass = clazz.getSuperclass();
-        // 查找父类中的 mediator 实例方法
-        if (superclass != null) {
-            found = found | findMediatorMethods(object, superclass);
-        }
+        // final Class<?> superclass = clazz.getSuperclass();
+        // // 查找父类中的 mediator 实例方法
+        // if (superclass != null) {
+        // found = found | findMediatorMethods(object, superclass);
+        // }
 
         return found;
     }
