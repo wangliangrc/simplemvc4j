@@ -14,7 +14,7 @@ class Controller {
         this.facade = facade;
     }
 
-    private HashMap<Class<?>, SignalReceiverHolder> functionHolderMap = new HashMap<Class<?>, SignalReceiverHolder>();
+    private HashMap<Class<?>, SignalReceiverHolder> signalReceiverHolderMap = new HashMap<Class<?>, SignalReceiverHolder>();
 
     private Facade facade;
 
@@ -30,7 +30,7 @@ class Controller {
             throw new NullPointerException();
         }
 
-        if (functionHolderMap.containsKey(clazz)) {
+        if (signalReceiverHolderMap.containsKey(clazz)) {
             System.err.println("Already registered command: "
                     + clazz.getCanonicalName());
             return;
@@ -112,7 +112,7 @@ class Controller {
                             }
                         };
                         facade.registerSignalReceiver(name, function);
-                        functionHolderMap.put(clazz, new SignalReceiverHolder(
+                        signalReceiverHolderMap.put(clazz, new SignalReceiverHolder(
                                 name, function));
                         found = true;
                     }
@@ -140,10 +140,10 @@ class Controller {
             throw new NullPointerException();
         }
 
-        if (functionHolderMap.containsKey(clazz)) {
-            SignalReceiverHolder functionHolder = functionHolderMap.get(clazz);
+        if (signalReceiverHolderMap.containsKey(clazz)) {
+            SignalReceiverHolder functionHolder = signalReceiverHolderMap.get(clazz);
             facade.removeSignalReceiver(functionHolder.name, functionHolder.function);
-            functionHolderMap.remove(clazz);
+            signalReceiverHolderMap.remove(clazz);
             System.out.println(facade + " remove command: ["
                     + clazz.getCanonicalName() + "]");
         } else {
@@ -153,6 +153,6 @@ class Controller {
     }
 
     synchronized boolean contains(Class<?> key) {
-        return functionHolderMap.containsKey(key);
+        return signalReceiverHolderMap.containsKey(key);
     }
 }
