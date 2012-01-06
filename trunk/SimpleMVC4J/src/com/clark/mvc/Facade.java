@@ -26,19 +26,19 @@ public class Facade {
     private final Controller controller = new Controller(this);
     private final Model model = new Model(this);
 
-    private final HashMap<String, Set<SignalReceiver>> functionMap = new HashMap<String, Set<SignalReceiver>>();
+    private final HashMap<String, Set<SignalReceiver>> receiverMap = new HashMap<String, Set<SignalReceiver>>();
     private volatile UIWorker uiWorker;
 
     /**
      * 注册一个 {@link SignalReceiver} 对象到 name 指定的 key 上。
      * 
      * @param name
-     * @param function
+     * @param receiver
      */
-    synchronized void registerFunction(String name, SignalReceiver function) {
-        if (name != null && function != null) {
-            Set<SignalReceiver> functions = getFunctions(name);
-            functions.add(function);
+    synchronized void registerSignalReceiver(String name, SignalReceiver receiver) {
+        if (name != null && receiver != null) {
+            Set<SignalReceiver> signalReceivers = getSignalReceivers(name);
+            signalReceivers.add(receiver);
         }
     }
 
@@ -46,12 +46,12 @@ public class Facade {
      * 移除 name 对应的所有 {@link Set}<{@link SignalReceiver}> 集合中的某一个 {@link SignalReceiver} 对象。
      * 
      * @param name
-     * @param function
+     * @param receiver
      */
-    synchronized void removeFunction(String name, SignalReceiver function) {
-        if (name != null && function != null && functionMap.containsKey(name)) {
-            Set<SignalReceiver> set = functionMap.get(name);
-            set.remove(function);
+    synchronized void removeSignalReceiver(String name, SignalReceiver receiver) {
+        if (name != null && receiver != null && receiverMap.containsKey(name)) {
+            Set<SignalReceiver> set = receiverMap.get(name);
+            set.remove(receiver);
         }
     }
 
@@ -60,8 +60,8 @@ public class Facade {
      * 
      * @param name
      */
-    synchronized void removeFunction(String name) {
-        functionMap.remove(name);
+    synchronized void removeSignalReceiver(String name) {
+        receiverMap.remove(name);
     }
 
     /**
@@ -79,11 +79,11 @@ public class Facade {
 
                     @Override
                     public void run() {
-                        signalInternal(signal);
+                        sendSignalInternal(signal);
                     }
                 });
             } else {
-                signalInternal(signal);
+                sendSignalInternal(signal);
             }
         }
     }
@@ -101,13 +101,13 @@ public class Facade {
     /**
      * 该方法会遍历 Function Map 查找处相关的 Function 对象并依次 调用它们的
      * {@link SignalReceiver#onReceive(Signal)} 方法。<br />
-     * 注意：本方法还会调用 parent 属性的 {@link #signalInternal(Signal)} 方法，在 parent 不为 null
+     * 注意：本方法还会调用 parent 属性的 {@link #sendSignalInternal(Signal)} 方法，在 parent 不为 null
      * 的时候。
      * 
      * @param signal
      */
-    private void signalInternal(Signal signal) {
-        Set<SignalReceiver> set = functionMap.get(signal.name);
+    private void sendSignalInternal(Signal signal) {
+        Set<SignalReceiver> set = receiverMap.get(signal.name);
         if (set != null && set.size() > 0) {
             System.out.println(toString() + " notified at "
                     + Thread.currentThread().toString());
@@ -119,15 +119,15 @@ public class Facade {
 
         // call parent's functions
         if (parent != null) {
-            parent.signalInternal(signal);
+            parent.sendSignalInternal(signal);
         }
     }
 
-    private Set<SignalReceiver> getFunctions(String name) {
-        Set<SignalReceiver> set = functionMap.get(name);
+    private Set<SignalReceiver> getSignalReceivers(String name) {
+        Set<SignalReceiver> set = receiverMap.get(name);
         if (set == null) {
             set = new HashSet<SignalReceiver>();
-            functionMap.put(name.intern(), set);
+            receiverMap.put(name.intern(), set);
         }
         return set;
     }

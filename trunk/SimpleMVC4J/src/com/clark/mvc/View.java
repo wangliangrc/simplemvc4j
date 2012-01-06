@@ -138,7 +138,7 @@ class View {
                                     }
                                 }
                             };
-                            facade.registerFunction(name, function);
+                            facade.registerSignalReceiver(name, function);
                             functions = getObservers(object);
                             functions.add(new SignalReceiverHolder(name,
                                     function));
@@ -184,7 +184,7 @@ class View {
             Set<SignalReceiverHolder> set = views.get(object);
             if (set != null && set.size() > 0) {
                 for (SignalReceiverHolder holder : set) {
-                    facade.removeFunction(holder.name, holder.function);
+                    facade.removeSignalReceiver(holder.name, holder.function);
                 }
             }
             views.remove(object);

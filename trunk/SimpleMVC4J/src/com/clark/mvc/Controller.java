@@ -111,7 +111,7 @@ class Controller {
                                 }
                             }
                         };
-                        facade.registerFunction(name, function);
+                        facade.registerSignalReceiver(name, function);
                         functionHolderMap.put(clazz, new SignalReceiverHolder(
                                 name, function));
                         found = true;
@@ -142,7 +142,7 @@ class Controller {
 
         if (functionHolderMap.containsKey(clazz)) {
             SignalReceiverHolder functionHolder = functionHolderMap.get(clazz);
-            facade.removeFunction(functionHolder.name, functionHolder.function);
+            facade.removeSignalReceiver(functionHolder.name, functionHolder.function);
             functionHolderMap.remove(clazz);
             System.out.println(facade + " remove command: ["
                     + clazz.getCanonicalName() + "]");
