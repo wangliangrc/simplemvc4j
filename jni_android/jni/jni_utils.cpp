@@ -127,7 +127,9 @@ jobject clark::jnis::newObject(JNIEnv *env) {
     assert_android(env != 0, TAG, "env must not be NULL!");
 
     jclass clazz = env->FindClass("java/lang/Object");
-    return env->NewObject(clazz, env->GetMethodID(clazz, "<init>", "()V"));
+    jobject res = env->NewObject(clazz, env->GetMethodID(clazz, "<init>", "()V"));
+    env->DeleteLocalRef(clazz);
+    return res;
 }
 
 bool clark::jnis::isReferenceValid(JNIEnv *env, const jobject obj) {

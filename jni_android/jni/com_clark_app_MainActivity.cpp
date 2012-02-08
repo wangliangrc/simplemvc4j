@@ -2,6 +2,7 @@
 #include "jni_stdout.h"
 #include "jni_utils.h"
 #include "logger.h"
+#include "string_utils.h"
 
 using clark::androids::logger;
 
@@ -17,7 +18,7 @@ jobject Java_com_clark_app_MainActivity_test(JNIEnv *env, jobject obj) {
     jobject temp = 0;
     while (true) {
         ++i;
-        out << i << clark::jnis::endl;
+        out << std::string() + i << clark::jnis::endl;
         temp = clark::jnis::newObject(env);
         env->DeleteLocalRef(temp);
     }

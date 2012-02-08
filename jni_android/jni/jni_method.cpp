@@ -191,23 +191,26 @@ namespace clark {
 
         jmethodID jni_method::getMethodId(JNIEnv *env) const {
             assert_android(env != 0, TAG, "env can't be NULL!");
-            assert_android(isValid(), TAG,
+            assert_android(isValid(env), TAG,
                     "Maybe your jni_method didn't init!");
+
+            jclass cla = getClass(env);
 
             std::string holder;
             jmethodID internal_method_id = 0;
             const char *csig = toNativeSig(holder);
             if (is_static) {
-                internal_method_id = env->GetStaticMethodID(getClass(env),
+                internal_method_id = env->GetStaticMethodID(cla,
                         method_name.c_str(), csig);
             } else {
-                internal_method_id = env->GetMethodID(getClass(env),
-                        method_name.c_str(), csig);
+                internal_method_id = env->GetMethodID(cla, method_name.c_str(),
+                        csig);
             }
 
             assert_android( internal_method_id, TAG,
                     ("jmethodID not find < " + holder + " >").c_str());
 
+            env->DeleteLocalRef(cla);
             return internal_method_id;
         }
 
@@ -260,14 +263,14 @@ namespace clark {
 
             } else if (return_type == "I") {
                 if (is_static) {
-                    value.i = env->CallStaticIntMethodV(getClass(env),
-                            getMethodId(env), args);
+                    value.i = env->CallStaticIntMethodV(clazz, getMethodId(env),
+                            args);
                 } else {
                     value.i = env->CallIntMethodV(obj, getMethodId(env), args);
                 }
             } else if (return_type == "Z") {
                 if (is_static) {
-                    value.z = env->CallStaticBooleanMethodV(getClass(env),
+                    value.z = env->CallStaticBooleanMethodV(clazz,
                             getMethodId(env), args);
                 } else {
                     value.z = env->CallBooleanMethodV(obj, getMethodId(env),
@@ -275,21 +278,21 @@ namespace clark {
                 }
             } else if (return_type == "B") {
                 if (is_static) {
-                    value.b = env->CallStaticByteMethodV(getClass(env),
+                    value.b = env->CallStaticByteMethodV(clazz,
                             getMethodId(env), args);
                 } else {
                     value.b = env->CallByteMethodV(obj, getMethodId(env), args);
                 }
             } else if (return_type == "C") {
                 if (is_static) {
-                    value.c = env->CallStaticCharMethodV(getClass(env),
+                    value.c = env->CallStaticCharMethodV(clazz,
                             getMethodId(env), args);
                 } else {
                     value.c = env->CallCharMethodV(obj, getMethodId(env), args);
                 }
             } else if (return_type == "S") {
                 if (is_static) {
-                    value.s = env->CallStaticShortMethodV(getClass(env),
+                    value.s = env->CallStaticShortMethodV(clazz,
                             getMethodId(env), args);
                 } else {
                     value.s = env->CallShortMethodV(obj, getMethodId(env),
@@ -297,14 +300,14 @@ namespace clark {
                 }
             } else if (return_type == "J") {
                 if (is_static) {
-                    value.j = env->CallStaticLongMethodV(getClass(env),
+                    value.j = env->CallStaticLongMethodV(clazz,
                             getMethodId(env), args);
                 } else {
                     value.j = env->CallLongMethodV(obj, getMethodId(env), args);
                 }
             } else if (return_type == "F") {
                 if (is_static) {
-                    value.f = env->CallStaticFloatMethodV(getClass(env),
+                    value.f = env->CallStaticFloatMethodV(clazz,
                             getMethodId(env), args);
                 } else {
                     value.f = env->CallFloatMethodV(obj, getMethodId(env),
@@ -312,7 +315,7 @@ namespace clark {
                 }
             } else if (return_type == "D") {
                 if (is_static) {
-                    value.d = env->CallStaticDoubleMethodV(getClass(env),
+                    value.d = env->CallStaticDoubleMethodV(clazz,
                             getMethodId(env), args);
                 } else {
                     value.d = env->CallDoubleMethodV(obj, getMethodId(env),
@@ -320,7 +323,7 @@ namespace clark {
                 }
             } else {
                 if (is_static) {
-                    value.l = env->CallStaticObjectMethodV(getClass(env),
+                    value.l = env->CallStaticObjectMethodV(clazz,
                             getMethodId(env), args);
                 } else {
                     value.l = env->CallObjectMethodV(obj, getMethodId(env),
@@ -328,8 +331,8 @@ namespace clark {
                 }
             }
 
-            env->DeleteLocalRef(clazz);
             va_end(args);
+            env->DeleteLocalRef(clazz);
             return value;
         }
 
@@ -339,8 +342,11 @@ namespace clark {
                 return 0;
             }
 
-            return env->ToReflectedMethod(getClass(env), getMethodId(env),
+            jclass cla = getClass(env);
+            jobject res = env->ToReflectedMethod(cla, getMethodId(env),
                     is_static);
+            env->DeleteLocalRef(cla);
+            return res;
         }
 
         const char *jni_method::toNativeSig(std::string& holder) const {
