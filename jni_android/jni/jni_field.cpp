@@ -9,7 +9,6 @@
 #include "string_utils.h"
 #include "jni_utils.h"
 #include <vector>
-#include <cassert>
 #include "logger.h"
 
 using clark::strings::trim;
@@ -55,12 +54,9 @@ namespace clark {
 
             std::string signture = trim(sig);
             int index = signture.find(' ');
-            if (index < 0) {
-                logger::e_print(TAG,
-                        "jni_field::initFromSig(const std::string&)\n\t%s\n",
-                        "error sig!");
-                return;
-            }
+
+            assert_android(index >= 0, TAG, "error sig!");
+
             std::vector<std::string> parts = split(signture, ' ');
             field_type = toJNIFieldDesc(parts[0]);
             index = parts[1].find('#');
@@ -70,17 +66,12 @@ namespace clark {
                 is_static = false;
             } else {
                 index = parts[1].find_last_of('.');
-                if (index > 0) {
-                    class_name = toJNIClassDesc(parts[1].substr(0, index));
-                    field_name = parts[1].substr(index + 1);
-                    is_static = true;
-                } else {
-                    logger::e_print(
-                            TAG,
-                            "jni_field::initFromSig(const std::string&)\n\t%s\n",
-                            "error sig, No '#' or '.'!");
-                    return;
-                }
+
+                assert_android(index > 0, TAG, "error sig, No '#' or '.'!");
+
+                class_name = toJNIClassDesc(parts[1].substr(0, index));
+                field_name = parts[1].substr(index + 1);
+                is_static = true;
             }
         }
 
@@ -110,23 +101,21 @@ namespace clark {
         }
 
         jclass jni_field::getClass(JNIEnv * env) const {
-            if (class_name.empty()) {
-                return 0;
-            }
+            assert_android(env != 0, TAG, "env can't be NULL!");
+            assert_android(!class_name.empty(), TAG,
+                    "Maybe you didn't init jni_field yet!");
 
             jclass internal_class = env->FindClass(class_name.c_str());
 
-            if (!internal_class) {
-                logger::e_print(TAG, "jni_field::getClass(JNIEnv*)\n\t%s%s%s\n",
-                        "can't find java class!( ", class_name.c_str(), " )");
-            }
+            assert_android(internal_class, TAG,
+                    ("can't find java class!( " + class_name + " )").c_str());
             return internal_class;
         }
 
         jfieldID jni_field::getFieldId(JNIEnv * env) const {
-            if (isInvalid()) {
-                return 0;
-            }
+            assert_android(env != 0, TAG, "env can't be NULL!");
+            assert_android(isValid(), TAG,
+                    "Maybe you didn't init jni_field yet!");
 
             jfieldID internal_field = 0;
             if (is_static) {
@@ -137,11 +126,8 @@ namespace clark {
                         field_name.c_str(), field_type.c_str());
             }
 
-            if (!internal_field) {
-                logger::e_print(TAG,
-                        "jni_field::getFieldId(JNIEnv*)\n\t%s%s%s\n",
-                        "can't find java field!( ", class_name.c_str(), " )");
-            }
+            assert_android(internal_field, TAG,
+                    ("can't find java field!( " + class_name + " )").c_str());
             return internal_field;
         }
 
@@ -154,26 +140,17 @@ namespace clark {
         }
 
         jvalue jni_field::get(JNIEnv * env, const jobject obj) const {
+            assert_android(env != 0, TAG, "env can't be NULL!");
+            assert_android(!(obj == 0 && !is_static), TAG,
+                    "Non static field must belong some java.lang.Object!");
+
             jvalue res;
-            if (obj == 0 && !is_static) {
-                logger::e_print(TAG,
-                        "jni_field::get(JNIEnv*, const jobject)\n\t%s\n",
-                        "Non static field must belong some java.lang.Object!");
-                return res;
-            }
-
             jclass clazz = getClass(env);
-            if (clazz == 0) {
-                return res;
-            }
 
-            if (obj != 0 && !env->IsInstanceOf(obj, clazz)) {
-                logger::e_print(
-                        TAG,
-                        "jni_field::get(JNIEnv*, const jobject)\n\t%s\n",
-                        "obj's class is not the same class as or father class of the field define!");
-                return res;
-            }
+            assert_android(
+                    !(obj != 0 && !env->IsInstanceOf(obj, clazz)),
+                    TAG,
+                    "obj's class is not the same class as or father class of the field define!");
 
             if (field_type == "Z") {
                 if (is_static) {
@@ -236,26 +213,16 @@ namespace clark {
 
         void jni_field::set(JNIEnv * env, const jvalue & value,
                 const jobject obj) const {
-            if (obj == 0 && !is_static) {
-                logger::e_print(
-                        TAG,
-                        "jni_field::set(JNIEnv*, const jvalue&, const jobject)\n\t%s\n",
-                        "Non static field must belong some java.lang.Object!");
-                return;
-            }
+            assert_android(env != 0, TAG, "env can't be NULL!");
+            assert_android(!(obj == 0 && !is_static), TAG,
+                    "Non static field must belong some java.lang.Object!");
 
             jclass clazz = getClass(env);
-            if (clazz == 0) {
-                return;
-            }
 
-            if (obj != 0 && !env->IsInstanceOf(obj, clazz)) {
-                logger::e_print(
-                        TAG,
-                        "jni_field::set(JNIEnv*, const jvalue&, const jobject)\n\t%s\n",
-                        "obj's class is not the same class as or father class of the field define!");
-                return;
-            }
+            assert_android(
+                    !(obj != 0 && !env->IsInstanceOf(obj, clazz)),
+                    TAG,
+                    "obj's class is not the same class as or father class of the field define!");
 
             if (field_type == "Z") {
                 if (is_static) {

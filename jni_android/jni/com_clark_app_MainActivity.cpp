@@ -5,11 +5,15 @@
 
 using clark::androids::logger;
 
+namespace {
+    const char *TAG = "com_clark_app_MainActivity";
+}
+
 jobject Java_com_clark_app_MainActivity_test(JNIEnv *env, jobject obj) {
-    clark::jnis::jni_output out = clark::jnis::jni_output::std_out(env);
-    clark::jnis::jni_output err = clark::jnis::jni_output::std_err(env);
-    out << "Hello world!" << clark::jnis::endl;
-    err << "Hello world!" << clark::jnis::endl;
+    logger::open();
+    logger::d(TAG, "debug!!!");
+    logger::close();
+    logger::e(TAG, "error!!!");
     return 0;
 }
 

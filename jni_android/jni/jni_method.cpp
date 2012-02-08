@@ -24,9 +24,6 @@ namespace clark {
     namespace jnis {
 
         namespace {
-            /**
-             * 缓存变量
-             */
             const char *TAG = "jni_method";
         }
 
@@ -59,14 +56,14 @@ namespace clark {
 
             int index = 0;
             index = signture.find(')');
-            if (index < 0) {
-                return;
-            }
+
+            assert_android(index >= 0, TAG, "signture has no ')'!");
+
             std::string sig = trim(signture.substr(0, index));
             index = sig.find('(');
-            if (index < 0) {
-                return;
-            }
+
+            assert_android(index >= 0, TAG, "signture has no '('!");
+
             std::string paramsPart;
             paramsPart = trim(sig.substr(index + 1));
             method_name = sig.substr(0, index);
@@ -86,14 +83,13 @@ namespace clark {
                     is_static = false;
                 } else {
                     index = method_name.find_last_of('.');
-                    if (index > 0) {
-                        class_name = toJNIClassDesc(
-                                method_name.substr(0, index));
-                        method_name = method_name.substr(index + 1);
-                        is_static = true;
-                    } else {
-                        return;
-                    }
+
+                    assert_android(index > 0, TAG,
+                            "signture has no 'classname.methodname'!");
+
+                    class_name = toJNIClassDesc(method_name.substr(0, index));
+                    method_name = method_name.substr(index + 1);
+                    is_static = true;
                 }
 
             }
@@ -179,22 +175,23 @@ namespace clark {
         }
 
         jclass jni_method::getClass(JNIEnv *env) const {
-            if (isInvalid()) {
-                return 0;
-            }
+            assert_android(env != 0, TAG, "env can't be NULL!");
+            assert_android(isValid(), TAG,
+                    "Maybe your jni_method didn't init!");
+
             jclass internal_class = env->FindClass(class_name.c_str());
-            if (!internal_class) {
-                logger::e_print(TAG,
-                        "jni_method::getClass(JNIEnv*)\n\t%s%s%s\n",
-                        "class not find < ", class_name.c_str(), " >");
-            }
+
+            assert_android(internal_class, TAG,
+                    ("class not find < " + class_name + " >").c_str());
+
             return internal_class;
         }
 
         jmethodID jni_method::getMethodId(JNIEnv *env) const {
-            if (isInvalid()) {
-                return 0;
-            }
+            assert_android(env != 0, TAG, "env can't be NULL!");
+            assert_android(isValid(), TAG,
+                    "Maybe your jni_method didn't init!");
+
             std::string holder;
             jmethodID internal_method_id = 0;
             const char *csig = toNativeSig(holder);
@@ -206,11 +203,11 @@ namespace clark {
                         method_name.c_str(), csig);
             }
 
-            if (!internal_method_id) {
-                logger::e_print(TAG,
-                        "jni_method::getMethodId(JNIEnv*)\n\t%s%s%s\n",
-                        "jmethodID not find < ", csig, " >");
-            }
+            assert_android(
+                    internal_method_id,
+                    TAG,
+                    ("jmethodID not find < " + holder + " >").c_str());
+
             return internal_method_id;
         }
 
@@ -228,30 +225,23 @@ namespace clark {
         }
 
         jvalue jni_method::call(JNIEnv *env, const jobject obj, ...) const {
+            assert_android(env != 0, TAG, "env can't be NULL!");
+
             va_list args;
             va_start(args, obj);
             jvalue value;
 
-            if (!is_static && obj == 0 && method_name != "<init>") {
-                logger::e_print(
-                        TAG,
-                        "jni_method::call(JNIEnv*, const jobject, ...)\n\t%s\n",
-                        "Not static or <init> method must pass a non-null obj argument!");
-                return value;
-            }
+            assert_android(
+                    !(!is_static && obj == 0 && method_name != "<init>"),
+                    TAG,
+                    "Not static or <init> method must pass a non-null obj argument!");
 
             jclass clazz = getClass(env);
-            if (clazz == 0) {
-                return value;
-            }
 
-            if (obj != 0 && !env->IsInstanceOf(obj, clazz)) {
-                logger::e_print(
-                        TAG,
-                        "jni_method::call(JNIEnv*, const jobject, ...)\n\t%s\n",
-                        "obj's jclass is not the same as or father class of the method's jclass object!");
-                return value;
-            }
+            assert_android(
+                    !(obj != 0 && !env->IsInstanceOf(obj, clazz)),
+                    TAG,
+                    "obj's jclass is not the same as or father class of the method's jclass object!");
 
             if (return_type == "V") {
                 if (is_static) {
@@ -340,6 +330,7 @@ namespace clark {
         }
 
         jobject jni_method::getReflectedMethod(JNIEnv *env) const {
+            assert_android(env != 0, TAG, "env can't be NULL!");
             if (isInvalid(env)) {
                 return 0;
             }

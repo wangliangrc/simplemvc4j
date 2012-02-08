@@ -45,6 +45,8 @@ namespace clark {
 
         jni_output::jni_output(JNIEnv * env) :
                 env(env) {
+            assert_android(env != 0, TAG, "env can't be NULL!");
+
             const jclass SYSTEM_CLASS = this->env->FindClass(
                     "java/lang/System");
             const jfieldID STD_OUT = this->env->GetStaticFieldID(SYSTEM_CLASS,
@@ -54,12 +56,16 @@ namespace clark {
         }
 
         jni_output jni_output::std_out(JNIEnv *env) {
+            assert_android(env != 0, TAG, "env can't be NULL!");
+
             jni_field out("java.io.PrintStream java.lang.System.out");
             jni_output out_(env, out.get(env).l);
             return out_;
         }
 
         jni_output jni_output::std_err(JNIEnv *env) {
+            assert_android(env != 0, TAG, "env can't be NULL!");
+
             jni_field err("java.io.PrintStream java.lang.System.err");
             jni_output out_(env, err.get(env).l);
             return out_;
@@ -71,6 +77,8 @@ namespace clark {
 
         jni_output::jni_output(JNIEnv *env, const jobject printstream) :
                 env(env) {
+            assert_android(env != 0, TAG, "env can't be NULL!");
+
             const jclass PRINTSTREAM_CLASS = this->env->FindClass(
                     "java/io/PrintStream");
 
@@ -121,21 +129,15 @@ namespace clark {
         }
 
         jni_output & jni_output::print(const jstring val) {
-            if (val == 0) {
-                logger::e_print(TAG, "jni_output::print(const jstring)\n\t%s\n",
-                        "can't accept NULL");
-                return *this;
-            }
+            assert_android(val != 0, TAG, "val can't be NULL!");
+
             STRING_PRINT_METHOD.call(env, printstream, val);
             return *this;
         }
 
         jni_output & jni_output::print(const jobject val) {
-            if (val == 0) {
-                logger::e_print(TAG, "jni_output::print(const jobject)\n\t%s\n",
-                        "can't accept NULL");
-                return *this;
-            }
+            assert_android(val != 0, TAG, "val can't be NULL!");
+
             OBJECT_PRINT_METHOD.call(env, printstream, val);
             return *this;
         }
@@ -149,6 +151,8 @@ namespace clark {
         }
 
         jni_output & jni_output::operator <<(int(* const op)(void)) {
+            assert_android(op != 0, TAG, "op can't be NULL!");
+
             int code = op();
             switch (code) {
                 case ENDL_CODE:
@@ -177,6 +181,8 @@ namespace clark {
         }
 
         jni_output & jni_output::operator <<(const void *p) {
+            assert_android(p != 0, TAG, "p can't be NULL!");
+
             char buf[20];
             std::sprintf(buf, "%p", p);
             return operator <<(buf);

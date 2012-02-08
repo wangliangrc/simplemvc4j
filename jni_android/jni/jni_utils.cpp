@@ -7,10 +7,18 @@
 //#define DEBUG
 #include "jni_utils.h"
 #include "string_utils.h"
+#include "logger.h"
+
 using clark::strings::trim;
 using clark::strings::split;
+using clark::androids::logger;
 
 namespace {
+
+    namespace {
+        const char *TAG = "jni_utils";
+    }
+
     std::string replaceDot(const std::string & signture) {
         std::string res = signture;
         for (std::string::iterator i = res.begin(), j = res.end(); i != j;
@@ -98,10 +106,13 @@ std::string clark::jnis::toJNIClassDesc(const std::string & signture) {
 }
 
 jstring clark::jnis::toJString(JNIEnv* env, const std::string & s) {
+    assert_android(env != 0, TAG, "env must not be NULL!");
     return env->NewStringUTF(s.c_str());
 }
 
 std::string clark::jnis::toString(JNIEnv* env, const jstring s) {
+    assert_android(env != 0, TAG, "env must not be NULL!");
+
     if (s == 0) {
         return std::string("");
     }
@@ -113,6 +124,8 @@ std::string clark::jnis::toString(JNIEnv* env, const jstring s) {
 }
 
 jobject clark::jnis::newObject(JNIEnv *env) {
+    assert_android(env != 0, TAG, "env must not be NULL!");
+
     jclass clazz = env->FindClass("java/lang/Object");
     return env->NewObject(clazz, env->GetMethodID(clazz, "<init>", "()V"));
 }
