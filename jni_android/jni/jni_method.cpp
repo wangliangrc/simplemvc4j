@@ -191,7 +191,7 @@ namespace clark {
 
         jmethodID jni_method::getMethodId(JNIEnv *env) const {
             assert_android(env != 0, TAG, "env can't be NULL!");
-            assert_android(isValid(env), TAG,
+            assert_android(isValid(), TAG,
                     "Maybe your jni_method didn't init!");
 
             jclass cla = getClass(env);

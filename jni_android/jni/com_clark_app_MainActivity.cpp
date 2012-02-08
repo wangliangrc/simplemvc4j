@@ -18,7 +18,7 @@ jobject Java_com_clark_app_MainActivity_test(JNIEnv *env, jobject obj) {
     jobject temp = 0;
     while (true) {
         ++i;
-        out << std::string() + i << clark::jnis::endl;
+        out << i << clark::jnis::endl;
         temp = clark::jnis::newObject(env);
         env->DeleteLocalRef(temp);
     }

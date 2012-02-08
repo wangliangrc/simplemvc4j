@@ -300,8 +300,11 @@ namespace clark {
                 return 0;
             }
 
-            return env->ToReflectedField(getClass(env), getFieldId(env),
+            jclass cla = getClass(env);
+            jobject res = env->ToReflectedField(cla, getFieldId(env),
                     is_static);
+            env->DeleteLocalRef(cla);
+            return res;
         }
 
         const bool & jni_field::isStatic() const {
