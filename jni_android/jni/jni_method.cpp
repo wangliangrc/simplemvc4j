@@ -57,12 +57,14 @@ namespace clark {
             int index = 0;
             index = signture.find(')');
 
-            assert_android(index >= 0, TAG, "signture has no ')'!");
+            assert_android(index >= 0, TAG,
+                    "signture " + signture + " has no ')'!");
 
             std::string sig = trim(signture.substr(0, index));
             index = sig.find('(');
 
-            assert_android(index >= 0, TAG, "signture has no '('!");
+            assert_android(index >= 0, TAG,
+                    "signture " + signture + " has no '('!");
 
             std::string paramsPart;
             paramsPart = trim(sig.substr(index + 1));
@@ -203,9 +205,7 @@ namespace clark {
                         method_name.c_str(), csig);
             }
 
-            assert_android(
-                    internal_method_id,
-                    TAG,
+            assert_android( internal_method_id, TAG,
                     ("jmethodID not find < " + holder + " >").c_str());
 
             return internal_method_id;
@@ -216,7 +216,10 @@ namespace clark {
                 return !class_name.empty() && !return_type.empty()
                         && !method_name.empty();
             } else {
-                return getClass(env) != 0 && getMethodId(env) != 0;
+                jclass clas = getClass(env);
+                bool res = clas != 0 && getMethodId(env) != 0;
+                env->DeleteLocalRef(clas);
+                return res;
             }
         }
 
@@ -325,6 +328,7 @@ namespace clark {
                 }
             }
 
+            env->DeleteLocalRef(clazz);
             va_end(args);
             return value;
         }

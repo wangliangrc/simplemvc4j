@@ -65,8 +65,8 @@ namespace clark {
     } /* namespace androids */
 } /* namespace clark */
 
-#define assert_android(bool_exp, tag, msg) if(!(bool_exp)) \
-    clark::androids::logger::e_print((tag), "ERROR: %s:%d", __FILE__, __LINE__);\
-    clark::androids::logger::asserts((tag), (msg))
+#define assert_android(bool_exp, tag, msg) if(!(bool_exp)) { \
+    clark::androids::logger::e_print((tag), "ERROR: %s:%d", __FILE__, __LINE__); \
+    clark::androids::logger::asserts((tag), (msg)); }
 
 #endif /* LOGGER_H_ */

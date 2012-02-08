@@ -130,3 +130,11 @@ jobject clark::jnis::newObject(JNIEnv *env) {
     return env->NewObject(clazz, env->GetMethodID(clazz, "<init>", "()V"));
 }
 
+bool clark::jnis::isReferenceValid(JNIEnv *env, const jobject obj) {
+    assert_android(env != 0, TAG, "env can't be NULL!");
+    if (obj == 0) {
+        return false;
+    }
+    return !env->IsSameObject(obj, 0);
+}
+

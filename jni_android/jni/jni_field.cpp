@@ -80,7 +80,10 @@ namespace clark {
                 return !class_name.empty() && !field_name.empty()
                         && !field_type.empty();
             } else {
-                return getClass(env) != 0 && getFieldId(env) != 0;
+                jclass clas = getClass(env);
+                bool res = clas != 0 && getFieldId(env) != 0;
+                env->DeleteLocalRef(clas);
+                return res;
             }
         }
 
@@ -208,6 +211,7 @@ namespace clark {
                 }
             }
 
+            env->DeleteLocalRef(clazz);
             return res;
         }
 
@@ -279,6 +283,8 @@ namespace clark {
                     env->SetObjectField(obj, getFieldId(env), value.l);
                 }
             }
+
+            env->DeleteLocalRef(clazz);
         }
 
         jni_output & operator <<(jni_output & out, const jni_field f) {

@@ -31,6 +31,11 @@ namespace clark {
 
         jobject newObject(JNIEnv* env);
 
+        /**
+         * 判断弱全局引用是否还有效
+         */
+        bool isReferenceValid(JNIEnv *env, const jobject obj);
+
     } // namespace jnis
 
 } // namespace clark

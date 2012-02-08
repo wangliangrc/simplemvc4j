@@ -53,6 +53,8 @@ namespace clark {
                     "out", "Ljava/io/PrintStream;");
             printstream = this->env->GetStaticObjectField(SYSTEM_CLASS,
                     STD_OUT);
+
+            env->DeleteLocalRef(SYSTEM_CLASS);
         }
 
         jni_output jni_output::std_out(JNIEnv *env) {
@@ -93,6 +95,8 @@ namespace clark {
                     PRINTSTREAM_CLASS, "out", "Ljava/io/PrintStream;");
             this->printstream = this->env->GetStaticObjectField(
                     PRINTSTREAM_CLASS, STD_OUT);
+
+            env->DeleteLocalRef(PRINTSTREAM_CLASS);
         }
 
         jni_output::~jni_output() {
@@ -154,10 +158,13 @@ namespace clark {
             assert_android(op != 0, TAG, "op can't be NULL!");
 
             int code = op();
+            jstring str = 0 ;
             switch (code) {
                 case ENDL_CODE:
-                    print(env->NewStringUTF("\n"));
+                    str = env->NewStringUTF("\n");
+                    print(str);
                     flush();
+                    env->DeleteLocalRef(str);
                     break;
                 case FLUSH_CODE:
                     flush();
@@ -169,10 +176,12 @@ namespace clark {
         }
 
         jni_output & jni_output::operator <<(const char *s) {
+            jstring str = 0;
             if (s == 0) {
-                print(env->NewStringUTF("null"));
+                print(str = env->NewStringUTF("null"));
             }
-            print(env->NewStringUTF(s));
+            print(str = env->NewStringUTF(s));
+            env->DeleteLocalRef(str);
             return *this;
         }
 
