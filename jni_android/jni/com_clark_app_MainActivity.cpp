@@ -11,17 +11,19 @@ namespace {
 }
 
 jobject Java_com_clark_app_MainActivity_test(JNIEnv *env, jobject obj) {
-    logger::open();
-
+//    logger::open();
+//
     clark::jnis::jni_output out = clark::jnis::jni_output::std_out(env);
-    int i = 0;
-    jobject temp = 0;
-    while (true) {
-        ++i;
-        out << i << clark::jnis::endl;
-        temp = clark::jnis::newObject(env);
-        env->DeleteLocalRef(temp);
-    }
+
+    out << "你好" << clark::jnis::endl;
+//    int i = 0;
+//    jobject temp = 0;
+//    while (true) {
+//        ++i;
+//        out << i << clark::jnis::endl;
+//        temp = clark::jnis::newObject(env);
+//        env->DeleteLocalRef(temp);
+//    }
     return 0;
 }
 
