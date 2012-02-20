@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src-bouncycastle"/>
+	<classpathentry kind="src" path="src-bouncycastle-extra"/>
+	<classpathentry kind="src" path="src-apache-http"/>
+	<classpathentry kind="src" path="src-guava"/>
+	<classpathentry kind="src" path="src-jsr305"/>
+	<classpathentry kind="src" path="src-apache-commons"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
