@@ -84,7 +84,7 @@ public class Facade {
     synchronized void notify(final Signal signal) {
         if (signal != null) {
             // 防 signal 重复判断
-            if (signal.equals(lastSignalTimeHolder.signal)) {
+            if (lastSignalTimeHolder != null && signal.equals(lastSignalTimeHolder.signal)) {
                 if (System.currentTimeMillis() - lastSignalTimeHolder.time < 1000) {
                     // less than 1s，drop signal
                     return;
