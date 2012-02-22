@@ -1,5 +1,11 @@
 package com.clark.mvc;
 
+/**
+ * 不可变类。
+ * 
+ * @author clark
+ *
+ */
 public class Signal {
 
     public final String name;
@@ -40,8 +46,8 @@ public class Signal {
 
     @Override
     public String toString() {
-        return "Signal [name=" + name + ", body=" + body + ", type="
-                + type + "]";
+        return "Signal [name=" + name + ", body=" + body + ", type=" + type
+                + "]";
     }
 
 }

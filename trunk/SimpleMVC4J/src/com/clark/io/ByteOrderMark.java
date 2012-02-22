@@ -3,8 +3,7 @@ package com.clark.io;
 import java.io.Serializable;
 
 /**
- * Byte Order Mark (BOM) representation - see
- * {@link BOMInputStream}.
+ * Byte Order Mark (BOM) representation - see {@link BOMInputStream}.
  * 
  * @see BOMInputStream
  * @see <a href="http://en.wikipedia.org/wiki/Byte_order_mark">Wikipedia - Byte

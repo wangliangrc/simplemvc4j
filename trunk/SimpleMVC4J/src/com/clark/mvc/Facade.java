@@ -29,13 +29,22 @@ public class Facade {
     private final HashMap<String, Set<SignalReceiver>> receiverMap = new HashMap<String, Set<SignalReceiver>>();
     private volatile UIWorker uiWorker;
 
+    // 添加防止信号过多的检测代码
+    private static class SignalTimeHolder {
+        public Signal signal;
+        public long time;
+    }
+
+    private SignalTimeHolder lastSignalTimeHolder;
+
     /**
      * 注册一个 {@link SignalReceiver} 对象到 name 指定的 key 上。
      * 
      * @param name
      * @param receiver
      */
-    synchronized void registerSignalReceiver(String name, SignalReceiver receiver) {
+    synchronized void registerSignalReceiver(String name,
+            SignalReceiver receiver) {
         if (name != null && receiver != null) {
             Set<SignalReceiver> signalReceivers = getSignalReceivers(name);
             signalReceivers.add(receiver);
@@ -43,7 +52,8 @@ public class Facade {
     }
 
     /**
-     * 移除 name 对应的所有 {@link Set}<{@link SignalReceiver}> 集合中的某一个 {@link SignalReceiver} 对象。
+     * 移除 name 对应的所有 {@link Set}<{@link SignalReceiver}> 集合中的某一个
+     * {@link SignalReceiver} 对象。
      * 
      * @param name
      * @param receiver
@@ -73,6 +83,14 @@ public class Facade {
      */
     synchronized void notify(final Signal signal) {
         if (signal != null) {
+            // 防 signal 重复判断
+            if (signal.equals(lastSignalTimeHolder.signal)) {
+                if (System.currentTimeMillis() - lastSignalTimeHolder.time < 1000) {
+                    // less than 1s，drop signal
+                    return;
+                }
+            }
+
             UIWorker worker = findUIWorker(this);
             if (worker != null) {
                 worker.postTask(new Runnable() {
@@ -85,6 +103,13 @@ public class Facade {
             } else {
                 sendSignalInternal(signal);
             }
+
+            // 更新 SignalTimeHolder
+            if (lastSignalTimeHolder == null) {
+                lastSignalTimeHolder = new SignalTimeHolder();
+            }
+            lastSignalTimeHolder.signal = signal;
+            lastSignalTimeHolder.time = System.currentTimeMillis();
         }
     }
 
@@ -101,8 +126,8 @@ public class Facade {
     /**
      * 该方法会遍历 Function Map 查找处相关的 Function 对象并依次 调用它们的
      * {@link SignalReceiver#onReceive(Signal)} 方法。<br />
-     * 注意：本方法还会调用 parent 属性的 {@link #sendSignalInternal(Signal)} 方法，在 parent 不为 null
-     * 的时候。
+     * 注意：本方法还会调用 parent 属性的 {@link #sendSignalInternal(Signal)} 方法，在 parent 不为
+     * null 的时候。
      * 
      * @param signal
      */
@@ -176,7 +201,7 @@ public class Facade {
     public void setUIWorker(UIWorker worker) {
         if (worker instanceof java.lang.reflect.Proxy) {
             throw new IllegalArgumentException(
-                    "Can't use callback(Class, String) method in the setUIWorker(UIWorker) CALLBACK!");
+                    "Can't use \"callback(Class, String)\" method in the setUIWorker(UIWorker) CALLBACK!");
         }
         uiWorker = worker;
     }

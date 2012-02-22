@@ -112,8 +112,8 @@ class Controller {
                             }
                         };
                         facade.registerSignalReceiver(name, function);
-                        signalReceiverHolderMap.put(clazz, new SignalReceiverHolder(
-                                name, function));
+                        signalReceiverHolderMap.put(clazz,
+                                new SignalReceiverHolder(name, function));
                         found = true;
                     }
 
@@ -141,8 +141,10 @@ class Controller {
         }
 
         if (signalReceiverHolderMap.containsKey(clazz)) {
-            SignalReceiverHolder functionHolder = signalReceiverHolderMap.get(clazz);
-            facade.removeSignalReceiver(functionHolder.name, functionHolder.function);
+            SignalReceiverHolder functionHolder = signalReceiverHolderMap
+                    .get(clazz);
+            facade.removeSignalReceiver(functionHolder.name,
+                    functionHolder.function);
             signalReceiverHolderMap.remove(clazz);
             System.out.println(facade + " remove command: ["
                     + clazz.getCanonicalName() + "]");
