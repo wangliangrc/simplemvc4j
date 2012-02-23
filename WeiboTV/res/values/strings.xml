@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">微博TV</string>
+    <string name="todo">TODO</string>
+    <string name="favorites">收藏</string>
+    <string name="comment">评论</string>
+    <string name="forwarding">转发</string>
+    <string name="refresh">刷新</string>
+
+    <string name="mainpage">首页</string>
+    <string name="atpage">我的</string>
+    <string name="commentpage">评论</string>
+    <string name="privatemsgpage">私信</string>
+    <string name="profilepage">资料</string>
+</resources>

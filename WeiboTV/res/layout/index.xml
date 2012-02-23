@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <LinearLayout
+        android:id="@+id/bottom"
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/bk_indexbottom"
+        android:gravity="center_vertical|right" >
+
+        <ImageView
+            android:id="@+id/functionKeyPrompt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="60dp"
+            android:contentDescription="@string/todo" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/left"
+        android:layout_width="320dp"
+        android:layout_height="fill_parent"
+        android:layout_above="@id/bottom"
+        android:background="@drawable/bk_indexleft" />
+
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@id/bottom"
+        android:layout_toRightOf="@id/left"
+        android:background="#F5F5F5"
+        android:contentDescription="@string/todo" >
+    </LinearLayout>
+
+    <RadioButton 
+        android:id="@+id/radio"
+        android:layout_width="320dp"
+        android:layout_height="124dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="80dp"/>
+</RelativeLayout>

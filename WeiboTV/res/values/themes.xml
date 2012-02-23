@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="WeiboTheme" parent="android:Theme.Holo.Light.NoActionBar.Fullscreen">
+
+        <!-- 提高绘制效率 -->
+        <item name="android:windowBackground">@null</item>
+    </style>
+
+</resources>
