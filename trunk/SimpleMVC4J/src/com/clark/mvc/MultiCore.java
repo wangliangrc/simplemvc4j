@@ -120,11 +120,20 @@ public final class MultiCore {
         return GLOBAL.sendSignal(clazz, signal);
     }
 
-    public static void sendSignal(String signalName, Object body, String type) {
-        GLOBAL.sendSignal(signalName, body, type);
+    public static void sendSignal(String signalName, String type, Object body) {
+        GLOBAL.sendSignal(signalName, type, body);
+    }
+
+    public static void sendSignal(String signalName, String type,
+            Object... body) {
+        GLOBAL.sendSignal(signalName, type, body);
     }
 
     public static void sendSignal(String signalName, Object body) {
+        GLOBAL.sendSignal(signalName, body);
+    }
+
+    public static void sendSignal(String signalName, Object... body) {
         GLOBAL.sendSignal(signalName, body);
     }
 

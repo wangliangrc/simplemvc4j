@@ -84,7 +84,8 @@ public class Facade {
     synchronized void notify(final Signal signal) {
         if (signal != null) {
             // 防 signal 重复判断
-            if (lastSignalTimeHolder != null && signal.equals(lastSignalTimeHolder.signal)) {
+            if (lastSignalTimeHolder != null
+                    && signal.equals(lastSignalTimeHolder.signal)) {
                 if (System.currentTimeMillis() - lastSignalTimeHolder.time < 1000) {
                     // less than 1s，drop signal
                     return;
@@ -231,7 +232,7 @@ public class Facade {
      * @param type
      *            通知类型。
      */
-    public void sendSignal(String signalName, Object body, String type) {
+    public void sendSignal(String signalName, String type, Object body) {
         if (signalName == null) {
             throw new NullPointerException();
         }
@@ -251,9 +252,39 @@ public class Facade {
      *            通知名称。不能为 null。
      * @param body
      *            通知包含消息体。
+     * @param type
+     *            通知类型。
+     */
+    public void sendSignal(String signalName, String type, Object... body) {
+        sendSignal(signalName, type, (Object) body);
+    }
+
+    /**
+     * 发送 {@link Signal} 通知实例。
+     * <p>
+     * 注意：回调方法运行线程由该方法所在线程决定。
+     * 
+     * @param signalName
+     *            通知名称。不能为 null。
+     * @param body
+     *            通知包含消息体。
      */
     public void sendSignal(String signalName, Object body) {
-        sendSignal(signalName, body, null);
+        sendSignal(signalName, null, body);
+    }
+
+    /**
+     * 发送 {@link Signal} 通知实例。
+     * <p>
+     * 注意：回调方法运行线程由该方法所在线程决定。
+     * 
+     * @param signalName
+     *            通知名称。不能为 null。
+     * @param body
+     *            通知包含消息体。
+     */
+    public void sendSignal(String signalName, Object... body) {
+        sendSignal(signalName, (Object) body);
     }
 
     /**
