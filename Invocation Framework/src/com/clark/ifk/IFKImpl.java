@@ -18,7 +18,9 @@ class IFKImpl implements IFK {
         this.executor = executor;
     }
 
-    /* (non-Javadoc)
+    /**
+     * (non-Javadoc)
+     * 
      * @see com.clark.ifk.IFK#register(java.lang.Object)
      */
     @Override
@@ -150,7 +152,9 @@ class IFKImpl implements IFK {
                 || parameterTypes[0] != Message.class;
     }
 
-    /* (non-Javadoc)
+    /**
+     * (non-Javadoc)
+     * 
      * @see com.clark.ifk.IFK#unregister(java.lang.Object)
      */
     @Override
@@ -179,15 +183,20 @@ class IFKImpl implements IFK {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.clark.ifk.IFK#rm(java.lang.Object, java.lang.String, java.lang.Object)
+    /**
+     * (non-Javadoc)
+     * 
+     * @see com.clark.ifk.IFK#rm(java.lang.Object, java.lang.String,
+     *      java.lang.Object)
      */
     @Override
     public final void rm(Object receiver, String message, Object... args) {
         rmrm(receiver, message, (Object) null, (String) null, args);
     }
 
-    /* (non-Javadoc)
+    /**
+     * (non-Javadoc)
+     * 
      * @see com.clark.ifk.IFK#m(java.lang.String, java.lang.Object)
      */
     @Override
@@ -195,8 +204,11 @@ class IFKImpl implements IFK {
         rmrm((Object) null, message, (Object) null, (String) null, args);
     }
 
-    /* (non-Javadoc)
-     * @see com.clark.ifk.IFK#rmrm(java.lang.Object, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)
+    /**
+     * (non-Javadoc)
+     * 
+     * @see com.clark.ifk.IFK#rmrm(java.lang.Object, java.lang.String,
+     *      java.lang.Object, java.lang.String, java.lang.Object)
      */
     @Override
     public final void rmrm(final Object receiver, final String msgname,
@@ -290,8 +302,11 @@ class IFKImpl implements IFK {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.clark.ifk.IFK#rmm(java.lang.Object, java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.clark.ifk.IFK#rmm(java.lang.Object, java.lang.String,
+     * java.lang.String, java.lang.Object)
      */
     @Override
     public final void rmm(Object receiver, String message, String callbackMsg,
@@ -299,8 +314,11 @@ class IFKImpl implements IFK {
         rmrm(receiver, message, (Object) null, callbackMsg, args);
     }
 
-    /* (non-Javadoc)
-     * @see com.clark.ifk.IFK#mrm(java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.clark.ifk.IFK#mrm(java.lang.String, java.lang.Object,
+     * java.lang.String, java.lang.Object)
      */
     @Override
     public final void mrm(String message, Object callbackRcv,
@@ -308,8 +326,11 @@ class IFKImpl implements IFK {
         rmrm((Object) null, message, callbackRcv, callbackMsg, args);
     }
 
-    /* (non-Javadoc)
-     * @see com.clark.ifk.IFK#mm(java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.clark.ifk.IFK#mm(java.lang.String, java.lang.String,
+     * java.lang.Object)
      */
     @Override
     public final void mm(String message, String callbackMsg, Object... args) {
