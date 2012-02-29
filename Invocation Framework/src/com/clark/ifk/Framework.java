@@ -178,11 +178,13 @@ public class Framework {
 
         List<MethodStateHolder> holders = operatorTable.get(message);
         Object returnVal = null;
+        Message msg = null;
         try {
             if (receiver == null) {
                 for (MethodStateHolder holder : holders) {
                     holder.method.setAccessible(true);
-                    returnVal = holder.method.invoke(holder.receiver, args);
+                    msg = new Message(message, args);
+                    returnVal = holder.method.invoke(holder.receiver, msg);
                     if (callbackMsg != null && callbackMsg.length() > 0) {
                         if (returnVal == null || returnVal instanceof Void) {
                             callAsync(callbackRcv, callbackMsg, (Object) null,
@@ -200,7 +202,8 @@ public class Framework {
                     }
 
                     holder.method.setAccessible(true);
-                    returnVal = holder.method.invoke(holder.receiver, args);
+                    msg = new Message(message, args);
+                    returnVal = holder.method.invoke(holder.receiver, msg);
                     if (callbackMsg != null && callbackMsg.length() > 0) {
                         if (returnVal == null || returnVal instanceof Void) {
                             callAsync(callbackRcv, callbackMsg, (Object) null,

@@ -5,14 +5,22 @@ public class Message {
     public final Type[] args;
     public final Type first;
 
-    Message(String name, Type[] args) {
+    Message(String name, Object[] args) {
         super();
         this.name = name;
-        this.args = args;
-        if (args != null && args.length > 0) {
-            first = args[0];
-        } else {
+        if (args == null) {
+            this.args = new Type[0];
             first = null;
+        } else {
+            this.args = new Type[args.length];
+            for (int i = 0, len = args.length; i < len; i++) {
+                this.args[i] = new Type(args[i]);
+            }
+            if (args != null && args.length > 0) {
+                first = this.args[0];
+            } else {
+                first = null;
+            }
         }
     }
 
