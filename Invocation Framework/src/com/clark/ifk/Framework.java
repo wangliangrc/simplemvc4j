@@ -166,15 +166,15 @@ public class Framework {
         }
     }
 
-    public final void callAsync(Object receiver, String message, Object... args) {
-        callAsync(receiver, message, (Object) null, (String) null, args);
+    public final void rm(Object receiver, String message, Object... args) {
+        rmRM(receiver, message, (Object) null, (String) null, args);
     }
 
-    public final void callAsync(String message, Object... args) {
-        callAsync((Object) null, message, (Object) null, (String) null, args);
+    public final void m(String message, Object... args) {
+        rmRM((Object) null, message, (Object) null, (String) null, args);
     }
 
-    public final void callAsync(final Object receiver, final String message,
+    public final void rmRM(final Object receiver, final String message,
             final Object callbackRcv, final String callbackMsg,
             final Object... args) {
         if (executor == null) {
@@ -209,10 +209,10 @@ public class Framework {
                     returnVal = holder.method.invoke(holder.receiver, msg);
                     if (callbackMsg != null && callbackMsg.length() > 0) {
                         if (returnVal == null || returnVal instanceof Void) {
-                            callAsync(callbackRcv, callbackMsg, (Object) null,
+                            rmRM(callbackRcv, callbackMsg, (Object) null,
                                     (String) null);
                         } else {
-                            callAsync(callbackRcv, callbackMsg, (Object) null,
+                            rmRM(callbackRcv, callbackMsg, (Object) null,
                                     (String) null, returnVal);
                         }
                     }
@@ -228,10 +228,10 @@ public class Framework {
                     returnVal = holder.method.invoke(holder.receiver, msg);
                     if (callbackMsg != null && callbackMsg.length() > 0) {
                         if (returnVal == null || returnVal instanceof Void) {
-                            callAsync(callbackRcv, callbackMsg, (Object) null,
+                            rmRM(callbackRcv, callbackMsg, (Object) null,
                                     (String) null);
                         } else {
-                            callAsync(callbackRcv, callbackMsg, (Object) null,
+                            rmRM(callbackRcv, callbackMsg, (Object) null,
                                     (String) null, returnVal);
                         }
                     }
@@ -242,19 +242,18 @@ public class Framework {
         }
     }
 
-    public final void callAsync(Object receiver, String message,
-            String callbackMsg, Object... args) {
-        callAsync(receiver, message, (Object) null, callbackMsg, args);
-    }
-
-    public final void callAsync(String message, Object callbackRcv,
-            String callbackMsg, Object... args) {
-        callAsync((Object) null, message, callbackRcv, callbackMsg, args);
-    }
-
-    public final void callAsync(String message, String callbackMsg,
+    public final void rmM(Object receiver, String message, String callbackMsg,
             Object... args) {
-        callAsync((Object) null, message, (Object) null, callbackMsg, args);
+        rmRM(receiver, message, (Object) null, callbackMsg, args);
+    }
+
+    public final void mRM(String message, Object callbackRcv,
+            String callbackMsg, Object... args) {
+        rmRM((Object) null, message, callbackRcv, callbackMsg, args);
+    }
+
+    public final void mM(String message, String callbackMsg, Object... args) {
+        rmRM((Object) null, message, (Object) null, callbackMsg, args);
     }
 
     @Override

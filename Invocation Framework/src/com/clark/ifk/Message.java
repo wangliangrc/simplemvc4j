@@ -1,5 +1,7 @@
 package com.clark.ifk;
 
+import java.util.Arrays;
+
 public class Message {
     public final String name;
     public final Type[] args;
@@ -22,6 +24,12 @@ public class Message {
                 first = null;
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Message [name=" + name + ", args=" + Arrays.toString(args)
+                + ", first=" + first + "]";
     }
 
 }
