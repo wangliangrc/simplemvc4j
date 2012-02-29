@@ -13,6 +13,32 @@ public class Framework {
     private Map<String, List<MethodStateHolder>> operatorTable = new HashMap<String, List<MethodStateHolder>>();
     private Executor executor;
 
+    private static Map<Executor, Framework> INSTANCES = new HashMap<Executor, Framework>();
+    private static final Framework DEFAULT = new Framework(null);
+
+    public static synchronized Framework getInstance(Executor executor) {
+        if (executor == null) {
+            return DEFAULT;
+        }
+
+        if (INSTANCES.containsKey(executor)) {
+            return INSTANCES.get(executor);
+        } else {
+            Framework framework = new Framework(executor);
+            INSTANCES.put(executor, framework);
+            return framework;
+        }
+    }
+
+    public static final Framework getInstance() {
+        return getInstance(null);
+    }
+
+    private Framework(Executor executor) {
+        super();
+        this.executor = executor;
+    }
+
     public final void register(Object receiver) {
         if (receiver == null) {
             return;
@@ -140,10 +166,6 @@ public class Framework {
         }
     }
 
-    public final void setAsyncExecutor(Executor executor) {
-        this.executor = executor;
-    }
-
     public final void callAsync(Object receiver, String message, Object... args) {
         callAsync(receiver, message, (Object) null, (String) null, args);
     }
@@ -152,9 +174,9 @@ public class Framework {
         callAsync((Object) null, message, (Object) null, (String) null, args);
     }
 
-    public final void callAsync(final Object receiver,
-            final String message, final Object callbackRcv,
-            final String callbackMsg, final Object... args) {
+    public final void callAsync(final Object receiver, final String message,
+            final Object callbackRcv, final String callbackMsg,
+            final Object... args) {
         if (executor == null) {
             callInternal(receiver, message, callbackRcv, callbackMsg, args);
         } else {
@@ -233,6 +255,32 @@ public class Framework {
     public final void callAsync(String message, String callbackMsg,
             Object... args) {
         callAsync((Object) null, message, (Object) null, callbackMsg, args);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((executor == null) ? 0 : executor.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Framework other = (Framework) obj;
+        if (executor == null) {
+            if (other.executor != null)
+                return false;
+        } else if (!executor.equals(other.executor))
+            return false;
+        return true;
     }
 
     private static class MethodStateHolder {
