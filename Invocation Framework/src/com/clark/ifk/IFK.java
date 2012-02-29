@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-public class Framework {
+public class IFK {
     private Map<Object, List<MethodStateHolder>> receiverTable = new HashMap<Object, List<MethodStateHolder>>();
     private Map<String, List<MethodStateHolder>> operatorTable = new HashMap<String, List<MethodStateHolder>>();
     private Executor executor;
 
-    private static Map<Executor, Framework> INSTANCES = new HashMap<Executor, Framework>();
-    private static final Framework DEFAULT = new Framework(null);
+    private static Map<Executor, IFK> INSTANCES = new HashMap<Executor, IFK>();
+    private static final IFK DEFAULT = new IFK(null);
 
-    public static synchronized Framework getInstance(Executor executor) {
+    public static synchronized IFK getInstance(Executor executor) {
         if (executor == null) {
             return DEFAULT;
         }
@@ -24,17 +24,17 @@ public class Framework {
         if (INSTANCES.containsKey(executor)) {
             return INSTANCES.get(executor);
         } else {
-            Framework framework = new Framework(executor);
+            IFK framework = new IFK(executor);
             INSTANCES.put(executor, framework);
             return framework;
         }
     }
 
-    public static final Framework getInstance() {
+    public static final IFK getInstance() {
         return getInstance(null);
     }
 
-    private Framework(Executor executor) {
+    private IFK(Executor executor) {
         super();
         this.executor = executor;
     }
@@ -273,7 +273,7 @@ public class Framework {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Framework other = (Framework) obj;
+        IFK other = (IFK) obj;
         if (executor == null) {
             if (other.executor != null)
                 return false;

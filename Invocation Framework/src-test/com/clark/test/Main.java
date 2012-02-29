@@ -1,14 +1,24 @@
 package com.clark.test;
 
-import com.clark.ifk.Framework;
+import com.clark.ifk.IFK;
 
 public class Main {
 
     public static void main(String[] args) {
-        Framework framework = Framework.getInstance();
-        framework.register(StaticMethod.class);
-        framework.m("1", "我靠", 2, 1.f, 4.);
-        framework.m("2");
+        IFK ifk = IFK.getInstance();
+        ifk.register(StaticMethod.class);
+        ifk.m("1", "我靠", 2, 1.f, 4.);
+        ifk.m("2");
+
+        StaticMethod instance = new StaticMethod();
+        ifk.register(instance);
+        ifk.m("3");
+
+        ifk.unregister(StaticMethod.class);
+        ifk.m("1", "我靠", 2, 1.f, 4.);
+        ifk.m("2");
+        ifk.unregister(instance);
+        ifk.m("3");
     }
 
 }

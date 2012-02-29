@@ -10,4 +10,10 @@ public class StaticMethod {
         System.out.println("StaticMethod.test1()");
         System.out.println(message);
     }
+
+    @Messenger("3")
+    void test2(Message message) {
+        System.out.println("StaticMethod.test2()");
+        System.out.println(message);
+    }
 }
