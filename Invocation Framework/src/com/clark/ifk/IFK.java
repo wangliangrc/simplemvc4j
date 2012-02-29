@@ -41,10 +41,13 @@ public class IFK {
 
     public final void register(Object receiver) {
         if (receiver == null) {
+            System.err.println("IFK.register() can't accept null param");
             return;
         }
 
         if (receiverTable.containsKey(receiver)) {
+            System.err.println("You have already register receiver: "
+                    + receiver);
             return;
         }
 
@@ -68,7 +71,16 @@ public class IFK {
                         || operator.value().length == 0) {
                     continue;
                 }
-                verifyMethod(methods[i]);
+                if (verifyMethodFail(methods[i])) {
+                    StringBuilder error = new StringBuilder();
+                    error.append(methods[i].getDeclaringClass()
+                            .getCanonicalName());
+                    error.append(".");
+                    error.append(methods[i].getName());
+                    error.append(" 不符合格式！");
+                    System.err.println(error);
+                    continue;
+                }
                 MethodStateHolder holder = new MethodStateHolder();
                 String[] ops = operator.value();
                 holder.operations = ops;
@@ -105,7 +117,16 @@ public class IFK {
                         || operator.value().length == 0) {
                     continue;
                 }
-                verifyMethod(methods[i]);
+                if (verifyMethodFail(methods[i])) {
+                    StringBuilder error = new StringBuilder();
+                    error.append(methods[i].getDeclaringClass()
+                            .getCanonicalName());
+                    error.append(".");
+                    error.append(methods[i].getName());
+                    error.append(" 不符合格式！");
+                    System.err.println(error);
+                    continue;
+                }
                 MethodStateHolder holder = new MethodStateHolder();
                 String[] ops = operator.value();
                 holder.operations = ops;
@@ -133,17 +154,15 @@ public class IFK {
         }
     }
 
-    private void verifyMethod(Method method) {
+    private boolean verifyMethodFail(Method method) {
         Class<?>[] parameterTypes = method.getParameterTypes();
-        if (parameterTypes == null || parameterTypes.length != 1
-                || parameterTypes[0] != Message.class) {
-            throw new RuntimeException(
-                    "Callback function can only have one Message param.");
-        }
+        return parameterTypes == null || parameterTypes.length != 1
+                || parameterTypes[0] != Message.class;
     }
 
     public final void unregister(Object receiver) {
         if (receiver == null) {
+            System.err.println("IFK.unregister() can't accept null param");
             return;
         }
 
@@ -174,17 +193,31 @@ public class IFK {
         rmRM((Object) null, message, (Object) null, (String) null, args);
     }
 
-    public final void rmRM(final Object receiver, final String message,
+    /**
+     * 
+     * @param receiver
+     *            如果是 Class 的实例则调用 static 方法；如果是 instance 则调用 instance 方法；如果为
+     *            null 则调用 static 和 instance 方法。
+     * @param msgname
+     *            表示 Message 的名字
+     * @param callbackRcv
+     *            表示回调 Message 的 receiver
+     * @param callbackMsg
+     *            表示回调 Message 的名字
+     * @param args
+     *            表示 Message 的参数
+     */
+    public final void rmRM(final Object receiver, final String msgname,
             final Object callbackRcv, final String callbackMsg,
             final Object... args) {
         if (executor == null) {
-            callInternal(receiver, message, callbackRcv, callbackMsg, args);
+            callInternal(receiver, msgname, callbackRcv, callbackMsg, args);
         } else {
             executor.execute(new Runnable() {
 
                 @Override
                 public void run() {
-                    callInternal(receiver, message, callbackRcv, callbackMsg,
+                    callInternal(receiver, msgname, callbackRcv, callbackMsg,
                             args);
                 }
             });
@@ -218,21 +251,42 @@ public class IFK {
                     }
                 }
             } else {
-                for (MethodStateHolder holder : holders) {
-                    if (!holder.receiver.equals(receiver)) {
-                        continue;
-                    }
+                if (receiver instanceof Class) {
+                    for (MethodStateHolder holder : holders) {
+                        if (holder.receiver != null) {
+                            continue;
+                        }
 
-                    holder.method.setAccessible(true);
-                    msg = new Message(message, args);
-                    returnVal = holder.method.invoke(holder.receiver, msg);
-                    if (callbackMsg != null && callbackMsg.length() > 0) {
-                        if (returnVal == null || returnVal instanceof Void) {
-                            rmRM(callbackRcv, callbackMsg, (Object) null,
-                                    (String) null);
-                        } else {
-                            rmRM(callbackRcv, callbackMsg, (Object) null,
-                                    (String) null, returnVal);
+                        holder.method.setAccessible(true);
+                        msg = new Message(message, args);
+                        returnVal = holder.method.invoke(holder.receiver, msg);
+                        if (callbackMsg != null && callbackMsg.length() > 0) {
+                            if (returnVal == null || returnVal instanceof Void) {
+                                rmRM(callbackRcv, callbackMsg, (Object) null,
+                                        (String) null);
+                            } else {
+                                rmRM(callbackRcv, callbackMsg, (Object) null,
+                                        (String) null, returnVal);
+                            }
+                        }
+                    }
+                } else {
+                    for (MethodStateHolder holder : holders) {
+                        if (!holder.receiver.equals(receiver)) {
+                            continue;
+                        }
+
+                        holder.method.setAccessible(true);
+                        msg = new Message(message, args);
+                        returnVal = holder.method.invoke(holder.receiver, msg);
+                        if (callbackMsg != null && callbackMsg.length() > 0) {
+                            if (returnVal == null || returnVal instanceof Void) {
+                                rmRM(callbackRcv, callbackMsg, (Object) null,
+                                        (String) null);
+                            } else {
+                                rmRM(callbackRcv, callbackMsg, (Object) null,
+                                        (String) null, returnVal);
+                            }
                         }
                     }
                 }
