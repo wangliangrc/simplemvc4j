@@ -186,11 +186,11 @@ public class IFK {
     }
 
     public final void rm(Object receiver, String message, Object... args) {
-        rmRM(receiver, message, (Object) null, (String) null, args);
+        rmrm(receiver, message, (Object) null, (String) null, args);
     }
 
     public final void m(String message, Object... args) {
-        rmRM((Object) null, message, (Object) null, (String) null, args);
+        rmrm((Object) null, message, (Object) null, (String) null, args);
     }
 
     /**
@@ -207,7 +207,7 @@ public class IFK {
      * @param args
      *            表示 Message 的参数
      */
-    public final void rmRM(final Object receiver, final String msgname,
+    public final void rmrm(final Object receiver, final String msgname,
             final Object callbackRcv, final String callbackMsg,
             final Object... args) {
         if (executor == null) {
@@ -242,10 +242,10 @@ public class IFK {
                     returnVal = holder.method.invoke(holder.receiver, msg);
                     if (callbackMsg != null && callbackMsg.length() > 0) {
                         if (returnVal == null || returnVal instanceof Void) {
-                            rmRM(callbackRcv, callbackMsg, (Object) null,
+                            rmrm(callbackRcv, callbackMsg, (Object) null,
                                     (String) null);
                         } else {
-                            rmRM(callbackRcv, callbackMsg, (Object) null,
+                            rmrm(callbackRcv, callbackMsg, (Object) null,
                                     (String) null, returnVal);
                         }
                     }
@@ -262,10 +262,10 @@ public class IFK {
                         returnVal = holder.method.invoke(holder.receiver, msg);
                         if (callbackMsg != null && callbackMsg.length() > 0) {
                             if (returnVal == null || returnVal instanceof Void) {
-                                rmRM(callbackRcv, callbackMsg, (Object) null,
+                                rmrm(callbackRcv, callbackMsg, (Object) null,
                                         (String) null);
                             } else {
-                                rmRM(callbackRcv, callbackMsg, (Object) null,
+                                rmrm(callbackRcv, callbackMsg, (Object) null,
                                         (String) null, returnVal);
                             }
                         }
@@ -281,10 +281,10 @@ public class IFK {
                         returnVal = holder.method.invoke(holder.receiver, msg);
                         if (callbackMsg != null && callbackMsg.length() > 0) {
                             if (returnVal == null || returnVal instanceof Void) {
-                                rmRM(callbackRcv, callbackMsg, (Object) null,
+                                rmrm(callbackRcv, callbackMsg, (Object) null,
                                         (String) null);
                             } else {
-                                rmRM(callbackRcv, callbackMsg, (Object) null,
+                                rmrm(callbackRcv, callbackMsg, (Object) null,
                                         (String) null, returnVal);
                             }
                         }
@@ -296,18 +296,18 @@ public class IFK {
         }
     }
 
-    public final void rmM(Object receiver, String message, String callbackMsg,
+    public final void rmm(Object receiver, String message, String callbackMsg,
             Object... args) {
-        rmRM(receiver, message, (Object) null, callbackMsg, args);
+        rmrm(receiver, message, (Object) null, callbackMsg, args);
     }
 
-    public final void mRM(String message, Object callbackRcv,
+    public final void mrm(String message, Object callbackRcv,
             String callbackMsg, Object... args) {
-        rmRM((Object) null, message, callbackRcv, callbackMsg, args);
+        rmrm((Object) null, message, callbackRcv, callbackMsg, args);
     }
 
-    public final void mM(String message, String callbackMsg, Object... args) {
-        rmRM((Object) null, message, (Object) null, callbackMsg, args);
+    public final void mm(String message, String callbackMsg, Object... args) {
+        rmrm((Object) null, message, (Object) null, callbackMsg, args);
     }
 
     @Override
