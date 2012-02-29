@@ -12,16 +12,20 @@ public class Message {
         this.name = name;
         if (args == null) {
             this.args = new Type[0];
-            first = null;
+            first = Type.NULL;
         } else {
             this.args = new Type[args.length];
             for (int i = 0, len = args.length; i < len; i++) {
-                this.args[i] = new Type(args[i]);
+                if (args[i] == null) {
+                    this.args[i] = Type.NULL;
+                } else {
+                    this.args[i] = new Type(args[i]);
+                }
             }
             if (args != null && args.length > 0) {
                 first = this.args[0];
             } else {
-                first = null;
+                first = Type.NULL;
             }
         }
     }

@@ -141,6 +141,22 @@ public class IFKTestCase extends TestCase {
         }
     }
 
+    static class CallbackTest {
+        static Object result = null;
+
+        @Messenger("1")
+        static Object method1(Message message) {
+            System.out.println(message);
+            return message.args[message.first.toInt()].toObject();
+        }
+
+        @Messenger("2")
+        static void method2(Message message) {
+            System.out.println(message.first);
+            result = message.first.toObject();
+        }
+    }
+
     private IFK ifk = IFKFactory.getInstance();
 
     @Override
@@ -329,5 +345,15 @@ public class IFKTestCase extends TestCase {
         assertTrue(TestClass.callTable[7]);
 
         ifk.unregister(testClass);
+    }
+
+    public void testCallbackTest() throws Exception {
+        ifk.register(CallbackTest.class);
+
+        ifk.rmm(CallbackTest.class, "1", "2", 1, "你好");
+        assertTrue(CallbackTest.result instanceof String);
+        assertEquals(CallbackTest.result, "你好");
+
+        ifk.unregister(CallbackTest.class);
     }
 }
