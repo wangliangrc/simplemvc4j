@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-class IFKImpl implements IFK {
+class IFKJavaImpl implements IFK {
     private Map<Object, List<MethodStateHolder>> receiverTable = new HashMap<Object, List<MethodStateHolder>>();
     private Map<String, List<MethodStateHolder>> operatorTable = new HashMap<String, List<MethodStateHolder>>();
     private Executor executor;
 
-    IFKImpl(Executor executor) {
+    IFKJavaImpl(Executor executor) {
         super();
         this.executor = executor;
     }
@@ -36,8 +36,6 @@ class IFKImpl implements IFK {
             return;
         }
 
-        List<MethodStateHolder> ms = new ArrayList<MethodStateHolder>();
-        Messenger operator = null;
         Class<?> clazz = null;
         // if (receiver instanceof Class) {
         if (receiver instanceof Class) {
@@ -46,10 +44,12 @@ class IFKImpl implements IFK {
             clazz = receiver.getClass();
         }
         Method[] methods = clazz.getDeclaredMethods();
-        if (methods == null) {
+        if (methods == null || methods.length == 0) {
             return;
         }
 
+        List<MethodStateHolder> ms = new ArrayList<MethodStateHolder>();
+        Messenger operator = null;
         int modifier = 0;
         for (int i = 0, len = methods.length; i < len; i++) {
             modifier = methods[i].getModifiers();
@@ -354,7 +354,7 @@ class IFKImpl implements IFK {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        IFKImpl other = (IFKImpl) obj;
+        IFKJavaImpl other = (IFKJavaImpl) obj;
         if (executor == null) {
             if (other.executor != null)
                 return false;

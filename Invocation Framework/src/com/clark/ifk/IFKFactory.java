@@ -7,7 +7,7 @@ import java.util.concurrent.Executor;
 public class IFKFactory {
 
     private static Map<Executor, IFK> INSTANCES = new HashMap<Executor, IFK>();
-    private static final IFK DEFAULT = new IFKImpl(null);
+    private static final IFK DEFAULT = new IFKJavaImpl(null);
 
     public static synchronized IFK getInstance(Executor executor) {
         if (executor == null) {
@@ -17,7 +17,7 @@ public class IFKFactory {
         if (INSTANCES.containsKey(executor)) {
             return INSTANCES.get(executor);
         } else {
-            IFK framework = new IFKImpl(executor);
+            IFK framework = new IFKJavaImpl(executor);
             INSTANCES.put(executor, framework);
             return framework;
         }
