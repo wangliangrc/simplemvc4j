@@ -53,100 +53,102 @@ public class IFK {
 
         List<MethodStateHolder> ms = new ArrayList<MethodStateHolder>();
         Messenger operator = null;
-        if (receiver instanceof Class) {
-            Class<?> clazz = (Class<?>) receiver;
-            Method[] methods = clazz.getDeclaredMethods();
-            if (methods == null) {
-                return;
-            }
+        // if (receiver instanceof Class) {
+        Class<?> clazz = (Class<?>) receiver;
+        Method[] methods = clazz.getDeclaredMethods();
+        if (methods == null) {
+            return;
+        }
 
-            int modifier = 0;
-            for (int i = 0, len = methods.length; i < len; i++) {
-                modifier = methods[i].getModifiers();
-                if (!Modifier.isStatic(modifier)) {
-                    continue;
-                }
-                operator = methods[i].getAnnotation(Messenger.class);
-                if (operator == null || operator.value() == null
-                        || operator.value().length == 0) {
-                    continue;
-                }
-                if (verifyMethodFail(methods[i])) {
-                    StringBuilder error = new StringBuilder();
-                    error.append(methods[i].getDeclaringClass()
-                            .getCanonicalName());
-                    error.append(".");
-                    error.append(methods[i].getName());
-                    error.append(" 不符合格式！");
-                    System.err.println(error);
-                    continue;
-                }
-                MethodStateHolder holder = new MethodStateHolder();
-                String[] ops = operator.value();
-                holder.operations = ops;
-                holder.method = methods[i];
-                ms.add(holder);
-                List<MethodStateHolder> oplist = null;
-                for (int j = 0, size = ops.length; j < size; j++) {
-                    synchronized (operatorTable) {
-                        if (operatorTable.containsKey(ops[j])) {
-                            oplist = operatorTable.get(ops[j]);
-                        } else {
-                            oplist = new ArrayList<MethodStateHolder>();
-                        }
-                        oplist.add(holder);
-                        operatorTable.put(ops[j], oplist);
-                    }
-                }
+        int modifier = 0;
+        for (int i = 0, len = methods.length; i < len; i++) {
+            modifier = methods[i].getModifiers();
+            if ((receiver instanceof Class && !Modifier.isStatic(modifier))
+                    || (!(receiver instanceof Class) && Modifier
+                            .isStatic(modifier))) {
+                continue;
             }
-        } else {
-            Class<?> clazz = receiver.getClass();
-            Method[] methods = clazz.getDeclaredMethods();
-            if (methods == null) {
-                return;
+            operator = methods[i].getAnnotation(Messenger.class);
+            if (operator == null || operator.value() == null
+                    || operator.value().length == 0) {
+                continue;
             }
-
-            int modifier = 0;
-            for (int i = 0, len = methods.length; i < len; i++) {
-                modifier = methods[i].getModifiers();
-                if (Modifier.isStatic(modifier)) {
-                    continue;
-                }
-                operator = methods[i].getAnnotation(Messenger.class);
-                if (operator == null || operator.value() == null
-                        || operator.value().length == 0) {
-                    continue;
-                }
-                if (verifyMethodFail(methods[i])) {
-                    StringBuilder error = new StringBuilder();
-                    error.append(methods[i].getDeclaringClass()
-                            .getCanonicalName());
-                    error.append(".");
-                    error.append(methods[i].getName());
-                    error.append(" 不符合格式！");
-                    System.err.println(error);
-                    continue;
-                }
-                MethodStateHolder holder = new MethodStateHolder();
-                String[] ops = operator.value();
-                holder.operations = ops;
-                holder.method = methods[i];
-                holder.receiver = receiver;
-                ms.add(holder);
-                List<MethodStateHolder> oplist = null;
-                for (int j = 0, size = ops.length; j < size; j++) {
-                    synchronized (operatorTable) {
-                        if (operatorTable.containsKey(ops[j])) {
-                            oplist = operatorTable.get(ops[j]);
-                        } else {
-                            oplist = new ArrayList<MethodStateHolder>();
-                        }
-                        oplist.add(holder);
-                        operatorTable.put(ops[j], oplist);
+            if (verifyMethodFail(methods[i])) {
+                StringBuilder error = new StringBuilder();
+                error.append(methods[i].getDeclaringClass().getCanonicalName());
+                error.append(".");
+                error.append(methods[i].getName());
+                error.append(" 不符合格式！");
+                System.err.println(error);
+                continue;
+            }
+            MethodStateHolder holder = new MethodStateHolder();
+            String[] ops = operator.value();
+            holder.operations = ops;
+            holder.method = methods[i];
+            holder.receiver = receiver;
+            ms.add(holder);
+            List<MethodStateHolder> oplist = null;
+            for (int j = 0, size = ops.length; j < size; j++) {
+                synchronized (operatorTable) {
+                    if (operatorTable.containsKey(ops[j])) {
+                        oplist = operatorTable.get(ops[j]);
+                    } else {
+                        oplist = new ArrayList<MethodStateHolder>();
                     }
+                    oplist.add(holder);
+                    operatorTable.put(ops[j], oplist);
                 }
             }
         }
+        // } else {
+        // Class<?> clazz = receiver.getClass();
+        // Method[] methods = clazz.getDeclaredMethods();
+        // if (methods == null) {
+        // return;
+        // }
+        //
+        // int modifier = 0;
+        // for (int i = 0, len = methods.length; i < len; i++) {
+        // modifier = methods[i].getModifiers();
+        // if (Modifier.isStatic(modifier)) {
+        // continue;
+        // }
+        // operator = methods[i].getAnnotation(Messenger.class);
+        // if (operator == null || operator.value() == null
+        // || operator.value().length == 0) {
+        // continue;
+        // }
+        // if (verifyMethodFail(methods[i])) {
+        // StringBuilder error = new StringBuilder();
+        // error.append(methods[i].getDeclaringClass()
+        // .getCanonicalName());
+        // error.append(".");
+        // error.append(methods[i].getName());
+        // error.append(" 不符合格式！");
+        // System.err.println(error);
+        // continue;
+        // }
+        // MethodStateHolder holder = new MethodStateHolder();
+        // String[] ops = operator.value();
+        // holder.operations = ops;
+        // holder.method = methods[i];
+        // holder.receiver = receiver;
+        // ms.add(holder);
+        // List<MethodStateHolder> oplist = null;
+        // for (int j = 0, size = ops.length; j < size; j++) {
+        // synchronized (operatorTable) {
+        // if (operatorTable.containsKey(ops[j])) {
+        // oplist = operatorTable.get(ops[j]);
+        // } else {
+        // oplist = new ArrayList<MethodStateHolder>();
+        // }
+        // oplist.add(holder);
+        // operatorTable.put(ops[j], oplist);
+        // }
+        // }
+        // }
+        // }
         if (ms.size() > 0) {
             synchronized (receiverTable) {
                 receiverTable.put(receiver, ms);
@@ -253,13 +255,15 @@ public class IFK {
             } else {
                 if (receiver instanceof Class) {
                     for (MethodStateHolder holder : holders) {
-                        if (holder.receiver != null) {
+                        // Class 实例是单例的，所以可以直接使用 == 符号
+                        if (holder.receiver != receiver) {
                             continue;
                         }
 
                         holder.method.setAccessible(true);
                         msg = new Message(message, args);
-                        returnVal = holder.method.invoke(holder.receiver, msg);
+                        // 调用 static 方法第一个参数为 null
+                        returnVal = holder.method.invoke(null, msg);
                         if (callbackMsg != null && callbackMsg.length() > 0) {
                             if (returnVal == null || returnVal instanceof Void) {
                                 rmrm(callbackRcv, callbackMsg, (Object) null,
