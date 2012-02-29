@@ -5,6 +5,7 @@ import java.util.Arrays;
 import junit.framework.TestCase;
 
 import com.clark.ifk.IFK;
+import com.clark.ifk.IFKFactory;
 import com.clark.ifk.Message;
 import com.clark.ifk.Messenger;
 
@@ -126,7 +127,7 @@ public class IFKTestCase extends TestCase {
         }
     }
 
-    private IFK ifk = IFK.getInstance();
+    private IFK ifk = IFKFactory.getInstance();
 
     @Override
     protected void tearDown() throws Exception {
