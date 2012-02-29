@@ -13,7 +13,7 @@ public class IFKTestCase extends TestCase {
 
     static class TestClass {
 
-        static boolean[] callTable = new boolean[7];
+        static boolean[] callTable = new boolean[8];
 
         @Messenger("staticMethod1")
         static Object staticMethod1(Message message) {
@@ -62,6 +62,13 @@ public class IFKTestCase extends TestCase {
             System.out.println("IFKTestCase.TestClass.staticMethod11()");
             System.out.println(message);
             callTable[6] = true;
+        }
+
+        @Messenger({ "instanceMethod1", "instanceMethod2" })
+        void instanceMethod12(Message message) {
+            System.out.println("IFKTestCase.TestClass.instanceMethod12()");
+            System.out.println(message);
+            callTable[7] = true;
         }
 
         static void clear() {
@@ -71,7 +78,7 @@ public class IFKTestCase extends TestCase {
 
     static class TestClass2 {
 
-        static boolean[] callTable = new boolean[7];
+        static boolean[] callTable = new boolean[8];
 
         @Messenger("staticMethod1")
         static Object staticMethod1(Message message) {
@@ -120,6 +127,13 @@ public class IFKTestCase extends TestCase {
             System.out.println("IFKTestCase.TestClass.staticMethod11()");
             System.out.println(message);
             callTable[6] = true;
+        }
+
+        @Messenger({ "instanceMethod1", "instanceMethod2" })
+        void instanceMethod12(Message message) {
+            System.out.println("IFKTestCase.TestClass.instanceMethod12()");
+            System.out.println(message);
+            callTable[7] = true;
         }
 
         static void clear() {
@@ -217,6 +231,102 @@ public class IFKTestCase extends TestCase {
 
         ifk.m("instanceMethod1");
         assertTrue(TestClass.callTable[3]);
+
+        ifk.unregister(testClass);
+    }
+
+    public void testInstanceMultiMethods() throws Exception {
+        TestClass testClass = new TestClass();
+        ifk.register(testClass);
+
+        ifk.m("instanceMethod1");
+        assertTrue(TestClass.callTable[3]);
+        assertTrue(TestClass.callTable[7]);
+
+        ifk.unregister(testClass);
+    }
+
+    public void testInstanceMultiMethods2() throws Exception {
+        TestClass testClass1 = new TestClass();
+        TestClass2 testClass2 = new TestClass2();
+        ifk.register(testClass1);
+        ifk.register(testClass2);
+
+        ifk.m("instanceMethod1");
+        assertTrue(TestClass.callTable[3]);
+        assertTrue(TestClass.callTable[7]);
+        assertTrue(TestClass2.callTable[3]);
+        assertTrue(TestClass2.callTable[7]);
+
+        ifk.unregister(testClass1);
+        ifk.unregister(testClass2);
+    }
+
+    public void testInstanceMultiMethods3() throws Exception {
+        TestClass testClass1 = new TestClass();
+        TestClass2 testClass2 = new TestClass2();
+        ifk.register(testClass1);
+        ifk.register(testClass2);
+
+        ifk.rm(testClass1, "instanceMethod1");
+        assertTrue(TestClass.callTable[3]);
+        assertTrue(TestClass.callTable[7]);
+        assertFalse(TestClass2.callTable[3]);
+        assertFalse(TestClass2.callTable[7]);
+
+        ifk.unregister(testClass1);
+        ifk.unregister(testClass2);
+    }
+
+    public void testInstanceMultiMethods4() throws Exception {
+        TestClass testClass1 = new TestClass();
+        TestClass2 testClass2 = new TestClass2();
+        ifk.register(testClass1);
+        ifk.register(testClass2);
+
+        ifk.rm(testClass2, "instanceMethod1");
+        assertFalse(TestClass.callTable[3]);
+        assertFalse(TestClass.callTable[7]);
+        assertTrue(TestClass2.callTable[3]);
+        assertTrue(TestClass2.callTable[7]);
+
+        ifk.unregister(testClass1);
+        ifk.unregister(testClass2);
+    }
+
+    public void testInstanceMethodCallback() throws Exception {
+        TestClass testClass = new TestClass();
+        ifk.register(testClass);
+
+        ifk.mm("instanceMethod2", "instanceMethod1");
+        assertTrue(TestClass.callTable[3]);
+        assertTrue(TestClass.callTable[7]);
+        assertTrue(TestClass.callTable[4]);
+
+        ifk.unregister(testClass);
+    }
+
+    public void testStaticMethodSupportMulti() throws Exception {
+        ifk.register(TestClass.class);
+
+        ifk.m("staticMethod1");
+        assertTrue(TestClass.callTable[6]);
+        TestClass.clear();
+        ifk.m("staticMethod2");
+        assertTrue(TestClass.callTable[6]);
+
+        ifk.unregister(TestClass.class);
+    }
+
+    public void testInstanceMethodSupportMulti() throws Exception {
+        TestClass testClass = new TestClass();
+        ifk.register(testClass);
+
+        ifk.m("instanceMethod1");
+        assertTrue(TestClass.callTable[7]);
+        TestClass.clear();
+        ifk.m("instanceMethod1");
+        assertTrue(TestClass.callTable[7]);
 
         ifk.unregister(testClass);
     }
