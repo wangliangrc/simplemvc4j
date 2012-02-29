@@ -87,7 +87,7 @@ class IFKJavaImpl implements IFK {
                         oplist = new ArrayList<MethodStateHolder>();
                     }
                     oplist.add(holder);
-                    operatorTable.put(ops[j], oplist);
+                    operatorTable.put(ops[j].intern(), oplist);
                 }
             }
         }

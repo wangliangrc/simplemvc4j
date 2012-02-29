@@ -6,10 +6,12 @@ public class Message {
     public final String name;
     public final Type[] args;
     public final Type first;
+    public final boolean empty;
+    public final boolean notEmpty;
 
     Message(String name, Object[] args) {
         super();
-        this.name = name;
+        this.name = name.intern();
         if (args == null) {
             this.args = new Type[0];
             first = Type.NULL;
@@ -28,6 +30,8 @@ public class Message {
                 first = Type.NULL;
             }
         }
+        empty = Type.NULL == first;
+        notEmpty = !empty;
     }
 
     @Override
