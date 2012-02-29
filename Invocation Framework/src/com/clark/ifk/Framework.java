@@ -23,7 +23,7 @@ public class Framework {
         }
 
         List<MethodStateHolder> ms = new ArrayList<MethodStateHolder>();
-        Operator operator = null;
+        Messenger operator = null;
         if (receiver instanceof Class) {
             Class<?> clazz = (Class<?>) receiver;
             Method[] methods = clazz.getDeclaredMethods();
@@ -37,7 +37,7 @@ public class Framework {
                 if (!Modifier.isStatic(modifier)) {
                     continue;
                 }
-                operator = methods[i].getAnnotation(Operator.class);
+                operator = methods[i].getAnnotation(Messenger.class);
                 if (operator == null || operator.value() == null
                         || operator.value().length == 0) {
                     continue;
@@ -74,7 +74,7 @@ public class Framework {
                 if (Modifier.isStatic(modifier)) {
                     continue;
                 }
-                operator = methods[i].getAnnotation(Operator.class);
+                operator = methods[i].getAnnotation(Messenger.class);
                 if (operator == null || operator.value() == null
                         || operator.value().length == 0) {
                     continue;
@@ -116,7 +116,7 @@ public class Framework {
         }
     }
 
-    public final void remove(Object receiver) {
+    public final void unregister(Object receiver) {
         if (receiver == null) {
             return;
         }
@@ -152,16 +152,11 @@ public class Framework {
         callAsync((Object) null, message, (Object) null, (String) null, args);
     }
 
-    public synchronized final void callAsync(final Object receiver,
+    public final void callAsync(final Object receiver,
             final String message, final Object callbackRcv,
             final String callbackMsg, final Object... args) {
         if (executor == null) {
-            new Thread() {
-                public void run() {
-                    callInternal(receiver, message, callbackRcv, callbackMsg,
-                            args);
-                }
-            }.start();
+            callInternal(receiver, message, callbackRcv, callbackMsg, args);
         } else {
             executor.execute(new Runnable() {
 
@@ -174,7 +169,7 @@ public class Framework {
         }
     }
 
-    private void callInternal(Object receiver, String message,
+    private synchronized void callInternal(Object receiver, String message,
             Object callbackRcv, String callbackMsg, Object... args) {
         assert message != null && message.length() > 0;
         if (!operatorTable.containsKey(message)) {
@@ -238,16 +233,24 @@ public class Framework {
     }
 
     private static class MethodStateHolder {
+        /**
+         * receiver 为 null 表示 static 方法，否则是 instance 方法
+         */
         Object receiver;
         Method method;
         String[] operations;
 
+        /**
+         * receiver 和 method 唯一确定一个 MethodStateHolder 实例
+         */
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
             result = prime * result
                     + ((method == null) ? 0 : method.hashCode());
+            result = prime * result
+                    + ((receiver == null) ? 0 : receiver.hashCode());
             return result;
         }
 
@@ -264,6 +267,11 @@ public class Framework {
                 if (other.method != null)
                     return false;
             } else if (!method.equals(other.method))
+                return false;
+            if (receiver == null) {
+                if (other.receiver != null)
+                    return false;
+            } else if (!receiver.equals(other.receiver))
                 return false;
             return true;
         }
