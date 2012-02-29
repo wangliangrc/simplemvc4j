@@ -206,4 +206,17 @@ public class IFKTestCase extends TestCase {
         ifk.unregister(TestClass.class);
         ifk.unregister(TestClass2.class);
     }
+
+    public void testInstanceRegister() throws Exception {
+        ifk.m("instanceMethod1");
+        assertFalse(TestClass.callTable[3]);
+
+        TestClass testClass = new TestClass();
+        ifk.register(testClass);
+
+        ifk.m("instanceMethod1");
+        assertTrue(TestClass.callTable[3]);
+
+        ifk.unregister(testClass);
+    }
 }

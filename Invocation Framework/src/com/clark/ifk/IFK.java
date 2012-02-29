@@ -53,8 +53,13 @@ public class IFK {
 
         List<MethodStateHolder> ms = new ArrayList<MethodStateHolder>();
         Messenger operator = null;
+        Class<?> clazz = null;
         // if (receiver instanceof Class) {
-        Class<?> clazz = (Class<?>) receiver;
+        if (receiver instanceof Class) {
+            clazz = (Class<?>) receiver;
+        } else {
+            clazz = receiver.getClass();
+        }
         Method[] methods = clazz.getDeclaredMethods();
         if (methods == null) {
             return;
