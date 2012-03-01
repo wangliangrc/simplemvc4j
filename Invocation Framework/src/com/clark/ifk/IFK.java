@@ -1,6 +1,7 @@
 package com.clark.ifk;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 public abstract class IFK {
     private static class Holder {
@@ -37,4 +38,13 @@ public abstract class IFK {
     protected abstract void invokeExecutor(Object receiver, String message,
             ThreadStrategy strategy, Object callbackRcv, String callbackMsg,
             ThreadStrategy callbackStrategy, Object... args);
+
+    public final void close() {
+        if (syncExecutor instanceof ExecutorService) {
+            ((ExecutorService) syncExecutor).shutdown();
+        }
+        if (asyncExecutor instanceof ExecutorService) {
+            ((ExecutorService) asyncExecutor).shutdown();
+        }
+    }
 }

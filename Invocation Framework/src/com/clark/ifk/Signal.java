@@ -2,7 +2,7 @@ package com.clark.ifk;
 
 import java.util.Arrays;
 
-public class Message {
+public class Signal {
     public final String name;
     public final Type[] args;
     public final Type first;
@@ -11,7 +11,7 @@ public class Message {
     private final long invocationTime;
     private final Thread invocationThread;
 
-    Message(String name, Object[] args) {
+    Signal(String name, Object[] args) {
         super();
         this.name = name.intern();
         if (args == null) {

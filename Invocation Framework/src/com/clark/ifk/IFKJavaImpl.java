@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -25,15 +24,21 @@ class IFKJavaImpl extends IFK {
         private final AtomicInteger mCount = new AtomicInteger(1);
 
         public Thread newThread(Runnable r) {
-            return new Thread(r, "IFK Async #" + mCount.getAndIncrement());
+            Thread thread = new Thread(r, "IFK Async #"
+                    + mCount.getAndIncrement());
+            thread.setDaemon(false);
+            return thread;
         }
     };
-    private final Executor DEFAULT_SYNC_EXECUTOR = Executors
-            .newSingleThreadExecutor(new ThreadFactory() {
+    private final Executor DEFAULT_SYNC_EXECUTOR = new ThreadPoolExecutor(1, 1,
+            0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
+            new ThreadFactory() {
 
                 @Override
                 public Thread newThread(Runnable r) {
-                    return new Thread(r, "IFK default Sync Executor");
+                    Thread thread = new Thread(r, "IFK default Sync Executor");
+                    thread.setDaemon(false);
+                    return thread;
                 }
             });
 
@@ -68,7 +73,7 @@ class IFKJavaImpl extends IFK {
         }
 
         List<MethodStateHolder> ms = new ArrayList<MethodStateHolder>();
-        Messenger operator = null;
+        Invoker operator = null;
         int modifier = 0;
         for (int i = 0, len = methods.length; i < len; i++) {
             modifier = methods[i].getModifiers();
@@ -77,18 +82,12 @@ class IFKJavaImpl extends IFK {
                             .isStatic(modifier))) {
                 continue;
             }
-            operator = methods[i].getAnnotation(Messenger.class);
+            operator = methods[i].getAnnotation(Invoker.class);
             if (operator == null || operator.value() == null
                     || operator.value().length == 0) {
                 continue;
             }
             if (verifyMethodFail(methods[i])) {
-                StringBuilder error = new StringBuilder();
-                error.append(methods[i].getDeclaringClass().getCanonicalName());
-                error.append(".");
-                error.append(methods[i].getName());
-                error.append(" 不符合格式！");
-                System.err.println(error);
                 continue;
             }
             MethodStateHolder holder = new MethodStateHolder();
@@ -120,8 +119,31 @@ class IFKJavaImpl extends IFK {
 
     private boolean verifyMethodFail(Method method) {
         Class<?>[] parameterTypes = method.getParameterTypes();
-        return parameterTypes == null || parameterTypes.length != 1
-                || parameterTypes[0] != Message.class;
+        String methodName = null;
+        if (Modifier.isStatic(method.getModifiers())) {
+            methodName = method.getDeclaringClass().getCanonicalName() + "."
+                    + method.getName();
+        } else {
+            methodName = method.getDeclaringClass().getCanonicalName() + "#"
+                    + method.getName();
+        }
+        if (parameterTypes == null || parameterTypes.length == 0) {
+            System.err.println(methodName + " 方法没有参数，不符合格式");
+            return true;
+        }
+
+        if (parameterTypes.length != 1) {
+            System.out.println(methodName + " 方法参数个数多于 1 个，不符合格式");
+            return true;
+        }
+
+        if (parameterTypes[0] != Signal.class) {
+            System.out.println(methodName + " 方法第一个参数不是 "
+                    + Signal.class.getCanonicalName() + " 类型");
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -133,17 +155,20 @@ class IFKJavaImpl extends IFK {
 
         List<MethodStateHolder> methodlist = null;
         synchronized (receiverTable) {
-            methodlist = receiverTable.remove(receiver);
+            methodlist = receiverTable.get(receiver);
+            receiverTable.remove(receiver);
         }
 
         List<MethodStateHolder> oplist = null;
-        for (MethodStateHolder holder : methodlist) {
-            synchronized (operatorTable) {
-                for (String op : holder.operations) {
-                    oplist = operatorTable.get(op);
-                    oplist.remove(holder);
-                    if (oplist.isEmpty()) {
-                        operatorTable.remove(op);
+        if (methodlist != null) {
+            for (MethodStateHolder holder : methodlist) {
+                synchronized (operatorTable) {
+                    for (String op : holder.operations) {
+                        oplist = operatorTable.get(op);
+                        oplist.remove(holder);
+                        if (oplist.isEmpty()) {
+                            operatorTable.remove(op);
+                        }
                     }
                 }
             }
@@ -228,7 +253,7 @@ class IFKJavaImpl extends IFK {
             public void run() {
                 try {
                     holder.method.setAccessible(true);
-                    final Message msg = new Message(message, args);
+                    final Signal msg = new Signal(message, args);
                     final Object returnVal = holder.method.invoke(
                             holder.receiver instanceof Class ? null
                                     : holder.receiver, msg);
