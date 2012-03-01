@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -36,7 +37,7 @@ class IFKJavaImpl extends IFK {
 
                 @Override
                 public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r, "IFK default Sync Executor");
+                    Thread thread = new Thread(r, "IFK Sync [DEFAULT]");
                     thread.setDaemon(false);
                     return thread;
                 }
@@ -73,7 +74,7 @@ class IFKJavaImpl extends IFK {
             return;
         }
 
-        List<MethodStateHolder> ms = new ArrayList<MethodStateHolder>();
+        List<MethodStateHolder> holders = new ArrayList<MethodStateHolder>();
         Invoker operator = null;
         int modifier = 0;
         for (int i = 0, len = methods.length; i < len; i++) {
@@ -92,28 +93,31 @@ class IFKJavaImpl extends IFK {
                 continue;
             }
             MethodStateHolder holder = new MethodStateHolder();
-            String[] ops = operator.value();
-            holder.operations = ops;
+            String[] invokers = operator.value();
+            holder.operations = invokers;
             holder.method = methods[i];
             holder.receiver = receiver;
             holder.strategy = operator.strategy();
-            ms.add(holder);
+            holders.add(holder);
             List<MethodStateHolder> oplist = null;
-            for (int j = 0, size = ops.length; j < size; j++) {
+            for (int j = 0, size = invokers.length; j < size; j++) {
                 synchronized (operatorTable) {
-                    if (operatorTable.containsKey(ops[j])) {
-                        oplist = operatorTable.get(ops[j]);
+                    if (operatorTable.containsKey(invokers[j])) {
+                        oplist = operatorTable.get(invokers[j]);
                     } else {
                         oplist = new ArrayList<MethodStateHolder>();
                     }
-                    oplist.add(holder);
-                    operatorTable.put(ops[j].intern(), oplist);
+                    // 另一个线程可以在这个时候修改 oplist ？
+                    synchronized (oplist) {
+                        oplist.add(holder);
+                        operatorTable.put(invokers[j].intern(), oplist);
+                    }
                 }
             }
         }
-        if (ms.size() > 0) {
+        if (holders.size() > 0) {
             synchronized (receiverTable) {
-                receiverTable.put(receiver, ms);
+                receiverTable.put(receiver, holders);
             }
         }
     }
@@ -178,7 +182,31 @@ class IFKJavaImpl extends IFK {
                     }
                 }
             }
+        } else {
+            synchronized (operatorTable) {
+                Iterator<List<MethodStateHolder>> holdsIterator = operatorTable
+                        .values().iterator();
+                List<MethodStateHolder> holders = null;
+                Iterator<MethodStateHolder> holdIterator = null;
+                MethodStateHolder holder = null;
+                while (holdsIterator.hasNext()) {
+                    holders = holdsIterator.next();
+                    synchronized (holders) {
+                        holdIterator = holders.iterator();
+                        while (holdIterator.hasNext()) {
+                            holder = holdIterator.next();
+                            if (holder.receiver == receiver) {
+                                holdIterator.remove();
+                            }
+                        }
+                        if (holders.size() == 0) {
+                            holdsIterator.remove();
+                        }
+                    }
+                }
+            }
         }
+
     }
 
     /**
