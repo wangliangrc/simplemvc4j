@@ -1,5 +1,6 @@
 package com.clark.ifk;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -8,21 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-class IFKJavaImpl implements IFK {
+class IFKJavaImpl extends IFK {
     private Map<Object, List<MethodStateHolder>> receiverTable = new HashMap<Object, List<MethodStateHolder>>();
     private Map<String, List<MethodStateHolder>> operatorTable = new HashMap<String, List<MethodStateHolder>>();
-    private Executor executor;
+    private Executor uiExecutor, poolExecutor;
 
-    IFKJavaImpl(Executor executor) {
-        super();
-        this.executor = executor;
+    IFKJavaImpl() {
     }
 
-    /**
-     * (non-Javadoc)
-     * 
-     * @see com.clark.ifk.IFK#register(java.lang.Object)
-     */
     @Override
     public final void register(Object receiver) {
         if (receiver == null) {
@@ -37,7 +31,6 @@ class IFKJavaImpl implements IFK {
         }
 
         Class<?> clazz = null;
-        // if (receiver instanceof Class) {
         if (receiver instanceof Class) {
             clazz = (Class<?>) receiver;
         } else {
@@ -91,54 +84,6 @@ class IFKJavaImpl implements IFK {
                 }
             }
         }
-        // } else {
-        // Class<?> clazz = receiver.getClass();
-        // Method[] methods = clazz.getDeclaredMethods();
-        // if (methods == null) {
-        // return;
-        // }
-        //
-        // int modifier = 0;
-        // for (int i = 0, len = methods.length; i < len; i++) {
-        // modifier = methods[i].getModifiers();
-        // if (Modifier.isStatic(modifier)) {
-        // continue;
-        // }
-        // operator = methods[i].getAnnotation(Messenger.class);
-        // if (operator == null || operator.value() == null
-        // || operator.value().length == 0) {
-        // continue;
-        // }
-        // if (verifyMethodFail(methods[i])) {
-        // StringBuilder error = new StringBuilder();
-        // error.append(methods[i].getDeclaringClass()
-        // .getCanonicalName());
-        // error.append(".");
-        // error.append(methods[i].getName());
-        // error.append(" 不符合格式！");
-        // System.err.println(error);
-        // continue;
-        // }
-        // MethodStateHolder holder = new MethodStateHolder();
-        // String[] ops = operator.value();
-        // holder.operations = ops;
-        // holder.method = methods[i];
-        // holder.receiver = receiver;
-        // ms.add(holder);
-        // List<MethodStateHolder> oplist = null;
-        // for (int j = 0, size = ops.length; j < size; j++) {
-        // synchronized (operatorTable) {
-        // if (operatorTable.containsKey(ops[j])) {
-        // oplist = operatorTable.get(ops[j]);
-        // } else {
-        // oplist = new ArrayList<MethodStateHolder>();
-        // }
-        // oplist.add(holder);
-        // operatorTable.put(ops[j], oplist);
-        // }
-        // }
-        // }
-        // }
         if (ms.size() > 0) {
             synchronized (receiverTable) {
                 receiverTable.put(receiver, ms);
@@ -152,11 +97,6 @@ class IFKJavaImpl implements IFK {
                 || parameterTypes[0] != Message.class;
     }
 
-    /**
-     * (non-Javadoc)
-     * 
-     * @see com.clark.ifk.IFK#unregister(java.lang.Object)
-     */
     @Override
     public final void unregister(Object receiver) {
         if (receiver == null) {
@@ -183,76 +123,128 @@ class IFKJavaImpl implements IFK {
         }
     }
 
-    /**
-     * (non-Javadoc)
-     * 
-     * @see com.clark.ifk.IFK#rm(java.lang.Object, java.lang.String,
-     *      java.lang.Object)
-     */
-    @Override
-    public final void rm(Object receiver, String message, Object... args) {
-        rmrm(receiver, message, (Object) null, (String) null, args);
-    }
+    // public class Invocation {
+    // private Object receiver;
+    // private String rcvMsg;
+    // private boolean rcvRunOnUi = true;
+    // private Object callbackRcv;
+    // private String callbackMsg;
+    // private boolean callbackRunOnUi = true;
+    // private Object[] args;
+    //
+    // Invocation(String rcvMsg) {
+    // assert rcvMsg != null && rcvMsg.length() > 0;
+    // this.rcvMsg = rcvMsg;
+    // }
+    //
+    // public Invocation receiver(Object receiver) {
+    // this.receiver = receiver;
+    // return this;
+    // }
+    //
+    // public Invocation runOnUi(boolean runOnUi) {
+    // rcvRunOnUi = runOnUi;
+    // return this;
+    // }
+    //
+    // public Invocation arguments(Object... args) {
+    // if (args == null) {
+    // this.args = new Object[] {};
+    // } else {
+    // this.args = args;
+    // }
+    // return this;
+    // }
+    //
+    // public Invocation callbackReceiver(Object receiver) {
+    // callbackRcv = receiver;
+    // return this;
+    // }
+    //
+    // public Invocation callbackMessage(String name) {
+    // callbackMsg = name;
+    // return this;
+    // }
+    //
+    // public Invocation callbackRunOnUi(boolean runOnUi) {
+    // callbackRunOnUi = runOnUi;
+    // return this;
+    // }
+    //
+    // public void invoke() {
+    // IFKJavaImpl.this.invokeRunnable(receiver, rcvMsg, rcvRunOnUi,
+    // callbackRcv, callbackMsg, callbackRunOnUi, args);
+    // }
+    // }
 
     /**
-     * (non-Javadoc)
      * 
-     * @see com.clark.ifk.IFK#m(java.lang.String, java.lang.Object)
+     * @param receiver
+     *            如果是 Class 的实例则调用 static 方法；如果是 instance 则调用 instance 方法；如果为
+     *            null 则调用 static 和 instance 方法。
+     * @param message
+     *            表示 Message 的名字
+     * @param runOnUi
+     * @param callbackRcv
+     *            表示回调 Message 的 receiver
+     * @param callbackMsg
+     *            表示回调 Message 的名字
+     * @param callbackRunOnUi
+     * @param args
+     *            表示 Message 的参数
      */
     @Override
-    public final void m(String message, Object... args) {
-        rmrm((Object) null, message, (Object) null, (String) null, args);
-    }
-
-    /**
-     * (non-Javadoc)
-     * 
-     * @see com.clark.ifk.IFK#rmrm(java.lang.Object, java.lang.String,
-     *      java.lang.Object, java.lang.String, java.lang.Object)
-     */
-    @Override
-    public final void rmrm(final Object receiver, final String msgname,
-            final Object callbackRcv, final String callbackMsg,
+    protected void invokeRunnable(final Object receiver, final String message,
+            boolean runOnUi, final Object callbackRcv,
+            final String callbackMsg, final boolean callbackRunOnUi,
             final Object... args) {
-        if (executor == null) {
-            callInternal(receiver, msgname, callbackRcv, callbackMsg, args);
-        } else {
-            executor.execute(new Runnable() {
+        assert message != null && message.length() > 0;
+        List<MethodStateHolder> temp = null;
+        synchronized (operatorTable) {
+            if (!operatorTable.containsKey(message)) {
+                return;
+            }
+            temp = operatorTable.get(message);
+            if (temp == null || temp.size() == 0) {
+                return;
+            }
+        }
 
+        final List<MethodStateHolder> holders = temp;
+        synchronized (holders) {
+            Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    callInternal(receiver, msgname, callbackRcv, callbackMsg,
-                            args);
+                    invokeInternal(receiver, message, callbackRcv, callbackMsg,
+                            callbackRunOnUi, holders, args);
                 }
-            });
+            };
+
+            if (runOnUi) {
+                if (uiExecutor == null) {
+                    runnable.run();
+                } else {
+                    uiExecutor.execute(runnable);
+                }
+            } else {
+                if (poolExecutor == null) {
+                    runnable.run();
+                } else {
+                    poolExecutor.execute(runnable);
+                }
+            }
         }
     }
 
-    private synchronized void callInternal(Object receiver, String message,
-            Object callbackRcv, String callbackMsg, Object... args) {
-        assert message != null && message.length() > 0;
-        if (!operatorTable.containsKey(message)) {
-            return;
-        }
-
-        List<MethodStateHolder> holders = operatorTable.get(message);
-        Object returnVal = null;
-        Message msg = null;
+    // 处理直接调用逻辑
+    private void invokeInternal(Object receiver, String message,
+            Object callbackRcv, String callbackMsg, boolean callbackRunOnUi,
+            List<MethodStateHolder> holders, Object... args) {
         try {
             if (receiver == null) {
                 for (MethodStateHolder holder : holders) {
-                    holder.method.setAccessible(true);
-                    msg = new Message(message, args);
-                    returnVal = holder.method.invoke(holder.receiver, msg);
-                    if (callbackMsg != null && callbackMsg.length() > 0) {
-                        if (returnVal == null || returnVal instanceof Void) {
-                            rmrm(callbackRcv, callbackMsg, (Object) null,
-                                    (String) null);
-                        } else {
-                            rmrm(callbackRcv, callbackMsg, (Object) null,
-                                    (String) null, returnVal);
-                        }
-                    }
+                    invokeInternal0(message, callbackRcv, callbackMsg,
+                            callbackRunOnUi, holder, args);
                 }
             } else {
                 if (receiver instanceof Class) {
@@ -262,19 +254,8 @@ class IFKJavaImpl implements IFK {
                             continue;
                         }
 
-                        holder.method.setAccessible(true);
-                        msg = new Message(message, args);
-                        // 调用 static 方法第一个参数为 null
-                        returnVal = holder.method.invoke(null, msg);
-                        if (callbackMsg != null && callbackMsg.length() > 0) {
-                            if (returnVal == null || returnVal instanceof Void) {
-                                rmrm(callbackRcv, callbackMsg, (Object) null,
-                                        (String) null);
-                            } else {
-                                rmrm(callbackRcv, callbackMsg, (Object) null,
-                                        (String) null, returnVal);
-                            }
-                        }
+                        invokeInternal0(message, callbackRcv, callbackMsg,
+                                callbackRunOnUi, holder, args);
                     }
                 } else {
                     for (MethodStateHolder holder : holders) {
@@ -282,18 +263,8 @@ class IFKJavaImpl implements IFK {
                             continue;
                         }
 
-                        holder.method.setAccessible(true);
-                        msg = new Message(message, args);
-                        returnVal = holder.method.invoke(holder.receiver, msg);
-                        if (callbackMsg != null && callbackMsg.length() > 0) {
-                            if (returnVal == null || returnVal instanceof Void) {
-                                rmrm(callbackRcv, callbackMsg, (Object) null,
-                                        (String) null);
-                            } else {
-                                rmrm(callbackRcv, callbackMsg, (Object) null,
-                                        (String) null, returnVal);
-                            }
-                        }
+                        invokeInternal0(message, callbackRcv, callbackMsg,
+                                callbackRunOnUi, holder, args);
                     }
                 }
             }
@@ -302,65 +273,32 @@ class IFKJavaImpl implements IFK {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.clark.ifk.IFK#rmm(java.lang.Object, java.lang.String,
-     * java.lang.String, java.lang.Object)
-     */
-    @Override
-    public final void rmm(Object receiver, String message, String callbackMsg,
-            Object... args) {
-        rmrm(receiver, message, (Object) null, callbackMsg, args);
+    private void invokeInternal0(String message, Object callbackRcv,
+            String callbackMsg, boolean callbackRunOnUi,
+            MethodStateHolder holder, Object... args)
+            throws IllegalAccessException, InvocationTargetException {
+        holder.method.setAccessible(true);
+        final Message msg = new Message(message, args);
+        final Object returnVal = holder.method.invoke(
+                holder.receiver instanceof Class ? null : holder.receiver, msg);
+        callbackInternal(callbackRcv, callbackMsg, returnVal, callbackRunOnUi);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.clark.ifk.IFK#mrm(java.lang.String, java.lang.Object,
-     * java.lang.String, java.lang.Object)
-     */
-    @Override
-    public final void mrm(String message, Object callbackRcv,
-            String callbackMsg, Object... args) {
-        rmrm((Object) null, message, callbackRcv, callbackMsg, args);
-    }
+    // 处理回调逻辑
+    private void callbackInternal(Object callbackRcv, String callbackMsg,
+            Object returnVal, boolean callbackRunOnUi) {
+        if (callbackMsg == null || callbackMsg.length() == 0) {
+            return;
+        }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.clark.ifk.IFK#mm(java.lang.String, java.lang.String,
-     * java.lang.Object)
-     */
-    @Override
-    public final void mm(String message, String callbackMsg, Object... args) {
-        rmrm((Object) null, message, (Object) null, callbackMsg, args);
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((executor == null) ? 0 : executor.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        IFKJavaImpl other = (IFKJavaImpl) obj;
-        if (executor == null) {
-            if (other.executor != null)
-                return false;
-        } else if (!executor.equals(other.executor))
-            return false;
-        return true;
+        // 回调部分为空，不会循环处理
+        if (returnVal == null || returnVal instanceof Void) {
+            invokeRunnable(callbackRcv, callbackMsg, callbackRunOnUi, null,
+                    null, false);
+        } else {
+            invokeRunnable(callbackRcv, callbackMsg, callbackRunOnUi, null,
+                    null, false, returnVal);
+        }
     }
 
     private static class MethodStateHolder {

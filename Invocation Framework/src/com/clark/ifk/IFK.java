@@ -1,39 +1,39 @@
 package com.clark.ifk;
 
-public interface IFK {
+import java.util.concurrent.Executor;
+
+public abstract class IFK {
+    private static class Holder {
+        static IFK ifk = new IFKJavaImpl();
+    }
+
+    public static IFK getInstance() {
+        return Holder.ifk;
+    }
+
+    protected IFK() {
+    }
+
+    protected Executor uiExecutor, poolExecutor;
+
+    public final void setUiExecutor(Executor uiExecutor) {
+        this.uiExecutor = uiExecutor;
+    }
+
+    public final void setPoolExecutor(Executor poolExecutor) {
+        this.poolExecutor = poolExecutor;
+    }
 
     public abstract void register(Object receiver);
 
     public abstract void unregister(Object receiver);
 
-    public abstract void rm(Object receiver, String message, Object... args);
+    public final Invocation invoker(String msgname) {
+        return new Invocation(this, msgname);
+    }
 
-    public abstract void m(String message, Object... args);
-
-    /**
-     * 
-     * @param receiver
-     *            如果是 Class 的实例则调用 static 方法；如果是 instance 则调用 instance 方法；如果为
-     *            null 则调用 static 和 instance 方法。
-     * @param msgname
-     *            表示 Message 的名字
-     * @param callbackRcv
-     *            表示回调 Message 的 receiver
-     * @param callbackMsg
-     *            表示回调 Message 的名字
-     * @param args
-     *            表示 Message 的参数
-     */
-    public abstract void rmrm(final Object receiver, final String msgname,
-            final Object callbackRcv, final String callbackMsg,
+    protected abstract void invokeRunnable(final Object receiver,
+            final String message, boolean runOnUi, final Object callbackRcv,
+            final String callbackMsg, final boolean callbackRunOnUi,
             final Object... args);
-
-    public abstract void rmm(Object receiver, String message,
-            String callbackMsg, Object... args);
-
-    public abstract void mrm(String message, Object callbackRcv,
-            String callbackMsg, Object... args);
-
-    public abstract void mm(String message, String callbackMsg, Object... args);
-
 }
