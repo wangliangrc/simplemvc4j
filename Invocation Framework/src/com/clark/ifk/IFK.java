@@ -14,14 +14,14 @@ public abstract class IFK {
     protected IFK() {
     }
 
-    protected Executor uiExecutor, poolExecutor;
+    protected Executor syncExecutor, asyncExecutor;
 
-    public final void setUiExecutor(Executor uiExecutor) {
-        this.uiExecutor = uiExecutor;
+    public final void setSyncExecutor(Executor sync) {
+        this.syncExecutor = sync;
     }
 
-    public final void setPoolExecutor(Executor poolExecutor) {
-        this.poolExecutor = poolExecutor;
+    public final void setAsyncExecutor(Executor async) {
+        this.asyncExecutor = async;
     }
 
     public abstract void register(Object receiver);
@@ -32,7 +32,7 @@ public abstract class IFK {
         return new Invocation(this, msgname);
     }
 
-    protected abstract void invokeRunnable(final Object receiver,
+    protected abstract void invokeExecutor(final Object receiver,
             final String message, boolean runOnUi, final Object callbackRcv,
             final String callbackMsg, final boolean callbackRunOnUi,
             final Object... args);

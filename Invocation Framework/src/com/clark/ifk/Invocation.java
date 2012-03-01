@@ -21,8 +21,13 @@ public class Invocation {
         return this;
     }
 
-    public Invocation runOnUi(boolean runOnUi) {
-        rcvRunOnUi = runOnUi;
+    public Invocation sync() {
+        rcvRunOnUi = true;
+        return this;
+    }
+
+    public Invocation async() {
+        rcvRunOnUi = false;
         return this;
     }
 
@@ -45,13 +50,18 @@ public class Invocation {
         return this;
     }
 
-    public Invocation callbackRunOnUi(boolean runOnUi) {
-        callbackRunOnUi = runOnUi;
+    public Invocation callbackSync() {
+        callbackRunOnUi = true;
+        return this;
+    }
+
+    public Invocation callbackAsync() {
+        callbackRunOnUi = false;
         return this;
     }
 
     public void invoke() {
-        ifk.invokeRunnable(receiver, rcvMsg, rcvRunOnUi, callbackRcv,
+        ifk.invokeExecutor(receiver, rcvMsg, rcvRunOnUi, callbackRcv,
                 callbackMsg, callbackRunOnUi, args);
     }
 }
