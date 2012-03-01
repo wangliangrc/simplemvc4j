@@ -8,6 +8,7 @@ public class Message {
     public final Type first;
     public final boolean empty;
     public final boolean notEmpty;
+    public final long invocationTime;
 
     Message(String name, Object[] args) {
         super();
@@ -32,12 +33,17 @@ public class Message {
         }
         empty = Type.NULL == first;
         notEmpty = !empty;
+        invocationTime = System.currentTimeMillis();
     }
 
     @Override
     public String toString() {
-        return "Message [name=" + name + ", args=" + Arrays.toString(args)
-                + ", first=" + first + "]";
+        StringBuilder builder = new StringBuilder();
+        builder.append("Message [name=").append(name).append(", args=")
+                .append(Arrays.toString(args)).append(", first=").append(first)
+                .append(", empty=").append(empty).append(", invocationTime=")
+                .append(invocationTime).append("]");
+        return builder.toString();
     }
 
 }
