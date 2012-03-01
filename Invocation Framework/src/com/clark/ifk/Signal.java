@@ -8,6 +8,8 @@ public class Signal {
     public final Type first;
     public final boolean empty;
     public final boolean notEmpty;
+    public final boolean exceptionOccur;
+    public final Throwable throwable;
     private final long invocationTime;
     private final Thread invocationThread;
 
@@ -34,6 +36,8 @@ public class Signal {
         }
         empty = Type.NULL == first;
         notEmpty = !empty;
+        exceptionOccur = first.toObject() instanceof Throwable;
+        throwable = (Throwable) (exceptionOccur ? first.toObject() : null);
         invocationTime = System.currentTimeMillis();
         invocationThread = Thread.currentThread();
     }

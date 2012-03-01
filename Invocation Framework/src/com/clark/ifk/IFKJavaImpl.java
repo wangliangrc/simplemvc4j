@@ -1,5 +1,6 @@
 package com.clark.ifk;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -138,12 +139,12 @@ class IFKJavaImpl extends IFK {
         }
 
         if (parameterTypes.length != 1) {
-            System.out.println(methodName + " 方法参数个数多于 1 个，不符合格式");
+            System.err.println(methodName + " 方法参数个数多于 1 个，不符合格式");
             return true;
         }
 
         if (parameterTypes[0] != Signal.class) {
-            System.out.println(methodName + " 方法第一个参数不是 "
+            System.err.println(methodName + " 方法第一个参数不是 "
                     + Signal.class.getCanonicalName() + " 类型");
             return true;
         }
@@ -285,17 +286,25 @@ class IFKJavaImpl extends IFK {
             final MethodStateHolder holder, final Object... args) {
         Runnable runnable = new Runnable() {
             public void run() {
+                Object returnVal = null;
                 try {
                     holder.method.setAccessible(true);
                     final Signal msg = new Signal(message, args);
-                    final Object returnVal = holder.method.invoke(
+                    returnVal = holder.method.invoke(
                             holder.receiver instanceof Class ? null
                                     : holder.receiver, msg);
-                    invokeCallback(callbackRcv, callbackMsg, returnVal,
-                            callbackStrategy);
-                } catch (Exception e) {
+                } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
+                } catch (InvocationTargetException e) {
+                    returnVal = e.getCause();
+                    if (returnVal instanceof RuntimeException) {
+                        throw (RuntimeException) returnVal;
+                    }
+                } catch (RuntimeException e) {
+                    throw e;
                 }
+                invokeCallback(callbackRcv, callbackMsg, returnVal,
+                        callbackStrategy);
             }
         };
 
@@ -359,6 +368,10 @@ class IFKJavaImpl extends IFK {
                 }
                 invokeExecutor(callbackRcv, callbackMsg, callbackStrategy,
                         null, null, ThreadStrategy.DEFAULT, dest);
+            } else if (returnVal instanceof Type) {
+                invokeExecutor(callbackRcv, callbackMsg, callbackStrategy,
+                        null, null, ThreadStrategy.DEFAULT,
+                        ((Type) returnVal).toObject());
             } else {
                 invokeExecutor(callbackRcv, callbackMsg, callbackStrategy,
                         null, null, ThreadStrategy.DEFAULT, returnVal);
