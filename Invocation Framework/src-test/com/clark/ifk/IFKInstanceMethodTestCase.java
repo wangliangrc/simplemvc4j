@@ -42,6 +42,14 @@ public class IFKInstanceMethodTestCase extends TestCase {
             System.out.println("\tIFKInstanceMethodTestCase.A.supportAll()");
             System.out.println("\t" + message);
         }
+
+        @Messenger("测试参数传递和回调")
+        Object callback(Message message) {
+            System.out.println("..................................");
+            System.out.println("\tIFKInstanceMethodTestCase.A.callback()");
+            System.out.println("\t" + message);
+            return message.args;
+        }
     }
 
     public void testSingleInvocation() throws Exception {
@@ -64,5 +72,15 @@ public class IFKInstanceMethodTestCase extends TestCase {
         System.out.println("两个响应");
         ifk.invoker("multiple").invoke();
         ifk.unregister(a);
+    }
+
+    public void testCallback() throws Exception {
+        ifk.register(a);
+        ifk.register(A.class);
+        ifk.invoker("测试参数传递和回调")
+                .arguments(false, (byte) 1, (short) 1, '好', 1, 1L, 1.f, 1.,
+                        "^_^").callbackMessage("single").invoke();
+        ifk.unregister(a);
+        ifk.unregister(A.class);
     }
 }

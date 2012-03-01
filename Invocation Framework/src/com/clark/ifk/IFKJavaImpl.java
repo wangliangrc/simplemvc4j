@@ -309,8 +309,14 @@ class IFKJavaImpl extends IFK {
                 invokeRunnable(callbackRcv, callbackMsg, callbackRunOnUi, null,
                         null, false, dest);
             } else if (returnVal instanceof Object[]) {
+                final Object[] dest = (Object[]) returnVal;
+                for (int i = 0, len = dest.length; i < len; i++) {
+                    if (dest[i] instanceof Type) {
+                        dest[i] = ((Type) dest[i]).toObject();
+                    }
+                }
                 invokeRunnable(callbackRcv, callbackMsg, callbackRunOnUi, null,
-                        null, false, (Object[]) returnVal);
+                        null, false, dest);
             } else {
                 invokeRunnable(callbackRcv, callbackMsg, callbackRunOnUi, null,
                         null, false, returnVal);
