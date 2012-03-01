@@ -48,6 +48,14 @@ public class IFKStaticMethodTestCase extends TestCase {
             System.out.println("\tIFKStaticMethodTestCase.A.supportAll()");
             System.out.println("\t" + message);
         }
+
+        @Messenger("测试参数传递和回调")
+        static Object callback(Message message) {
+            System.out.println("..................................");
+            System.out.println("\tIFKStaticMethodTestCase.A.callback()");
+            System.out.println("\t" + message);
+            return message.args;
+        }
     }
 
     public void testSingleInvocation() throws Exception {
@@ -93,4 +101,14 @@ public class IFKStaticMethodTestCase extends TestCase {
         ifk.unregister(A.class);
     }
 
+    public void testCallback() throws Exception {
+        ifk.register(A.class);
+        A a = new A();
+        ifk.register(a);
+        ifk.invoker("测试参数传递和回调")
+                .arguments(false, (byte) 1, (short) 1, '好', 1, 1L, 1.f, 1.,
+                        "^_^").callbackMessage("single").invoke();
+        ifk.unregister(a);
+        ifk.unregister(A.class);
+    }
 }
