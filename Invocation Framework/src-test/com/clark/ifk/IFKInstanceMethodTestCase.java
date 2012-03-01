@@ -61,6 +61,8 @@ public class IFKInstanceMethodTestCase extends TestCase {
         ifk.register(A.class);
         System.out.println("注册 A 后 static 和 instance 都可以被触发");
         ifk.invoker("single").invoke();
+
+        Thread.sleep(2000);
         ifk.unregister(A.class);
         ifk.unregister(a);
         System.out.println("注销之后什么也不会触发");
@@ -71,6 +73,7 @@ public class IFKInstanceMethodTestCase extends TestCase {
         ifk.register(a);
         System.out.println("两个响应");
         ifk.invoker("multiple").invoke();
+        Thread.sleep(2000);
         ifk.unregister(a);
     }
 
@@ -80,6 +83,7 @@ public class IFKInstanceMethodTestCase extends TestCase {
         ifk.invoker("测试参数传递和回调")
                 .arguments(false, (byte) 1, (short) 1, '好', 1, 1L, 1.f, 1.,
                         "^_^").callbackSignal("single").invoke();
+        Thread.sleep(2000);
         ifk.unregister(a);
         ifk.unregister(A.class);
     }

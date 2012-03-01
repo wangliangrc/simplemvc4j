@@ -41,7 +41,7 @@ class IFKJavaImpl extends IFK {
                     return thread;
                 }
             });
-    private static final boolean DEBUG_WITHOUT_THREAD = true;
+    private static final boolean DEBUG_WITHOUT_THREAD = false;
 
     IFKJavaImpl() {
         asyncExecutor = new ThreadPoolExecutor(5, 64, 1, TimeUnit.SECONDS,
@@ -166,9 +166,14 @@ class IFKJavaImpl extends IFK {
                 synchronized (operatorTable) {
                     for (String op : holder.operations) {
                         oplist = operatorTable.get(op);
-                        oplist.remove(holder);
-                        if (oplist.isEmpty()) {
-                            operatorTable.remove(op);
+                        if (oplist == null) {
+                            continue;
+                        }
+                        synchronized (oplist) {
+                            oplist.remove(holder);
+                            if (oplist.isEmpty()) {
+                                operatorTable.remove(op);
+                            }
                         }
                     }
                 }
@@ -197,18 +202,18 @@ class IFKJavaImpl extends IFK {
             ThreadStrategy strategy, Object callbackRcv, String callbackMsg,
             ThreadStrategy callbackStrategy, Object... args) {
         assert message != null && message.length() > 0;
-        List<MethodStateHolder> temp = null;
+        List<MethodStateHolder> holders = null;
         synchronized (operatorTable) {
             if (!operatorTable.containsKey(message)) {
                 return;
             }
-            temp = operatorTable.get(message);
-            if (temp == null || temp.size() == 0) {
+            holders = operatorTable.get(message);
+            if (holders == null || holders.size() == 0) {
                 return;
             }
         }
         fillterReceivers(receiver, message, strategy, callbackRcv, callbackMsg,
-                callbackStrategy, temp, args);
+                callbackStrategy, holders, args);
     }
 
     private void fillterReceivers(Object receiver, String message,

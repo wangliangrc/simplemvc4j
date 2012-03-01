@@ -29,6 +29,11 @@ public abstract class IFK {
 
     public abstract void register(Object receiver);
 
+    /**
+     * 注意：如果你在执行异步任务时注销，则运行过程中可能出现任务注册方法移除的情况？！
+     * 
+     * @param receiver
+     */
     public abstract void unregister(Object receiver);
 
     public final Invocation invoker(String msgname) {

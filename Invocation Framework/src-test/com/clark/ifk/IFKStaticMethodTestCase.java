@@ -78,6 +78,7 @@ public class IFKStaticMethodTestCase extends TestCase {
         System.out.println("一个响应，instance 的");
         ifk.invoker("single").receiver(a).invoke();
 
+        Thread.sleep(2000);
         ifk.unregister(a);
         ifk.unregister(A.class);
 
@@ -90,6 +91,7 @@ public class IFKStaticMethodTestCase extends TestCase {
         ifk.register(A.class);
         System.out.println("两个响应，static 的");
         ifk.invoker("multiple").invoke();
+        Thread.sleep(2000);
         ifk.unregister(A.class);
     }
 
@@ -98,6 +100,7 @@ public class IFKStaticMethodTestCase extends TestCase {
         System.out.println("两种响应");
         ifk.invoker("supportMulti1").invoke();
         ifk.invoker("supportMulti2").invoke();
+        Thread.sleep(2000);
         ifk.unregister(A.class);
     }
 
@@ -108,6 +111,7 @@ public class IFKStaticMethodTestCase extends TestCase {
         ifk.invoker("测试参数传递和回调")
                 .arguments(false, (byte) 1, (short) 1, '好', 1, 1L, 1.f, 1.,
                         "^_^").callbackSignal("single").invoke();
+        Thread.sleep(2000);
         ifk.unregister(a);
         ifk.unregister(A.class);
     }
