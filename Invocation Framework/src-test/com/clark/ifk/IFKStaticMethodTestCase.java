@@ -7,54 +7,54 @@ public class IFKStaticMethodTestCase extends TestCase {
 
     static class A {
 
-        @Messenger("single")
-        static void single(Message message) {
+        @Invoker("single")
+        static void single(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.single()");
-            System.out.println("\t" + message);
+            System.out.println("\t" + signal);
         }
 
-        @Messenger("single")
-        void instanceSingle(Message message) {
+        @Invoker("single")
+        void instanceSingle(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.instanceSingle()");
-            System.out.println("\t" + message);
+            System.out.println("\t" + signal);
         }
 
-        @Messenger("multiple")
-        static void multiple1(Message message) {
+        @Invoker("multiple")
+        static void multiple1(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.multiple1()");
-            System.out.println("\t" + message);
+            System.out.println("\t" + signal);
         }
 
-        @Messenger("multiple")
-        static void multiple2(Message message) {
+        @Invoker("multiple")
+        static void multiple2(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.multiple2()");
-            System.out.println("\t" + message);
+            System.out.println("\t" + signal);
         }
 
-        @Messenger({ "supportMulti1", "supportMulti2" })
-        static void supportMulti(Message message) {
+        @Invoker({ "supportMulti1", "supportMulti2" })
+        static void supportMulti(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.supportMulti()");
-            System.out.println("\t" + message);
+            System.out.println("\t" + signal);
         }
 
-        @Messenger({ "single", "multiple", "supportMulti1", "supportMulti2" })
-        static void supportAll(Message message) {
+        @Invoker({ "single", "multiple", "supportMulti1", "supportMulti2" })
+        static void supportAll(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.supportAll()");
-            System.out.println("\t" + message);
+            System.out.println("\t" + signal);
         }
 
-        @Messenger("测试参数传递和回调")
-        static Object callback(Message message) {
+        @Invoker("测试参数传递和回调")
+        static Object callback(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.callback()");
-            System.out.println("\t" + message);
-            return message.args;
+            System.out.println("\t" + signal);
+            return signal.args;
         }
     }
 
@@ -107,7 +107,7 @@ public class IFKStaticMethodTestCase extends TestCase {
         ifk.register(a);
         ifk.invoker("测试参数传递和回调")
                 .arguments(false, (byte) 1, (short) 1, '好', 1, 1L, 1.f, 1.,
-                        "^_^").callbackMessage("single").invoke();
+                        "^_^").callbackSignal("single").invoke();
         ifk.unregister(a);
         ifk.unregister(A.class);
     }

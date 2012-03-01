@@ -2,18 +2,18 @@ package com.clark.ifk;
 
 public class Invocation {
     private Object receiver;
-    private String rcvMsg;
+    private String rcvSignal;
     private ThreadStrategy rcvStrategy = ThreadStrategy.DEFAULT;
     private Object callbackRcv;
-    private String callbackMsg;
+    private String callbackSgl;
     private ThreadStrategy callbackStrategy = ThreadStrategy.DEFAULT;
     private Object[] args;
     private IFK ifk;
 
-    Invocation(IFK ifk, String rcvMsg) {
-        assert ifk != null && rcvMsg != null && rcvMsg.length() > 0;
+    Invocation(IFK ifk, String rcvSignal) {
+        assert ifk != null && rcvSignal != null && rcvSignal.length() > 0;
         this.ifk = ifk;
-        this.rcvMsg = rcvMsg;
+        this.rcvSignal = rcvSignal;
     }
 
     public Invocation receiver(Object receiver) {
@@ -45,8 +45,8 @@ public class Invocation {
         return this;
     }
 
-    public Invocation callbackMessage(String name) {
-        callbackMsg = name;
+    public Invocation callbackSignal(String name) {
+        callbackSgl = name;
         return this;
     }
 
@@ -61,7 +61,7 @@ public class Invocation {
     }
 
     public void invoke() {
-        ifk.invokeExecutor(receiver, rcvMsg, rcvStrategy, callbackRcv, callbackMsg,
+        ifk.invokeExecutor(receiver, rcvSignal, rcvStrategy, callbackRcv, callbackSgl,
                 callbackStrategy, args);
     }
 }

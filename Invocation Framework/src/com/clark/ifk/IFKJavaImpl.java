@@ -41,6 +41,7 @@ class IFKJavaImpl extends IFK {
                     return thread;
                 }
             });
+    private static final boolean DEBUG_WITHOUT_THREAD = true;
 
     IFKJavaImpl() {
         asyncExecutor = new ThreadPoolExecutor(5, 64, 1, TimeUnit.SECONDS,
@@ -264,6 +265,11 @@ class IFKJavaImpl extends IFK {
                 }
             }
         };
+
+        if (DEBUG_WITHOUT_THREAD) {
+            runnable.run();
+            return;
+        }
 
         // 传入的参数优先级比较大
         boolean sync = false;

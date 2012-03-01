@@ -8,47 +8,47 @@ public class IFKInstanceMethodTestCase extends TestCase {
 
     static class A {
 
-        @Messenger("single")
-        void single(Message message) {
+        @Invoker("single")
+        void single(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKInstanceMethodTestCase.A.single()");
-            System.out.println("\t" + message);
+            System.out.println("\t" + signal);
         }
 
-        @Messenger("single")
-        static void staticSingle(Message message) {
+        @Invoker("single")
+        static void staticSingle(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKInstanceMethodTestCase.A.staticSingle()");
-            System.out.println("\t" + message);
+            System.out.println("\t" + signal);
         }
 
-        @Messenger("multiple")
-        void multiple1(Message message) {
+        @Invoker("multiple")
+        void multiple1(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKInstanceMethodTestCase.A.multiple1()");
-            System.out.println("\t" + message);
+            System.out.println("\t" + signal);
         }
 
-        @Messenger("multiple")
-        void multiple2(Message message) {
+        @Invoker("multiple")
+        void multiple2(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKInstanceMethodTestCase.A.multiple2()");
-            System.out.println("\t" + message);
+            System.out.println("\t" + signal);
         }
 
-        @Messenger({ "single", "multiple" })
-        void supportAll(Message message) {
+        @Invoker({ "single", "multiple" })
+        void supportAll(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKInstanceMethodTestCase.A.supportAll()");
-            System.out.println("\t" + message);
+            System.out.println("\t" + signal);
         }
 
-        @Messenger("测试参数传递和回调")
-        Object callback(Message message) {
+        @Invoker("测试参数传递和回调")
+        Object callback(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKInstanceMethodTestCase.A.callback()");
-            System.out.println("\t" + message);
-            return message.args;
+            System.out.println("\t" + signal);
+            return signal.args;
         }
     }
 
@@ -79,7 +79,7 @@ public class IFKInstanceMethodTestCase extends TestCase {
         ifk.register(A.class);
         ifk.invoker("测试参数传递和回调")
                 .arguments(false, (byte) 1, (short) 1, '好', 1, 1L, 1.f, 1.,
-                        "^_^").callbackMessage("single").invoke();
+                        "^_^").callbackSignal("single").invoke();
         ifk.unregister(a);
         ifk.unregister(A.class);
     }
