@@ -1,6 +1,5 @@
 package com.clark.ifk;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -8,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -27,6 +28,14 @@ class IFKJavaImpl extends IFK {
             return new Thread(r, "IFK Async #" + mCount.getAndIncrement());
         }
     };
+    private final Executor DEFAULT_SYNC_EXECUTOR = Executors
+            .newSingleThreadExecutor(new ThreadFactory() {
+
+                @Override
+                public Thread newThread(Runnable r) {
+                    return new Thread(r, "IFK default Sync Executor");
+                }
+            });
 
     IFKJavaImpl() {
         asyncExecutor = new ThreadPoolExecutor(5, 64, 1, TimeUnit.SECONDS,
@@ -87,6 +96,7 @@ class IFKJavaImpl extends IFK {
             holder.operations = ops;
             holder.method = methods[i];
             holder.receiver = receiver;
+            holder.strategy = operator.strategy();
             ms.add(holder);
             List<MethodStateHolder> oplist = null;
             for (int j = 0, size = ops.length; j < size; j++) {
@@ -140,60 +150,6 @@ class IFKJavaImpl extends IFK {
         }
     }
 
-    // public class Invocation {
-    // private Object receiver;
-    // private String rcvMsg;
-    // private boolean rcvRunOnUi = true;
-    // private Object callbackRcv;
-    // private String callbackMsg;
-    // private boolean callbackRunOnUi = true;
-    // private Object[] args;
-    //
-    // Invocation(String rcvMsg) {
-    // assert rcvMsg != null && rcvMsg.length() > 0;
-    // this.rcvMsg = rcvMsg;
-    // }
-    //
-    // public Invocation receiver(Object receiver) {
-    // this.receiver = receiver;
-    // return this;
-    // }
-    //
-    // public Invocation runOnUi(boolean runOnUi) {
-    // rcvRunOnUi = runOnUi;
-    // return this;
-    // }
-    //
-    // public Invocation arguments(Object... args) {
-    // if (args == null) {
-    // this.args = new Object[] {};
-    // } else {
-    // this.args = args;
-    // }
-    // return this;
-    // }
-    //
-    // public Invocation callbackReceiver(Object receiver) {
-    // callbackRcv = receiver;
-    // return this;
-    // }
-    //
-    // public Invocation callbackMessage(String name) {
-    // callbackMsg = name;
-    // return this;
-    // }
-    //
-    // public Invocation callbackRunOnUi(boolean runOnUi) {
-    // callbackRunOnUi = runOnUi;
-    // return this;
-    // }
-    //
-    // public void invoke() {
-    // IFKJavaImpl.this.invokeRunnable(receiver, rcvMsg, rcvRunOnUi,
-    // callbackRcv, callbackMsg, callbackRunOnUi, args);
-    // }
-    // }
-
     /**
      * 
      * @param receiver
@@ -211,9 +167,9 @@ class IFKJavaImpl extends IFK {
      *            表示 Message 的参数
      */
     @Override
-    protected void invokeExecutor(final Object receiver, final String message,
-            boolean isSync, final Object callbackRcv, final String callbackMsg,
-            final boolean isCallbackSync, final Object... args) {
+    protected void invokeExecutor(Object receiver, String message,
+            ThreadStrategy strategy, Object callbackRcv, String callbackMsg,
+            ThreadStrategy callbackStrategy, Object... args) {
         assert message != null && message.length() > 0;
         List<MethodStateHolder> temp = null;
         synchronized (operatorTable) {
@@ -225,42 +181,19 @@ class IFKJavaImpl extends IFK {
                 return;
             }
         }
-
-        final List<MethodStateHolder> holders = temp;
-        synchronized (holders) {
-            Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    invokeInternal(receiver, message, callbackRcv, callbackMsg,
-                            isCallbackSync, holders, args);
-                }
-            };
-
-            if (isSync) {
-                if (syncExecutor == null) {
-                    runnable.run();
-                } else {
-                    syncExecutor.execute(runnable);
-                }
-            } else {
-                if (asyncExecutor == null) {
-                    runnable.run();
-                } else {
-                    asyncExecutor.execute(runnable);
-                }
-            }
-        }
+        fillterReceivers(receiver, message, strategy, callbackRcv, callbackMsg,
+                callbackStrategy, temp, args);
     }
 
-    // 处理直接调用逻辑
-    private void invokeInternal(Object receiver, String message,
-            Object callbackRcv, String callbackMsg, boolean callbackRunOnUi,
-            List<MethodStateHolder> holders, Object... args) {
-        try {
+    private void fillterReceivers(Object receiver, String message,
+            ThreadStrategy strategy, Object callbackRcv, String callbackMsg,
+            ThreadStrategy callbackStrategy, List<MethodStateHolder> holders,
+            Object... args) {
+        synchronized (holders) {
             if (receiver == null) {
                 for (MethodStateHolder holder : holders) {
-                    invokeInternal0(message, callbackRcv, callbackMsg,
-                            callbackRunOnUi, holder, args);
+                    invokeInternal(message, callbackRcv, strategy, callbackMsg,
+                            callbackStrategy, holder, args);
                 }
             } else {
                 if (receiver instanceof Class) {
@@ -270,8 +203,8 @@ class IFKJavaImpl extends IFK {
                             continue;
                         }
 
-                        invokeInternal0(message, callbackRcv, callbackMsg,
-                                callbackRunOnUi, holder, args);
+                        invokeInternal(message, callbackRcv, strategy,
+                                callbackMsg, callbackStrategy, holder, args);
                     }
                 } else {
                     for (MethodStateHolder holder : holders) {
@@ -279,53 +212,80 @@ class IFKJavaImpl extends IFK {
                             continue;
                         }
 
-                        invokeInternal0(message, callbackRcv, callbackMsg,
-                                callbackRunOnUi, holder, args);
+                        invokeInternal(message, callbackRcv, strategy,
+                                callbackMsg, callbackStrategy, holder, args);
                     }
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
-    private void invokeInternal0(String message, Object callbackRcv,
-            String callbackMsg, boolean callbackRunOnUi,
-            MethodStateHolder holder, Object... args)
-            throws IllegalAccessException, InvocationTargetException {
-        holder.method.setAccessible(true);
-        final Message msg = new Message(message, args);
-        final Object returnVal = holder.method.invoke(
-                holder.receiver instanceof Class ? null : holder.receiver, msg);
-        callbackInternal(callbackRcv, callbackMsg, returnVal, callbackRunOnUi);
+    private void invokeInternal(final String message, final Object callbackRcv,
+            ThreadStrategy strategy, final String callbackMsg,
+            final ThreadStrategy callbackStrategy,
+            final MethodStateHolder holder, final Object... args) {
+        Runnable runnable = new Runnable() {
+            public void run() {
+                try {
+                    holder.method.setAccessible(true);
+                    final Message msg = new Message(message, args);
+                    final Object returnVal = holder.method.invoke(
+                            holder.receiver instanceof Class ? null
+                                    : holder.receiver, msg);
+                    invokeCallback(callbackRcv, callbackMsg, returnVal,
+                            callbackStrategy);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+
+        // 传入的参数优先级比较大
+        boolean sync = false;
+        if (strategy == ThreadStrategy.DEFAULT) {
+            sync = holder.strategy == ThreadStrategy.DEFAULT
+                    || holder.strategy == ThreadStrategy.SYNCHRONOUS;
+        } else {
+            sync = strategy == ThreadStrategy.SYNCHRONOUS;
+        }
+
+        if (sync) {
+            if (syncExecutor == null) {
+                DEFAULT_SYNC_EXECUTOR.execute(runnable);
+            } else {
+                syncExecutor.execute(runnable);
+            }
+        } else {
+            asyncExecutor.execute(runnable);
+        }
     }
 
     // 处理回调逻辑
-    private void callbackInternal(Object callbackRcv, String callbackMsg,
-            Object returnVal, boolean callbackRunOnUi) {
+    private void invokeCallback(Object callbackRcv, String callbackMsg,
+            Object returnVal, ThreadStrategy callbackStrategy) {
         if (callbackMsg == null || callbackMsg.length() == 0) {
             return;
         }
 
         // 回调部分为空，不会循环处理
         if (returnVal == null || returnVal instanceof Void) {
-            invokeExecutor(callbackRcv, callbackMsg, callbackRunOnUi, null,
-                    null, false);
+            invokeExecutor(callbackRcv, callbackMsg, callbackStrategy, null,
+                    null, ThreadStrategy.DEFAULT);
         } else {
             if (returnVal instanceof Type[]) {
                 // Type 只用于参数转换，不作为参数传递
                 final Type[] src = (Type[]) returnVal;
                 int len = src.length;
                 if (len == 0) {
-                    invokeExecutor(callbackRcv, callbackMsg, callbackRunOnUi,
-                            null, null, false);
+                    invokeExecutor(callbackRcv, callbackMsg, callbackStrategy,
+                            null, null, ThreadStrategy.DEFAULT);
                 }
                 final Object[] dest = new Object[src.length];
                 for (int i = 0; i < len; i++) {
                     dest[i] = src[i].toObject();
                 }
-                invokeExecutor(callbackRcv, callbackMsg, callbackRunOnUi, null,
-                        null, false, dest);
+                invokeExecutor(callbackRcv, callbackMsg, callbackStrategy,
+                        null, null, ThreadStrategy.DEFAULT, dest);
             } else if (returnVal instanceof Object[]) {
                 final Object[] dest = (Object[]) returnVal;
                 for (int i = 0, len = dest.length; i < len; i++) {
@@ -333,11 +293,11 @@ class IFKJavaImpl extends IFK {
                         dest[i] = ((Type) dest[i]).toObject();
                     }
                 }
-                invokeExecutor(callbackRcv, callbackMsg, callbackRunOnUi, null,
-                        null, false, dest);
+                invokeExecutor(callbackRcv, callbackMsg, callbackStrategy,
+                        null, null, ThreadStrategy.DEFAULT, dest);
             } else {
-                invokeExecutor(callbackRcv, callbackMsg, callbackRunOnUi, null,
-                        null, false, returnVal);
+                invokeExecutor(callbackRcv, callbackMsg, callbackStrategy,
+                        null, null, ThreadStrategy.DEFAULT, returnVal);
             }
         }
     }
@@ -349,6 +309,7 @@ class IFKJavaImpl extends IFK {
         Object receiver;
         Method method;
         String[] operations;
+        ThreadStrategy strategy;
 
         /**
          * receiver 和 method 唯一确定一个 MethodStateHolder 实例

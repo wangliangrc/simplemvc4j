@@ -3,10 +3,10 @@ package com.clark.ifk;
 public class Invocation {
     private Object receiver;
     private String rcvMsg;
-    private boolean rcvRunOnUi = true;
+    private ThreadStrategy rcvStrategy = ThreadStrategy.DEFAULT;
     private Object callbackRcv;
     private String callbackMsg;
-    private boolean callbackRunOnUi = true;
+    private ThreadStrategy callbackStrategy = ThreadStrategy.DEFAULT;
     private Object[] args;
     private IFK ifk;
 
@@ -22,12 +22,12 @@ public class Invocation {
     }
 
     public Invocation sync() {
-        rcvRunOnUi = true;
+        rcvStrategy = ThreadStrategy.SYNCHRONOUS;
         return this;
     }
 
     public Invocation async() {
-        rcvRunOnUi = false;
+        rcvStrategy = ThreadStrategy.ASYNCHRONOUS;
         return this;
     }
 
@@ -51,17 +51,17 @@ public class Invocation {
     }
 
     public Invocation callbackSync() {
-        callbackRunOnUi = true;
+        callbackStrategy = ThreadStrategy.SYNCHRONOUS;
         return this;
     }
 
     public Invocation callbackAsync() {
-        callbackRunOnUi = false;
+        callbackStrategy = ThreadStrategy.ASYNCHRONOUS;
         return this;
     }
 
     public void invoke() {
-        ifk.invokeExecutor(receiver, rcvMsg, rcvRunOnUi, callbackRcv,
-                callbackMsg, callbackRunOnUi, args);
+        ifk.invokeExecutor(receiver, rcvMsg, rcvStrategy, callbackRcv, callbackMsg,
+                callbackStrategy, args);
     }
 }

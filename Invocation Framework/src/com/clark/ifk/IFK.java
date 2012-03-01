@@ -21,6 +21,8 @@ public abstract class IFK {
     }
 
     public final void setAsyncExecutor(Executor async) {
+        if (async == null)
+            return;
         this.asyncExecutor = async;
     }
 
@@ -32,8 +34,7 @@ public abstract class IFK {
         return new Invocation(this, msgname);
     }
 
-    protected abstract void invokeExecutor(final Object receiver,
-            final String message, boolean runOnUi, final Object callbackRcv,
-            final String callbackMsg, final boolean callbackRunOnUi,
-            final Object... args);
+    protected abstract void invokeExecutor(Object receiver, String message,
+            ThreadStrategy strategy, Object callbackRcv, String callbackMsg,
+            ThreadStrategy callbackStrategy, Object... args);
 }

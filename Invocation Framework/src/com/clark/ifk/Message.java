@@ -1,6 +1,7 @@
 package com.clark.ifk;
 
 import java.util.Arrays;
+import java.util.Date;
 
 public class Message {
     public final String name;
@@ -8,7 +9,8 @@ public class Message {
     public final Type first;
     public final boolean empty;
     public final boolean notEmpty;
-    public final long invocationTime;
+    private final Date invocationTime;
+    private final Thread invocationThread;
 
     Message(String name, Object[] args) {
         super();
@@ -33,7 +35,8 @@ public class Message {
         }
         empty = Type.NULL == first;
         notEmpty = !empty;
-        invocationTime = System.currentTimeMillis();
+        invocationTime = new Date();
+        invocationThread = Thread.currentThread();
     }
 
     @Override
@@ -41,8 +44,10 @@ public class Message {
         StringBuilder builder = new StringBuilder();
         builder.append("Message [name=").append(name).append(", args=")
                 .append(Arrays.toString(args)).append(", first=").append(first)
-                .append(", empty=").append(empty).append(", invocationTime=")
-                .append(invocationTime).append("]");
+                .append(", empty=").append(empty).append(", notEmpty=")
+                .append(notEmpty).append(", invocationTime=")
+                .append(invocationTime).append(", invocationThread=")
+                .append(invocationThread).append("]");
         return builder.toString();
     }
 

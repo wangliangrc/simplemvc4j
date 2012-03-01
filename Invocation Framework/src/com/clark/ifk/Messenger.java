@@ -9,4 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Messenger {
     String[] value() default {};
+
+    ThreadStrategy strategy() default ThreadStrategy.DEFAULT;
 }
