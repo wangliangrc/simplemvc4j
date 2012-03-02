@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class IFKJavaImpl extends IFK {
-    private Map<Object, List<MethodStateHolder>> receiverTable = new HashMap<Object, List<MethodStateHolder>>();
-    private Map<String, List<MethodStateHolder>> operatorTable = new HashMap<String, List<MethodStateHolder>>();
+    private Map<Object, List<MethodStateHolder>> receiverHolders = new HashMap<Object, List<MethodStateHolder>>();
+    private Map<String, List<MethodStateHolder>> signalHolders = new HashMap<String, List<MethodStateHolder>>();
     private Map<Object, Integer> receiversLevel = new HashMap<Object, Integer>();
 
     private final BlockingQueue<Runnable> sPoolWorkQueue = new LinkedBlockingQueue<Runnable>(
@@ -59,7 +59,7 @@ class IFKJavaImpl extends IFK {
             return;
         }
 
-        if (receiverTable.containsKey(receiver)) {
+        if (receiverHolders.containsKey(receiver)) {
             System.err.println("You have already register receiver: "
                     + receiver);
             return;
@@ -103,23 +103,23 @@ class IFKJavaImpl extends IFK {
             holders.add(holder);
             List<MethodStateHolder> oplist = null;
             for (int j = 0, size = signalNames.length; j < size; j++) {
-                synchronized (operatorTable) {
-                    if (operatorTable.containsKey(signalNames[j])) {
-                        oplist = operatorTable.get(signalNames[j]);
+                synchronized (signalHolders) {
+                    if (signalHolders.containsKey(signalNames[j])) {
+                        oplist = signalHolders.get(signalNames[j]);
                     } else {
                         oplist = new ArrayList<MethodStateHolder>();
                     }
                     // 另一个线程可以在这个时候修改 oplist ？
                     synchronized (oplist) {
                         oplist.add(holder);
-                        operatorTable.put(signalNames[j].intern(), oplist);
+                        signalHolders.put(signalNames[j].intern(), oplist);
                     }
                 }
             }
         }
         if (holders.size() > 0) {
-            synchronized (receiverTable) {
-                receiverTable.put(receiver, holders);
+            synchronized (receiverHolders) {
+                receiverHolders.put(receiver, holders);
             }
             synchronized (receiversLevel) {
                 receiversLevel.put(receiver, level);
@@ -164,9 +164,9 @@ class IFKJavaImpl extends IFK {
         }
 
         List<MethodStateHolder> methodlist = null;
-        synchronized (receiverTable) {
-            methodlist = receiverTable.get(receiver);
-            receiverTable.remove(receiver);
+        synchronized (receiverHolders) {
+            methodlist = receiverHolders.get(receiver);
+            receiverHolders.remove(receiver);
         }
         synchronized (receiversLevel) {
             receiversLevel.remove(receiver);
@@ -175,24 +175,24 @@ class IFKJavaImpl extends IFK {
         List<MethodStateHolder> holdlist = null;
         if (methodlist != null) {
             for (MethodStateHolder holder : methodlist) {
-                synchronized (operatorTable) {
+                synchronized (signalHolders) {
                     for (String op : holder.signalNames) {
-                        holdlist = operatorTable.get(op);
+                        holdlist = signalHolders.get(op);
                         if (holdlist == null) {
                             continue;
                         }
                         synchronized (holdlist) {
                             holdlist.remove(holder);
                             if (holdlist.isEmpty()) {
-                                operatorTable.remove(op);
+                                signalHolders.remove(op);
                             }
                         }
                     }
                 }
             }
         } else {
-            synchronized (operatorTable) {
-                Iterator<List<MethodStateHolder>> holdsIterator = operatorTable
+            synchronized (signalHolders) {
+                Iterator<List<MethodStateHolder>> holdsIterator = signalHolders
                         .values().iterator();
                 List<MethodStateHolder> holders = null;
                 Iterator<MethodStateHolder> holdIterator = null;
@@ -252,49 +252,101 @@ class IFKJavaImpl extends IFK {
         assert interaction.requestMsg.signal != null
                 && interaction.requestMsg.signal.length() > 0;
         List<MethodStateHolder> holders = null;
-        synchronized (operatorTable) {
-            if (!operatorTable.containsKey(interaction.requestMsg.signal)) {
+        List<MethodStateHolder> preparelist = null;
+
+        synchronized (signalHolders) {
+            if (!signalHolders.containsKey(interaction.requestMsg.signal)) {
                 return;
             }
-            holders = operatorTable.get(interaction.requestMsg.signal);
+            holders = signalHolders.get(interaction.requestMsg.signal);
             if (holders == null || holders.size() == 0) {
                 return;
             }
         }
-        fillterReceivers(interaction, holders);
-    }
 
-    private void fillterReceivers(InvocationInteraction interaction,
-            List<MethodStateHolder> holders) {
         synchronized (holders) {
-            if (interaction.requestMsg.receiver == null) {
-                for (MethodStateHolder holder : holders) {
-                    invokeInternal(interaction, holder);
-                }
-            } else {
-                if (interaction.requestMsg.receiver instanceof Class) {
-                    for (MethodStateHolder holder : holders) {
-                        // Class 实例是单例的，所以可以直接使用 == 符号
-                        if (holder.receiver != interaction.requestMsg.receiver) {
-                            continue;
-                        }
+            preparelist = filter(interaction, holders);
+        }
 
-                        invokeInternal(interaction, holder);
-                    }
-                } else {
-                    for (MethodStateHolder holder : holders) {
-                        if (!holder.receiver
-                                .equals(interaction.requestMsg.receiver)) {
-                            continue;
-                        }
-
-                        invokeInternal(interaction, holder);
-                    }
-                }
+        // fillterReceivers(interaction, holders);
+        // 调用每一个过滤后省下来的方法
+        if (preparelist != null && preparelist.size() > 0) {
+            for (MethodStateHolder holder : preparelist) {
+                invokeInternal(interaction, holder);
             }
         }
     }
 
+    /**
+     * 过滤 receiver 和 level
+     * 
+     * @param interaction
+     * @param holders
+     * @return
+     */
+    private List<MethodStateHolder> filter(InvocationInteraction interaction,
+            List<MethodStateHolder> holders) {
+        List<MethodStateHolder> result = new ArrayList<MethodStateHolder>();
+        if (interaction.requestMsg.receiver != null) {
+            int receiverLevel = receiversLevel
+                    .get(interaction.requestMsg.receiver);
+            if (receiverLevel > interaction.requestMsg.signalLevel) {
+                // receiver 的 Level 高于请求 level，请求被拒绝
+                return result;
+            }
+
+            // 过滤 receiver
+            // static 方法
+            if (interaction.requestMsg.receiver instanceof Class) {
+                for (MethodStateHolder holder : holders) {
+                    // Class 实例是单例的，所以可以直接使用 == 符号
+                    if (holder.receiver != interaction.requestMsg.receiver) {
+                        continue;
+                    }
+
+                    filterMethodLevels(interaction, holder);
+                }
+            }
+            // instance 方法
+            else {
+                for (MethodStateHolder holder : holders) {
+                    if (!holder.receiver
+                            .equals(interaction.requestMsg.receiver)) {
+                        continue;
+                    }
+
+                    filterMethodLevels(interaction, holder);
+                }
+            }
+        } else {
+            for (MethodStateHolder holder : holders) {
+                filterMethodLevels(interaction, holder);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 依据单个方法的 level 过滤
+     * 
+     * @param interaction
+     * @param holder
+     */
+    private void filterMethodLevels(InvocationInteraction interaction,
+            MethodStateHolder holder) {
+        if (holder.signalLevel > interaction.requestMsg.signalLevel) {
+            return;
+        }
+
+        invokeInternal(interaction, holder);
+    }
+
+    /**
+     * 真正调用一个方法，期间决定运行线程
+     * 
+     * @param interaction
+     * @param holder
+     */
     private void invokeInternal(final InvocationInteraction interaction,
             final MethodStateHolder holder) {
         Runnable runnable = new Runnable() {
@@ -317,7 +369,7 @@ class IFKJavaImpl extends IFK {
                 } catch (RuntimeException e) {
                     throw e;
                 }
-                invokeCallback(interaction, returnVal);
+                invokeResponse(interaction, returnVal);
             }
         };
 
@@ -346,34 +398,34 @@ class IFKJavaImpl extends IFK {
         }
     }
 
-    // 处理回调逻辑
-    private void invokeCallback(InvocationInteraction interaction,
+    private void invokeResponse(InvocationInteraction interaction,
             Object returnVal) {
         if (interaction.responseMsg.signal == null
                 || interaction.responseMsg.signal.length() == 0) {
             return;
         }
 
-        InvocationInteraction callbackArgument = new InvocationInteraction();
-        callbackArgument.requestMsg = interaction.responseMsg;
+        InvocationInteraction responseInteraction = new InvocationInteraction();
+        // 原来的 response 此时为新的 interaction 的 request
+        responseInteraction.requestMsg = interaction.responseMsg;
 
         // 回调部分为空，不会循环处理
         if (returnVal == null || returnVal instanceof Void) {
-            invokeExecutor(callbackArgument);
+            invokeExecutor(responseInteraction);
         } else {
             if (returnVal instanceof Type[]) {
                 // Type 只用于参数转换，不作为参数传递
                 final Type[] src = (Type[]) returnVal;
                 int len = src.length;
                 if (len == 0) {
-                    invokeExecutor(callbackArgument);
+                    invokeExecutor(responseInteraction);
                 }
                 final Object[] dest = new Object[src.length];
                 for (int i = 0; i < len; i++) {
                     dest[i] = src[i].toObject();
                 }
-                callbackArgument.extra = dest;
-                invokeExecutor(callbackArgument);
+                responseInteraction.extra = dest;
+                invokeExecutor(responseInteraction);
             } else if (returnVal instanceof Object[]) {
                 final Object[] dest = (Object[]) returnVal;
                 for (int i = 0, len = dest.length; i < len; i++) {
@@ -381,15 +433,15 @@ class IFKJavaImpl extends IFK {
                         dest[i] = ((Type) dest[i]).toObject();
                     }
                 }
-                callbackArgument.extra = dest;
-                invokeExecutor(callbackArgument);
+                responseInteraction.extra = dest;
+                invokeExecutor(responseInteraction);
             } else if (returnVal instanceof Type) {
-                callbackArgument.extra = new Object[] { ((Type) returnVal)
+                responseInteraction.extra = new Object[] { ((Type) returnVal)
                         .toObject() };
-                invokeExecutor(callbackArgument);
+                invokeExecutor(responseInteraction);
             } else {
-                callbackArgument.extra = new Object[] { returnVal };
-                invokeExecutor(callbackArgument);
+                responseInteraction.extra = new Object[] { returnVal };
+                invokeExecutor(responseInteraction);
             }
         }
     }
