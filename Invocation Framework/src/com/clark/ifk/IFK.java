@@ -4,6 +4,10 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 public abstract class IFK {
+    public static final int MAX_LEVEL = 1000;
+    public static final int DEFAULT_LEVEL = 500;
+    public static final int MIN_LEVEL = 0;
+
     private static class Holder {
         static IFK ifk = new IFKJavaImpl();
     }
@@ -27,7 +31,13 @@ public abstract class IFK {
         this.asyncExecutor = async;
     }
 
-    public abstract void register(Object receiver);
+    public abstract void register(Object receiver, int level);
+
+    public final void register(Object receiver) {
+        register(receiver, DEFAULT_LEVEL);
+    }
+
+    public abstract void setLevel(Object receiver, int level);
 
     /**
      * 注意：如果你在执行异步任务时注销，则运行过程中可能出现任务注册方法移除的情况？！
@@ -40,9 +50,7 @@ public abstract class IFK {
         return new Invocation(this, msgname);
     }
 
-    protected abstract void invokeExecutor(Object receiver, String message,
-            ThreadStrategy strategy, Object callbackRcv, String callbackMsg,
-            ThreadStrategy callbackStrategy, Object... args);
+    protected abstract void invokeExecutor(InvocationInteraction argument);
 
     public final void close() {
         if (syncExecutor instanceof ExecutorService) {

@@ -1,67 +1,91 @@
 package com.clark.ifk;
 
 public class Invocation {
-    private Object receiver;
-    private String rcvSignal;
-    private ThreadStrategy rcvStrategy = ThreadStrategy.DEFAULT;
-    private Object callbackRcv;
-    private String callbackSgl;
-    private ThreadStrategy callbackStrategy = ThreadStrategy.DEFAULT;
-    private Object[] args;
     private IFK ifk;
+    private InvocationInteraction interaction = new InvocationInteraction();
 
     Invocation(IFK ifk, String rcvSignal) {
         assert ifk != null && rcvSignal != null && rcvSignal.length() > 0;
         this.ifk = ifk;
-        this.rcvSignal = rcvSignal;
+        interaction.requestArg.signal = rcvSignal;
     }
 
     public Invocation receiver(Object receiver) {
-        this.receiver = receiver;
+        interaction.requestArg.receiver = receiver;
+        return this;
+    }
+
+    public Invocation level(int level) {
+        if (level < IFK.MIN_LEVEL || level > IFK.MAX_LEVEL) {
+            throw new IndexOutOfBoundsException("超出Level设置范围");
+        }
+
+        interaction.requestArg.level = level;
         return this;
     }
 
     public Invocation sync() {
-        rcvStrategy = ThreadStrategy.SYNCHRONOUS;
+        interaction.requestArg.strategy = ThreadStrategy.SYNCHRONOUS;
         return this;
     }
 
     public Invocation async() {
-        rcvStrategy = ThreadStrategy.ASYNCHRONOUS;
+        interaction.requestArg.strategy = ThreadStrategy.ASYNCHRONOUS;
         return this;
     }
 
     public Invocation arguments(Object... args) {
         if (args == null) {
-            this.args = new Object[] {};
+            interaction.extra = new Object[] {};
         } else {
-            this.args = args;
+            interaction.extra = args;
         }
         return this;
     }
 
     public Invocation callbackReceiver(Object receiver) {
-        callbackRcv = receiver;
+        interaction.responseArg.receiver = receiver;
         return this;
     }
 
     public Invocation callbackSignal(String name) {
-        callbackSgl = name;
+        interaction.responseArg.signal = name;
+        return this;
+    }
+
+    public Invocation callbackLevel(int level) {
+        if (level < IFK.MIN_LEVEL || level > IFK.MAX_LEVEL) {
+            throw new IndexOutOfBoundsException("超出Level设置范围");
+        }
+
+        interaction.responseArg.level = level;
         return this;
     }
 
     public Invocation callbackSync() {
-        callbackStrategy = ThreadStrategy.SYNCHRONOUS;
+        interaction.responseArg.strategy = ThreadStrategy.SYNCHRONOUS;
         return this;
     }
 
     public Invocation callbackAsync() {
-        callbackStrategy = ThreadStrategy.ASYNCHRONOUS;
+        interaction.responseArg.strategy = ThreadStrategy.ASYNCHRONOUS;
         return this;
     }
 
     public void invoke() {
-        ifk.invokeExecutor(receiver, rcvSignal, rcvStrategy, callbackRcv, callbackSgl,
-                callbackStrategy, args);
+        ifk.invokeExecutor(interaction);
     }
+}
+
+class InvocationInteraction {
+    public Messenger requestArg = new Messenger();
+    public Messenger responseArg = new Messenger();
+    public Object[] extra;
+}
+
+class Messenger {
+    public Object receiver;
+    public String signal;
+    public ThreadStrategy strategy = ThreadStrategy.DEFAULT;
+    public int level = IFK.DEFAULT_LEVEL;
 }
