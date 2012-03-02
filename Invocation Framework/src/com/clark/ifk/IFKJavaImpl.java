@@ -100,6 +100,7 @@ class IFKJavaImpl extends IFK {
             holder.method = methods[i];
             holder.receiver = receiver;
             holder.threadStrategy = invoker.threadStrategy();
+            holder.signalLevel = invoker.signalLevel();
             holders.add(holder);
             List<MethodStateHolder> oplist = null;
             for (int j = 0, size = signalNames.length; j < size; j++) {
@@ -304,7 +305,7 @@ class IFKJavaImpl extends IFK {
                         continue;
                     }
 
-                    filterMethodLevels(interaction, holder);
+                    filterMethodLevels(interaction, holder, result);
                 }
             }
             // instance 方法
@@ -315,12 +316,12 @@ class IFKJavaImpl extends IFK {
                         continue;
                     }
 
-                    filterMethodLevels(interaction, holder);
+                    filterMethodLevels(interaction, holder, result);
                 }
             }
         } else {
             for (MethodStateHolder holder : holders) {
-                filterMethodLevels(interaction, holder);
+                filterMethodLevels(interaction, holder, result);
             }
         }
         return result;
@@ -331,14 +332,16 @@ class IFKJavaImpl extends IFK {
      * 
      * @param interaction
      * @param holder
+     * @param result
      */
     private void filterMethodLevels(InvocationInteraction interaction,
-            MethodStateHolder holder) {
+            MethodStateHolder holder, List<MethodStateHolder> result) {
         if (holder.signalLevel > interaction.requestMsg.signalLevel) {
             return;
         }
 
-        invokeInternal(interaction, holder);
+        result.add(holder);
+        // invokeInternal(interaction, holder);
     }
 
     /**
@@ -354,8 +357,12 @@ class IFKJavaImpl extends IFK {
                 Object returnVal = null;
                 try {
                     holder.method.setAccessible(true);
-                    final Signal msg = new Signal(
-                            interaction.requestMsg.signal, interaction.extra);
+                    SignalProducer producer = new SignalProducer();
+                    producer.signal = interaction.requestMsg.signal;
+                    producer.extra = interaction.extra;
+                    producer.level = interaction.requestMsg.signalLevel;
+
+                    final Signal msg = new Signal(producer);
                     returnVal = holder.method.invoke(
                             holder.receiver instanceof Class ? null
                                     : holder.receiver, msg);
@@ -453,8 +460,8 @@ class IFKJavaImpl extends IFK {
         Object receiver;
         Method method;
         String[] signalNames;
-        ThreadStrategy threadStrategy;
-        int signalLevel;
+        ThreadStrategy threadStrategy = ThreadStrategy.DEFAULT;
+        int signalLevel = IFK.DEFAULT_LEVEL;
 
         /**
          * receiver 和 method 唯一确定一个 MethodStateHolder 实例

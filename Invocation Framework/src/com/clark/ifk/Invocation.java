@@ -24,6 +24,16 @@ public class Invocation {
         return this;
     }
 
+    public Invocation topLevel() {
+        interaction.requestMsg.signalLevel = IFK.MAX_LEVEL;
+        return this;
+    }
+
+    public Invocation lowLevel() {
+        interaction.requestMsg.signalLevel = IFK.MIN_LEVEL;
+        return this;
+    }
+
     public Invocation sync() {
         interaction.requestMsg.threadStrategy = ThreadStrategy.SYNCHRONOUS;
         return this;
@@ -59,6 +69,16 @@ public class Invocation {
         }
 
         interaction.responseMsg.signalLevel = level;
+        return this;
+    }
+
+    public Invocation callbackTopLevel() {
+        interaction.responseMsg.signalLevel = IFK.MAX_LEVEL;
+        return this;
+    }
+
+    public Invocation callbackLowLevel() {
+        interaction.responseMsg.signalLevel = IFK.MIN_LEVEL;
         return this;
     }
 
