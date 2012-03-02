@@ -6,7 +6,7 @@ public class IFKLevelTestCase extends TestCase {
     private IFK ifk = IFK.getInstance();
 
     static class A {
-        @Invoker(value = { "测试 Level" }, signalLevel = 600)
+        @SignalReceiver(value = { "测试 Level" }, signalLevel = 600)
         static void levelTest(Signal signal) {
             System.out.println("IFKLevelTestCase.A.levelTest()");
             System.out.println(signal);

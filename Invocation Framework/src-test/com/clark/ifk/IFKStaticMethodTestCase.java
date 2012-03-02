@@ -7,49 +7,49 @@ public class IFKStaticMethodTestCase extends TestCase {
 
     static class A {
 
-        @Invoker("single")
+        @SignalReceiver("single")
         static void single(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.single()");
             System.out.println("\t" + signal);
         }
 
-        @Invoker("single")
+        @SignalReceiver("single")
         void instanceSingle(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.instanceSingle()");
             System.out.println("\t" + signal);
         }
 
-        @Invoker("multiple")
+        @SignalReceiver("multiple")
         static void multiple1(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.multiple1()");
             System.out.println("\t" + signal);
         }
 
-        @Invoker("multiple")
+        @SignalReceiver("multiple")
         static void multiple2(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.multiple2()");
             System.out.println("\t" + signal);
         }
 
-        @Invoker({ "supportMulti1", "supportMulti2" })
+        @SignalReceiver({ "supportMulti1", "supportMulti2" })
         static void supportMulti(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.supportMulti()");
             System.out.println("\t" + signal);
         }
 
-        @Invoker({ "single", "multiple", "supportMulti1", "supportMulti2" })
+        @SignalReceiver({ "single", "multiple", "supportMulti1", "supportMulti2" })
         static void supportAll(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.supportAll()");
             System.out.println("\t" + signal);
         }
 
-        @Invoker("测试参数传递和回调")
+        @SignalReceiver("测试参数传递和回调")
         static Object callback(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKStaticMethodTestCase.A.callback()");

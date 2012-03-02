@@ -7,14 +7,14 @@ public class IFKExceptionTestCase extends TestCase {
 
     static class A {
 
-        @Invoker("测试异常")
+        @SignalReceiver("测试异常")
         static void exceptionTest(Signal signal) throws Exception {
             System.out.println("IFKExceptionTestCase.A.exceptionTest()");
             System.out.println(signal);
             throw new Exception();
         }
 
-        @Invoker("异常处理")
+        @SignalReceiver("异常处理")
         static void exceptionHandler(Signal signal) {
             System.out.println("IFKExceptionTestCase.A.exceptionHandler()");
             System.out.println(signal);

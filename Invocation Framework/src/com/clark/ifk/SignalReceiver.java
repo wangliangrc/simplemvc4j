@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Invoker {
+public @interface SignalReceiver {
     String[] value() default {};
 
     ThreadStrategy threadStrategy() default ThreadStrategy.DEFAULT;

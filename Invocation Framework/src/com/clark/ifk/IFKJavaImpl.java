@@ -77,7 +77,7 @@ class IFKJavaImpl extends IFK {
         }
 
         List<MethodStateHolder> holders = new ArrayList<MethodStateHolder>();
-        Invoker invoker = null;
+        SignalReceiver invoker = null;
         int modifier = 0;
         for (int i = 0, len = methods.length; i < len; i++) {
             modifier = methods[i].getModifiers();
@@ -86,7 +86,7 @@ class IFKJavaImpl extends IFK {
                             .isStatic(modifier))) {
                 continue;
             }
-            invoker = methods[i].getAnnotation(Invoker.class);
+            invoker = methods[i].getAnnotation(SignalReceiver.class);
             if (invoker == null || invoker.value() == null
                     || invoker.value().length == 0) {
                 continue;

@@ -8,42 +8,42 @@ public class IFKInstanceMethodTestCase extends TestCase {
 
     static class A {
 
-        @Invoker("single")
+        @SignalReceiver("single")
         void single(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKInstanceMethodTestCase.A.single()");
             System.out.println("\t" + signal);
         }
 
-        @Invoker("single")
+        @SignalReceiver("single")
         static void staticSingle(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKInstanceMethodTestCase.A.staticSingle()");
             System.out.println("\t" + signal);
         }
 
-        @Invoker("multiple")
+        @SignalReceiver("multiple")
         void multiple1(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKInstanceMethodTestCase.A.multiple1()");
             System.out.println("\t" + signal);
         }
 
-        @Invoker("multiple")
+        @SignalReceiver("multiple")
         void multiple2(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKInstanceMethodTestCase.A.multiple2()");
             System.out.println("\t" + signal);
         }
 
-        @Invoker({ "single", "multiple" })
+        @SignalReceiver({ "single", "multiple" })
         void supportAll(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKInstanceMethodTestCase.A.supportAll()");
             System.out.println("\t" + signal);
         }
 
-        @Invoker("测试参数传递和回调")
+        @SignalReceiver("测试参数传递和回调")
         Object callback(Signal signal) {
             System.out.println("..................................");
             System.out.println("\tIFKInstanceMethodTestCase.A.callback()");
