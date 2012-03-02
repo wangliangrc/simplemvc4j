@@ -77,7 +77,7 @@ class IFKJavaImpl extends IFK {
         }
 
         List<MethodStateHolder> holders = new ArrayList<MethodStateHolder>();
-        Invoker operator = null;
+        Invoker invoker = null;
         int modifier = 0;
         for (int i = 0, len = methods.length; i < len; i++) {
             modifier = methods[i].getModifiers();
@@ -86,33 +86,33 @@ class IFKJavaImpl extends IFK {
                             .isStatic(modifier))) {
                 continue;
             }
-            operator = methods[i].getAnnotation(Invoker.class);
-            if (operator == null || operator.value() == null
-                    || operator.value().length == 0) {
+            invoker = methods[i].getAnnotation(Invoker.class);
+            if (invoker == null || invoker.value() == null
+                    || invoker.value().length == 0) {
                 continue;
             }
             if (verifyMethodFail(methods[i])) {
                 continue;
             }
             MethodStateHolder holder = new MethodStateHolder();
-            String[] invokers = operator.value();
-            holder.operations = invokers;
+            String[] signalNames = invoker.value();
+            holder.signalNames = signalNames;
             holder.method = methods[i];
             holder.receiver = receiver;
-            holder.strategy = operator.strategy();
+            holder.threadStrategy = invoker.threadStrategy();
             holders.add(holder);
             List<MethodStateHolder> oplist = null;
-            for (int j = 0, size = invokers.length; j < size; j++) {
+            for (int j = 0, size = signalNames.length; j < size; j++) {
                 synchronized (operatorTable) {
-                    if (operatorTable.containsKey(invokers[j])) {
-                        oplist = operatorTable.get(invokers[j]);
+                    if (operatorTable.containsKey(signalNames[j])) {
+                        oplist = operatorTable.get(signalNames[j]);
                     } else {
                         oplist = new ArrayList<MethodStateHolder>();
                     }
                     // 另一个线程可以在这个时候修改 oplist ？
                     synchronized (oplist) {
                         oplist.add(holder);
-                        operatorTable.put(invokers[j].intern(), oplist);
+                        operatorTable.put(signalNames[j].intern(), oplist);
                     }
                 }
             }
@@ -172,18 +172,18 @@ class IFKJavaImpl extends IFK {
             receiversLevel.remove(receiver);
         }
 
-        List<MethodStateHolder> oplist = null;
+        List<MethodStateHolder> holdlist = null;
         if (methodlist != null) {
             for (MethodStateHolder holder : methodlist) {
                 synchronized (operatorTable) {
-                    for (String op : holder.operations) {
-                        oplist = operatorTable.get(op);
-                        if (oplist == null) {
+                    for (String op : holder.signalNames) {
+                        holdlist = operatorTable.get(op);
+                        if (holdlist == null) {
                             continue;
                         }
-                        synchronized (oplist) {
-                            oplist.remove(holder);
-                            if (oplist.isEmpty()) {
+                        synchronized (holdlist) {
+                            holdlist.remove(holder);
+                            if (holdlist.isEmpty()) {
                                 operatorTable.remove(op);
                             }
                         }
@@ -249,14 +249,14 @@ class IFKJavaImpl extends IFK {
      */
     @Override
     protected void invokeExecutor(InvocationInteraction interaction) {
-        assert interaction.requestArg.signal != null
-                && interaction.requestArg.signal.length() > 0;
+        assert interaction.requestMsg.signal != null
+                && interaction.requestMsg.signal.length() > 0;
         List<MethodStateHolder> holders = null;
         synchronized (operatorTable) {
-            if (!operatorTable.containsKey(interaction.requestArg.signal)) {
+            if (!operatorTable.containsKey(interaction.requestMsg.signal)) {
                 return;
             }
-            holders = operatorTable.get(interaction.requestArg.signal);
+            holders = operatorTable.get(interaction.requestMsg.signal);
             if (holders == null || holders.size() == 0) {
                 return;
             }
@@ -267,15 +267,15 @@ class IFKJavaImpl extends IFK {
     private void fillterReceivers(InvocationInteraction interaction,
             List<MethodStateHolder> holders) {
         synchronized (holders) {
-            if (interaction.requestArg.receiver == null) {
+            if (interaction.requestMsg.receiver == null) {
                 for (MethodStateHolder holder : holders) {
                     invokeInternal(interaction, holder);
                 }
             } else {
-                if (interaction.requestArg.receiver instanceof Class) {
+                if (interaction.requestMsg.receiver instanceof Class) {
                     for (MethodStateHolder holder : holders) {
                         // Class 实例是单例的，所以可以直接使用 == 符号
-                        if (holder.receiver != interaction.requestArg.receiver) {
+                        if (holder.receiver != interaction.requestMsg.receiver) {
                             continue;
                         }
 
@@ -284,7 +284,7 @@ class IFKJavaImpl extends IFK {
                 } else {
                     for (MethodStateHolder holder : holders) {
                         if (!holder.receiver
-                                .equals(interaction.requestArg.receiver)) {
+                                .equals(interaction.requestMsg.receiver)) {
                             continue;
                         }
 
@@ -302,8 +302,8 @@ class IFKJavaImpl extends IFK {
                 Object returnVal = null;
                 try {
                     holder.method.setAccessible(true);
-                    final Signal msg = new Signal(interaction.requestArg.signal,
-                            interaction.extra);
+                    final Signal msg = new Signal(
+                            interaction.requestMsg.signal, interaction.extra);
                     returnVal = holder.method.invoke(
                             holder.receiver instanceof Class ? null
                                     : holder.receiver, msg);
@@ -328,11 +328,11 @@ class IFKJavaImpl extends IFK {
 
         // 传入的参数优先级比较大
         boolean sync = false;
-        if (interaction.requestArg.strategy == ThreadStrategy.DEFAULT) {
-            sync = holder.strategy == ThreadStrategy.DEFAULT
-                    || holder.strategy == ThreadStrategy.SYNCHRONOUS;
+        if (interaction.requestMsg.threadStrategy == ThreadStrategy.DEFAULT) {
+            sync = holder.threadStrategy == ThreadStrategy.DEFAULT
+                    || holder.threadStrategy == ThreadStrategy.SYNCHRONOUS;
         } else {
-            sync = interaction.requestArg.strategy == ThreadStrategy.SYNCHRONOUS;
+            sync = interaction.requestMsg.threadStrategy == ThreadStrategy.SYNCHRONOUS;
         }
 
         if (sync) {
@@ -347,14 +347,15 @@ class IFKJavaImpl extends IFK {
     }
 
     // 处理回调逻辑
-    private void invokeCallback(InvocationInteraction interaction, Object returnVal) {
-        if (interaction.responseArg.signal == null
-                || interaction.responseArg.signal.length() == 0) {
+    private void invokeCallback(InvocationInteraction interaction,
+            Object returnVal) {
+        if (interaction.responseMsg.signal == null
+                || interaction.responseMsg.signal.length() == 0) {
             return;
         }
 
         InvocationInteraction callbackArgument = new InvocationInteraction();
-        callbackArgument.requestArg = interaction.responseArg;
+        callbackArgument.requestMsg = interaction.responseMsg;
 
         // 回调部分为空，不会循环处理
         if (returnVal == null || returnVal instanceof Void) {
@@ -395,12 +396,13 @@ class IFKJavaImpl extends IFK {
 
     private static class MethodStateHolder {
         /**
-         * receiver 为 null 表示 static 方法，否则是 instance 方法
+         * receiver 为 Class 实例表示 static 方法，否则是 instance 方法
          */
         Object receiver;
         Method method;
-        String[] operations;
-        ThreadStrategy strategy;
+        String[] signalNames;
+        ThreadStrategy threadStrategy;
+        int signalLevel;
 
         /**
          * receiver 和 method 唯一确定一个 MethodStateHolder 实例

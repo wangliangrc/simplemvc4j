@@ -7,11 +7,11 @@ public class Invocation {
     Invocation(IFK ifk, String rcvSignal) {
         assert ifk != null && rcvSignal != null && rcvSignal.length() > 0;
         this.ifk = ifk;
-        interaction.requestArg.signal = rcvSignal;
+        interaction.requestMsg.signal = rcvSignal;
     }
 
     public Invocation receiver(Object receiver) {
-        interaction.requestArg.receiver = receiver;
+        interaction.requestMsg.receiver = receiver;
         return this;
     }
 
@@ -20,17 +20,17 @@ public class Invocation {
             throw new IndexOutOfBoundsException("超出Level设置范围");
         }
 
-        interaction.requestArg.level = level;
+        interaction.requestMsg.signalLevel = level;
         return this;
     }
 
     public Invocation sync() {
-        interaction.requestArg.strategy = ThreadStrategy.SYNCHRONOUS;
+        interaction.requestMsg.threadStrategy = ThreadStrategy.SYNCHRONOUS;
         return this;
     }
 
     public Invocation async() {
-        interaction.requestArg.strategy = ThreadStrategy.ASYNCHRONOUS;
+        interaction.requestMsg.threadStrategy = ThreadStrategy.ASYNCHRONOUS;
         return this;
     }
 
@@ -44,12 +44,12 @@ public class Invocation {
     }
 
     public Invocation callbackReceiver(Object receiver) {
-        interaction.responseArg.receiver = receiver;
+        interaction.responseMsg.receiver = receiver;
         return this;
     }
 
     public Invocation callbackSignal(String name) {
-        interaction.responseArg.signal = name;
+        interaction.responseMsg.signal = name;
         return this;
     }
 
@@ -58,17 +58,17 @@ public class Invocation {
             throw new IndexOutOfBoundsException("超出Level设置范围");
         }
 
-        interaction.responseArg.level = level;
+        interaction.responseMsg.signalLevel = level;
         return this;
     }
 
     public Invocation callbackSync() {
-        interaction.responseArg.strategy = ThreadStrategy.SYNCHRONOUS;
+        interaction.responseMsg.threadStrategy = ThreadStrategy.SYNCHRONOUS;
         return this;
     }
 
     public Invocation callbackAsync() {
-        interaction.responseArg.strategy = ThreadStrategy.ASYNCHRONOUS;
+        interaction.responseMsg.threadStrategy = ThreadStrategy.ASYNCHRONOUS;
         return this;
     }
 
@@ -78,14 +78,14 @@ public class Invocation {
 }
 
 class InvocationInteraction {
-    public Messenger requestArg = new Messenger();
-    public Messenger responseArg = new Messenger();
+    public Messenger requestMsg = new Messenger();
+    public Messenger responseMsg = new Messenger();
     public Object[] extra;
 }
 
 class Messenger {
     public Object receiver;
     public String signal;
-    public ThreadStrategy strategy = ThreadStrategy.DEFAULT;
-    public int level = IFK.DEFAULT_LEVEL;
+    public ThreadStrategy threadStrategy = ThreadStrategy.DEFAULT;
+    public int signalLevel = IFK.DEFAULT_LEVEL;
 }

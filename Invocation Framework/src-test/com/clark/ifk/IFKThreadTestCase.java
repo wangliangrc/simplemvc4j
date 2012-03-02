@@ -7,7 +7,7 @@ public class IFKThreadTestCase extends TestCase {
 
     static class A {
 
-        @Invoker(value = { "执行任务" }, strategy = ThreadStrategy.ASYNCHRONOUS)
+        @Invoker(value = { "执行任务" }, threadStrategy = ThreadStrategy.ASYNCHRONOUS)
         static void task1(Signal signal) {
             synchronized (System.out) {
                 System.out.println("IFKThreadTestCase.A.task1()");
@@ -15,7 +15,7 @@ public class IFKThreadTestCase extends TestCase {
             }
         }
 
-        @Invoker(value = { "执行任务" }, strategy = ThreadStrategy.ASYNCHRONOUS)
+        @Invoker(value = { "执行任务" }, threadStrategy = ThreadStrategy.ASYNCHRONOUS)
         static void task2(Signal signal) {
             synchronized (System.out) {
                 System.out.println("IFKThreadTestCase.A.task2()");
@@ -23,7 +23,7 @@ public class IFKThreadTestCase extends TestCase {
             }
         }
 
-        @Invoker(value = { "执行任务" }, strategy = ThreadStrategy.ASYNCHRONOUS)
+        @Invoker(value = { "执行任务" }, threadStrategy = ThreadStrategy.ASYNCHRONOUS)
         static void task3(Signal signal) {
             synchronized (System.out) {
                 System.out.println("IFKThreadTestCase.A.task3()");
@@ -31,7 +31,7 @@ public class IFKThreadTestCase extends TestCase {
             }
         }
 
-        @Invoker(value = { "执行任务" }, strategy = ThreadStrategy.ASYNCHRONOUS)
+        @Invoker(value = { "执行任务" }, threadStrategy = ThreadStrategy.ASYNCHRONOUS)
         static void task4(Signal signal) {
             synchronized (System.out) {
                 System.out.println("IFKThreadTestCase.A.task4()");
@@ -39,7 +39,7 @@ public class IFKThreadTestCase extends TestCase {
             }
         }
 
-        @Invoker(value = { "执行任务" }, strategy = ThreadStrategy.ASYNCHRONOUS)
+        @Invoker(value = { "执行任务" }, threadStrategy = ThreadStrategy.ASYNCHRONOUS)
         static void task5(Signal signal) {
             synchronized (System.out) {
                 System.out.println("IFKThreadTestCase.A.task5()");
@@ -47,7 +47,7 @@ public class IFKThreadTestCase extends TestCase {
             }
         }
 
-        @Invoker(value = { "执行任务" }, strategy = ThreadStrategy.ASYNCHRONOUS)
+        @Invoker(value = { "执行任务" }, threadStrategy = ThreadStrategy.ASYNCHRONOUS)
         static void task6(Signal signal) {
             synchronized (System.out) {
                 System.out.println("IFKThreadTestCase.A.task6()");
@@ -57,7 +57,7 @@ public class IFKThreadTestCase extends TestCase {
     }
 
     static class B {
-        @Invoker(value = { "执行任务" }, strategy = ThreadStrategy.SYNCHRONOUS)
+        @Invoker(value = { "执行任务" }, threadStrategy = ThreadStrategy.SYNCHRONOUS)
         static void task1(Signal signal) {
             synchronized (System.out) {
                 System.out.println("IFKThreadTestCase.B.task1()");
@@ -65,7 +65,7 @@ public class IFKThreadTestCase extends TestCase {
             }
         }
 
-        @Invoker(value = { "执行任务" }, strategy = ThreadStrategy.SYNCHRONOUS)
+        @Invoker(value = { "执行任务" }, threadStrategy = ThreadStrategy.SYNCHRONOUS)
         static void task2(Signal signal) {
             synchronized (System.out) {
                 System.out.println("IFKThreadTestCase.B.task2()");
@@ -73,7 +73,7 @@ public class IFKThreadTestCase extends TestCase {
             }
         }
 
-        @Invoker(value = { "执行任务" }, strategy = ThreadStrategy.SYNCHRONOUS)
+        @Invoker(value = { "执行任务" }, threadStrategy = ThreadStrategy.SYNCHRONOUS)
         static void task3(Signal signal) {
             synchronized (System.out) {
                 System.out.println("IFKThreadTestCase.B.task3()");
@@ -81,7 +81,7 @@ public class IFKThreadTestCase extends TestCase {
             }
         }
 
-        @Invoker(value = { "执行任务" }, strategy = ThreadStrategy.SYNCHRONOUS)
+        @Invoker(value = { "执行任务" }, threadStrategy = ThreadStrategy.SYNCHRONOUS)
         static void task4(Signal signal) {
             synchronized (System.out) {
                 System.out.println("IFKThreadTestCase.B.task4()");
@@ -89,7 +89,7 @@ public class IFKThreadTestCase extends TestCase {
             }
         }
 
-        @Invoker(value = { "执行任务" }, strategy = ThreadStrategy.SYNCHRONOUS)
+        @Invoker(value = { "执行任务" }, threadStrategy = ThreadStrategy.SYNCHRONOUS)
         static void task5(Signal signal) {
             synchronized (System.out) {
                 System.out.println("IFKThreadTestCase.B.task5()");
@@ -97,7 +97,7 @@ public class IFKThreadTestCase extends TestCase {
             }
         }
 
-        @Invoker(value = { "执行任务" }, strategy = ThreadStrategy.SYNCHRONOUS)
+        @Invoker(value = { "执行任务" }, threadStrategy = ThreadStrategy.SYNCHRONOUS)
         static void task6(Signal signal) {
             synchronized (System.out) {
                 System.out.println("IFKThreadTestCase.B.task6()");

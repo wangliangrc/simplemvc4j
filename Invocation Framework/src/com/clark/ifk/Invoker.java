@@ -10,5 +10,7 @@ import java.lang.annotation.Target;
 public @interface Invoker {
     String[] value() default {};
 
-    ThreadStrategy strategy() default ThreadStrategy.DEFAULT;
+    ThreadStrategy threadStrategy() default ThreadStrategy.DEFAULT;
+
+    int signalLevel() default IFK.DEFAULT_LEVEL;
 }
