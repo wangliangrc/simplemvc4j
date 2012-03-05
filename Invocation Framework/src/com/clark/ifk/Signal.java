@@ -15,7 +15,6 @@ public class Signal {
     private final Thread invocationThread;
 
     Signal(SignalProducer producer) {
-        super();
         this.name = producer.signal.intern();
         if (producer.extra == null) {
             this.args = new Type[0];
@@ -23,10 +22,10 @@ public class Signal {
         } else {
             this.args = new Type[producer.extra.length];
             for (int i = 0, len = args.length; i < len; i++) {
-                if (args[i] == null) {
+                if (producer.extra[i] == null) {
                     this.args[i] = Type.NULL;
                 } else {
-                    this.args[i] = new Type(args[i]);
+                    this.args[i] = new Type(producer.extra[i]);
                 }
             }
             if (args != null && args.length > 0) {
@@ -35,7 +34,7 @@ public class Signal {
                 first = Type.NULL;
             }
         }
-        empty = Type.NULL == first;
+        empty = args.length == 0;
         notEmpty = !empty;
         exceptionOccur = first.toObject() instanceof Throwable;
         throwable = (Throwable) (exceptionOccur ? first.toObject() : null);

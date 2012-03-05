@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -71,33 +72,37 @@ class IFKJavaImpl extends IFK {
         } else {
             clazz = receiver.getClass();
         }
-        Method[] methods = clazz.getDeclaredMethods();
-        if (methods == null || methods.length == 0) {
+        List<Method> methods = new ArrayList<Method>(Arrays.asList(clazz
+                .getDeclaredMethods()));
+        methods.addAll(Arrays.asList(clazz.getMethods()));
+        if (methods == null || methods.size() == 0) {
             return;
         }
 
         List<MethodStateHolder> holders = new ArrayList<MethodStateHolder>();
         SignalReceiver invoker = null;
         int modifier = 0;
-        for (int i = 0, len = methods.length; i < len; i++) {
-            modifier = methods[i].getModifiers();
+        Method temp = null;
+        for (int i = 0, len = methods.size(); i < len; i++) {
+            temp = methods.get(i);
+            modifier = temp.getModifiers();
             if ((receiver instanceof Class && !Modifier.isStatic(modifier))
                     || (!(receiver instanceof Class) && Modifier
                             .isStatic(modifier))) {
                 continue;
             }
-            invoker = methods[i].getAnnotation(SignalReceiver.class);
+            invoker = temp.getAnnotation(SignalReceiver.class);
             if (invoker == null || invoker.value() == null
                     || invoker.value().length == 0) {
                 continue;
             }
-            if (verifyMethodFail(methods[i])) {
+            if (verifyMethodFail(temp)) {
                 continue;
             }
             MethodStateHolder holder = new MethodStateHolder();
             String[] signalNames = invoker.value();
             holder.signalNames = signalNames;
-            holder.method = methods[i];
+            holder.method = temp;
             holder.receiver = receiver;
             holder.threadStrategy = invoker.threadStrategy();
             holder.signalLevel = invoker.signalLevel();
