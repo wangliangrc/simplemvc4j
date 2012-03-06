@@ -7,11 +7,14 @@ class SimpleLog extends Log {
     }
 
     @Override
-    public void v(CharSequence text) {
-        outputText("[verbose]", text);
+    public void v(boolean debug, CharSequence text) {
+        outputText(debug, "[verbose]", text);
     }
 
-    private void outputText(String type, CharSequence text) {
+    private void outputText(boolean debug, String type, CharSequence text) {
+        if (!debug) {
+            return;
+        }
         text = text == null ? "" : text;
         StringBuilder builder = new StringBuilder();
         builder.append("[").append(type).append("]--").append(getTag())
@@ -20,62 +23,66 @@ class SimpleLog extends Log {
     }
 
     @Override
-    public void v(CharSequence text, Throwable throwable) {
-        outputThrowable("[verbose]", text, throwable);
+    public void v(boolean debug, CharSequence text, Throwable throwable) {
+        outputThrowable(debug, "[verbose]", text, throwable);
     }
 
-    private void outputThrowable(String type, CharSequence text,
+    private void outputThrowable(boolean debug, String type, CharSequence text,
             Throwable throwable) {
+        if (!debug) {
+            return;
+        }
+
         if (throwable == null) {
-            outputText(type, text);
+            outputText(debug, type, text);
             return;
         }
 
         synchronized (System.err) {
             text = text == null ? "" : text;
-            outputText(type, text);
+            outputText(debug, type, text);
             throwable.printStackTrace();
         }
     }
 
     @Override
-    public void d(CharSequence text) {
-        outputText("[debug]", text);
+    void d(boolean debug, CharSequence text) {
+        outputText(debug, "[debug]", text);
     }
 
     @Override
-    public void d(CharSequence text, Throwable throwable) {
-        outputThrowable("[debug]", text, throwable);
+    void d(boolean debug, CharSequence text, Throwable throwable) {
+        outputThrowable(debug, "[debug]", text, throwable);
     }
 
     @Override
-    public void i(CharSequence text) {
-        outputText("[info]", text);
+    void i(boolean debug, CharSequence text) {
+        outputText(debug, "[info]", text);
     }
 
     @Override
-    public void i(CharSequence text, Throwable throwable) {
-        outputThrowable("[info]", text, throwable);
+    void i(boolean debug, CharSequence text, Throwable throwable) {
+        outputThrowable(debug, "[info]", text, throwable);
     }
 
     @Override
-    public void w(CharSequence text) {
-        outputText("[warn]", text);
+    void w(boolean debug, CharSequence text) {
+        outputText(debug, "[warn]", text);
     }
 
     @Override
-    public void w(CharSequence text, Throwable throwable) {
-        outputThrowable("[warn]", text, throwable);
+    void w(boolean debug, CharSequence text, Throwable throwable) {
+        outputThrowable(debug, "[warn]", text, throwable);
     }
 
     @Override
-    public void e(CharSequence text) {
-        outputText("[error]", text);
+    void e(boolean debug, CharSequence text) {
+        outputText(debug, "[error]", text);
     }
 
     @Override
-    public void e(CharSequence text, Throwable throwable) {
-        outputThrowable("[error]", text, throwable);
+    void e(boolean debug, CharSequence text, Throwable throwable) {
+        outputThrowable(debug, "[error]", text, throwable);
     }
 
 }

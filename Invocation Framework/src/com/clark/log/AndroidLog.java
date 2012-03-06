@@ -48,7 +48,10 @@ class AndroidLog extends Log {
     }
 
     @Override
-    public void v(CharSequence text) {
+    void v(boolean debug, CharSequence text) {
+        if (!debug) {
+            return;
+        }
         text = text == null ? "" : text;
         try {
             methods[0][0].invoke(null, getTag(), text.toString());
@@ -62,7 +65,10 @@ class AndroidLog extends Log {
     }
 
     @Override
-    public void v(CharSequence text, Throwable throwable) {
+    void v(boolean debug, CharSequence text, Throwable throwable) {
+        if (!debug) {
+            return;
+        }
         if (throwable == null) {
             v(text);
             return;
@@ -80,7 +86,10 @@ class AndroidLog extends Log {
     }
 
     @Override
-    public void d(CharSequence text) {
+    void d(boolean debug, CharSequence text) {
+        if (!debug) {
+            return;
+        }
         text = text == null ? "" : text;
         try {
             methods[1][0].invoke(null, getTag(), text.toString());
@@ -94,7 +103,10 @@ class AndroidLog extends Log {
     }
 
     @Override
-    public void d(CharSequence text, Throwable throwable) {
+    void d(boolean debug, CharSequence text, Throwable throwable) {
+        if (!debug) {
+            return;
+        }
         if (throwable == null) {
             d(text);
             return;
@@ -112,7 +124,10 @@ class AndroidLog extends Log {
     }
 
     @Override
-    public void i(CharSequence text) {
+    void i(boolean debug, CharSequence text) {
+        if (!debug) {
+            return;
+        }
         text = text == null ? "" : text;
         try {
             methods[2][0].invoke(null, getTag(), text.toString());
@@ -126,7 +141,10 @@ class AndroidLog extends Log {
     }
 
     @Override
-    public void i(CharSequence text, Throwable throwable) {
+    void i(boolean debug, CharSequence text, Throwable throwable) {
+        if (!debug) {
+            return;
+        }
         if (throwable == null) {
             i(text);
             return;
@@ -144,7 +162,10 @@ class AndroidLog extends Log {
     }
 
     @Override
-    public void w(CharSequence text) {
+    void w(boolean debug, CharSequence text) {
+        if (!debug) {
+            return;
+        }
         text = text == null ? "" : text;
         try {
             methods[3][0].invoke(null, getTag(), text.toString());
@@ -158,7 +179,10 @@ class AndroidLog extends Log {
     }
 
     @Override
-    public void w(CharSequence text, Throwable throwable) {
+    void w(boolean debug, CharSequence text, Throwable throwable) {
+        if (!debug) {
+            return;
+        }
         if (throwable == null) {
             w(text);
             return;
@@ -176,7 +200,10 @@ class AndroidLog extends Log {
     }
 
     @Override
-    public void e(CharSequence text) {
+    void e(boolean debug, CharSequence text) {
+        if (!debug) {
+            return;
+        }
         text = text == null ? "" : text;
         try {
             methods[4][0].invoke(null, getTag(), text.toString());
@@ -190,7 +217,10 @@ class AndroidLog extends Log {
     }
 
     @Override
-    public void e(CharSequence text, Throwable throwable) {
+    void e(boolean debug, CharSequence text, Throwable throwable) {
+        if (!debug) {
+            return;
+        }
         if (throwable == null) {
             e(text);
             return;
