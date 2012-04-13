@@ -19,8 +19,6 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Properties;
 
-import android.util.Log;
-
 public class JDBCConnection implements java.sql.Connection, SQLite.BusyHandler {
 
     /**
@@ -223,7 +221,7 @@ public class JDBCConnection implements java.sql.Connection, SQLite.BusyHandler {
                 try {
                     db.close();
                 } catch (SQLite.Exception ee) {
-                    Log.e("jdbc", "", e);
+                    ee.printStackTrace();
                 }
             }
             throw e;

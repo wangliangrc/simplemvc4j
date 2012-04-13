@@ -4,8 +4,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import android.util.Log;
-
 public abstract class JDBC {
 
     public static final int MAJORVERSION = 1;
@@ -38,7 +36,7 @@ public abstract class JDBC {
                     sharedCache = SQLite.Database._enable_shared_cache(true);
                 }
             } catch (java.lang.Exception e) {
-                Log.e("jdbc", "", e);
+                e.printStackTrace();
             }
             try {
                 String tvfs = java.lang.System.getProperty("SQLite.vfs");
@@ -46,10 +44,10 @@ public abstract class JDBC {
                     vfs = tvfs;
                 }
             } catch (java.lang.Exception e) {
-                Log.e("jdbc", "", e);
+                e.printStackTrace();
             }
         } catch (java.lang.Exception e) {
-            Log.e("jdbc", "", e);
+            e.printStackTrace();
         }
     }
 
