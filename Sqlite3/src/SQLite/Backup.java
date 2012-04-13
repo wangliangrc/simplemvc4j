@@ -14,7 +14,7 @@ public class Backup {
     /**
      * Finish a backup.
      */
-    protected void finish() throws SQLite.Exception {
+    protected void finish() throws SQLite.SQLiteException {
         synchronized (this) {
             _finalize();
         }
@@ -27,12 +27,12 @@ public class Backup {
         synchronized (this) {
             try {
                 _finalize();
-            } catch (SQLite.Exception e) {
+            } catch (SQLite.SQLiteException e) {
             }
         }
     }
 
-    protected native void _finalize() throws SQLite.Exception;
+    protected native void _finalize() throws SQLite.SQLiteException;
 
     /**
      * Perform a backup step.
@@ -41,18 +41,18 @@ public class Backup {
      *            number of pages to backup
      * @return true when backup completed
      */
-    public boolean step(int n) throws SQLite.Exception {
+    public boolean step(int n) throws SQLite.SQLiteException {
         synchronized (this) {
             return _step(n);
         }
     }
 
-    private native boolean _step(int n) throws SQLite.Exception;
+    private native boolean _step(int n) throws SQLite.SQLiteException;
 
     /**
      * Perform the backup in one step.
      */
-    public void backup() throws SQLite.Exception {
+    public void backup() throws SQLite.SQLiteException {
         synchronized (this) {
             _step(-1);
         }
@@ -61,24 +61,24 @@ public class Backup {
     /**
      * Return number of remaining pages to be backed up.
      */
-    public int remaining() throws SQLite.Exception {
+    public int remaining() throws SQLite.SQLiteException {
         synchronized (this) {
             return _remaining();
         }
     }
 
-    private native int _remaining() throws SQLite.Exception;
+    private native int _remaining() throws SQLite.SQLiteException;
 
     /**
      * Return the total number of pages in the backup source database.
      */
-    public int pagecount() throws SQLite.Exception {
+    public int pagecount() throws SQLite.SQLiteException {
         synchronized (this) {
             return _pagecount();
         }
     }
 
-    private native int _pagecount() throws SQLite.Exception;
+    private native int _pagecount() throws SQLite.SQLiteException;
 
     /**
      * Internal native initializer.

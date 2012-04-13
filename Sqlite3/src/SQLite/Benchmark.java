@@ -14,8 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.ArrayList;
 
 public abstract class Benchmark {
 
@@ -145,11 +144,9 @@ public abstract class Benchmark {
         }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void benchmark(String url, String user, String password, boolean init) {
-        Vector vClient = new Vector();
-        Thread Client = null;
-        Enumeration en = null;
+        ArrayList<Thread> vClient = new ArrayList<Thread>();
+        Thread client = null;
         try {
             if (init) {
                 System.out.print("Initializing dataset...");
@@ -163,85 +160,76 @@ public abstract class Benchmark {
             prepared_stmt = false;
             start_time = System.currentTimeMillis();
             for (int i = 0; i < n_clients; i++) {
-                Client = new BenchmarkThread(n_txn_per_client, url, user,
+                client = new BenchmarkThread(n_txn_per_client, url, user,
                         password, this);
-                Client.start();
-                vClient.addElement(Client);
+                client.start();
+                vClient.add(client);
             }
 
             /*
              * Barrier to complete this test session
              */
-            en = vClient.elements();
-            while (en.hasMoreElements()) {
-                Client = (Thread) en.nextElement();
-                Client.join();
+            for(Thread t : vClient) {
+                t.join();
             }
-            vClient.removeAllElements();
+            vClient.clear();
             reportDone();
 
             transactions = true;
             prepared_stmt = false;
             start_time = System.currentTimeMillis();
             for (int i = 0; i < n_clients; i++) {
-                Client = new BenchmarkThread(n_txn_per_client, url, user,
+                client = new BenchmarkThread(n_txn_per_client, url, user,
                         password, this);
-                Client.start();
-                vClient.addElement(Client);
+                client.start();
+                vClient.add(client);
             }
 
             /*
              * Barrier to complete this test session
              */
-            en = vClient.elements();
-            while (en.hasMoreElements()) {
-                Client = (Thread) en.nextElement();
-                Client.join();
+            for(Thread t : vClient) {
+                t.join();
             }
-            vClient.removeAllElements();
+            vClient.clear();
             reportDone();
 
             transactions = false;
             prepared_stmt = true;
             start_time = System.currentTimeMillis();
             for (int i = 0; i < n_clients; i++) {
-                Client = new BenchmarkThread(n_txn_per_client, url, user,
+                client = new BenchmarkThread(n_txn_per_client, url, user,
                         password, this);
-                Client.start();
-                vClient.addElement(Client);
+                client.start();
+                vClient.add(client);
             }
 
             /*
              * Barrier to complete this test session
              */
-
-            en = vClient.elements();
-            while (en.hasMoreElements()) {
-                Client = (Thread) en.nextElement();
-                Client.join();
+            for(Thread t : vClient) {
+                t.join();
             }
-            vClient.removeAllElements();
+            vClient.clear();
             reportDone();
 
             transactions = true;
             prepared_stmt = true;
             start_time = System.currentTimeMillis();
             for (int i = 0; i < n_clients; i++) {
-                Client = new BenchmarkThread(n_txn_per_client, url, user,
+                client = new BenchmarkThread(n_txn_per_client, url, user,
                         password, this);
-                Client.start();
-                vClient.addElement(Client);
+                client.start();
+                vClient.add(client);
             }
 
             /*
              * Barrier to complete this test session
              */
-            en = vClient.elements();
-            while (en.hasMoreElements()) {
-                Client = (Thread) en.nextElement();
-                Client.join();
+            for(Thread t : vClient) {
+                t.join();
             }
-            vClient.removeAllElements();
+            vClient.clear();
             reportDone();
 
         } catch (java.lang.Exception e) {

@@ -24,7 +24,7 @@ public class Database {
      * @param mode
      *            open mode (e.g. SQLITE_OPEN_READONLY)
      */
-    public void open(String filename, int mode) throws SQLite.Exception {
+    public void open(String filename, int mode) throws SQLite.SQLiteException {
         if ((mode & 0200) != 0) {
             mode = SQLite.Constants.SQLITE_OPEN_READWRITE
                     | SQLite.Constants.SQLITE_OPEN_CREATE;
@@ -34,7 +34,7 @@ public class Database {
         synchronized (this) {
             try {
                 _open4(filename, mode, null, false);
-            } catch (SQLite.Exception se) {
+            } catch (SQLite.SQLiteException se) {
                 throw se;
             } catch (java.lang.OutOfMemoryError me) {
                 throw me;
@@ -55,7 +55,7 @@ public class Database {
      *            VFS name (for SQLite >= 3.5)
      */
     public void open(String filename, int mode, String vfs)
-            throws SQLite.Exception {
+            throws SQLite.SQLiteException {
         if ((mode & 0200) != 0) {
             mode = SQLite.Constants.SQLITE_OPEN_READWRITE
                     | SQLite.Constants.SQLITE_OPEN_CREATE;
@@ -65,7 +65,7 @@ public class Database {
         synchronized (this) {
             try {
                 _open4(filename, mode, vfs, false);
-            } catch (SQLite.Exception se) {
+            } catch (SQLite.SQLiteException se) {
                 throw se;
             } catch (java.lang.OutOfMemoryError me) {
                 throw me;
@@ -89,7 +89,7 @@ public class Database {
      *            SQLite2)
      */
     public void open(String filename, int mode, String vfs, boolean ver2)
-            throws SQLite.Exception {
+            throws SQLite.SQLiteException {
         if ((mode & 0200) != 0) {
             mode = SQLite.Constants.SQLITE_OPEN_READWRITE
                     | SQLite.Constants.SQLITE_OPEN_CREATE;
@@ -99,7 +99,7 @@ public class Database {
         synchronized (this) {
             try {
                 _open4(filename, mode, vfs, ver2);
-            } catch (SQLite.Exception se) {
+            } catch (SQLite.SQLiteException se) {
                 throw se;
             } catch (java.lang.OutOfMemoryError me) {
                 throw me;
@@ -113,13 +113,13 @@ public class Database {
      * For backward compatibility to older sqlite.jar, sqlite_jni
      */
     private native void _open(String filename, int mode)
-            throws SQLite.Exception;
+            throws SQLite.SQLiteException;
 
     /*
      * Newer full interface
      */
     private native void _open4(String filename, int mode, String vfs,
-            boolean ver2) throws SQLite.Exception;
+            boolean ver2) throws SQLite.SQLiteException;
 
     /**
      * Open SQLite auxiliary database file for temporary tables.
@@ -127,13 +127,13 @@ public class Database {
      * @param filename
      *            the name of the auxiliary file or null
      */
-    public void open_aux_file(String filename) throws SQLite.Exception {
+    public void open_aux_file(String filename) throws SQLite.SQLiteException {
         synchronized (this) {
             _open_aux_file(filename);
         }
     }
 
-    private native void _open_aux_file(String filename) throws SQLite.Exception;
+    private native void _open_aux_file(String filename) throws SQLite.SQLiteException;
 
     /**
      * Destructor for object.
@@ -149,13 +149,13 @@ public class Database {
     /**
      * Close the underlying SQLite database file.
      */
-    public void close() throws SQLite.Exception {
+    public void close() throws SQLite.SQLiteException {
         synchronized (this) {
             _close();
         }
     }
 
-    private native void _close() throws SQLite.Exception;
+    private native void _close() throws SQLite.SQLiteException;
 
     /**
      * Execute an SQL statement and invoke callback methods for each row of the
@@ -170,14 +170,14 @@ public class Database {
      * @param cb
      *            the object implementing the callback methods
      */
-    public void exec(String sql, SQLite.Callback cb) throws SQLite.Exception {
+    public void exec(String sql, SQLite.Callback cb) throws SQLite.SQLiteException {
         synchronized (this) {
             _exec(sql, cb);
         }
     }
 
     private native void _exec(String sql, SQLite.Callback cb)
-            throws SQLite.Exception;
+            throws SQLite.SQLiteException;
 
     /**
      * Execute an SQL statement and invoke callback methods for each row of the
@@ -203,14 +203,14 @@ public class Database {
      *            arguments for the SQL statement, '%q' substitution
      */
     public void exec(String sql, SQLite.Callback cb, String args[])
-            throws SQLite.Exception {
+            throws SQLite.SQLiteException {
         synchronized (this) {
             _exec(sql, cb, args);
         }
     }
 
     private native void _exec(String sql, SQLite.Callback cb, String args[])
-            throws SQLite.Exception;
+            throws SQLite.SQLiteException;
 
     /**
      * Return the row identifier of the last inserted row.
@@ -284,12 +284,12 @@ public class Database {
      * @return result set
      */
     public TableResult get_table(String sql, int maxrows)
-            throws SQLite.Exception {
+            throws SQLite.SQLiteException {
         TableResult ret = new TableResult(maxrows);
         if (!is3()) {
             try {
                 exec(sql, ret);
-            } catch (SQLite.Exception e) {
+            } catch (SQLite.SQLiteException e) {
                 if (maxrows <= 0 || !ret.atmaxrows) {
                     throw e;
                 }
@@ -321,7 +321,7 @@ public class Database {
      *            the SQL statement to be executed
      * @return result set
      */
-    public TableResult get_table(String sql) throws SQLite.Exception {
+    public TableResult get_table(String sql) throws SQLite.SQLiteException {
         return get_table(sql, 0);
     }
 
@@ -337,12 +337,12 @@ public class Database {
      * @return result set
      */
     public TableResult get_table(String sql, int maxrows, String args[])
-            throws SQLite.Exception {
+            throws SQLite.SQLiteException {
         TableResult ret = new TableResult(maxrows);
         if (!is3()) {
             try {
                 exec(sql, ret, args);
-            } catch (SQLite.Exception e) {
+            } catch (SQLite.SQLiteException e) {
                 if (maxrows <= 0 || !ret.atmaxrows) {
                     throw e;
                 }
@@ -377,7 +377,7 @@ public class Database {
      * @return result set
      */
     public TableResult get_table(String sql, String args[])
-            throws SQLite.Exception {
+            throws SQLite.SQLiteException {
         return get_table(sql, 0, args);
     }
 
@@ -392,12 +392,12 @@ public class Database {
      *            TableResult to receive result set
      */
     public void get_table(String sql, String args[], TableResult tbl)
-            throws SQLite.Exception {
+            throws SQLite.SQLiteException {
         tbl.clear();
         if (!is3()) {
             try {
                 exec(sql, tbl, args);
-            } catch (SQLite.Exception e) {
+            } catch (SQLite.SQLiteException e) {
                 if (tbl.maxrows <= 0 || !tbl.atmaxrows) {
                     throw e;
                 }
@@ -549,13 +549,13 @@ public class Database {
      * @param enc
      *            name of encoding
      */
-    public void set_encoding(String enc) throws SQLite.Exception {
+    public void set_encoding(String enc) throws SQLite.SQLiteException {
         synchronized (this) {
             _set_encoding(enc);
         }
     }
 
-    private native void _set_encoding(String enc) throws SQLite.Exception;
+    private native void _set_encoding(String enc) throws SQLite.SQLiteException;
 
     /**
      * Set authorizer function. Only available in SQLite 2.7.6 and above,
@@ -599,7 +599,7 @@ public class Database {
      * @return Backup object to perform the backup operation
      */
     public Backup backup(Database dest, String destName, String srcName)
-            throws SQLite.Exception {
+            throws SQLite.SQLiteException {
         synchronized (this) {
             Backup b = new Backup();
             _backup(b, dest, destName, this, srcName);
@@ -609,7 +609,7 @@ public class Database {
 
     private static native void _backup(Backup b, Database dest,
             String destName, Database src, String srcName)
-            throws SQLite.Exception;
+            throws SQLite.SQLiteException;
 
     /**
      * Set profile function. Only available in SQLite 3.6 and above, otherwise a
@@ -674,7 +674,7 @@ public class Database {
      *            SQL statement to be compiled
      * @return a Vm object
      */
-    public Vm compile(String sql) throws SQLite.Exception {
+    public Vm compile(String sql) throws SQLite.SQLiteException {
         synchronized (this) {
             Vm vm = new Vm();
             vm_compile(sql, vm);
@@ -692,7 +692,7 @@ public class Database {
      *            arguments for the SQL statement, '%q' substitution
      * @return a Vm object
      */
-    public Vm compile(String sql, String args[]) throws SQLite.Exception {
+    public Vm compile(String sql, String args[]) throws SQLite.SQLiteException {
         synchronized (this) {
             Vm vm = new Vm();
             vm_compile_args(sql, vm, args);
@@ -708,7 +708,7 @@ public class Database {
      *            SQL statement to be prepared
      * @return a Stmt object
      */
-    public Stmt prepare(String sql) throws SQLite.Exception {
+    public Stmt prepare(String sql) throws SQLite.SQLiteException {
         synchronized (this) {
             Stmt stmt = new Stmt();
             stmt_prepare(sql, stmt);
@@ -732,7 +732,7 @@ public class Database {
      * @return a Blob object
      */
     public Blob open_blob(String db, String table, String column, long row,
-            boolean rw) throws SQLite.Exception {
+            boolean rw) throws SQLite.SQLiteException {
         synchronized (this) {
             Blob blob = new Blob();
             _open_blob(db, table, column, row, rw, blob);
@@ -755,7 +755,7 @@ public class Database {
      * @param vm
      *            Vm object
      */
-    private native void vm_compile(String sql, Vm vm) throws SQLite.Exception;
+    private native void vm_compile(String sql, Vm vm) throws SQLite.SQLiteException;
 
     /**
      * Internal compile method, SQLite 3.0 only.
@@ -768,7 +768,7 @@ public class Database {
      *            Vm object
      */
     private native void vm_compile_args(String sql, Vm vm, String args[])
-            throws SQLite.Exception;
+            throws SQLite.SQLiteException;
 
     /**
      * Internal SQLite3 prepare method.
@@ -779,7 +779,7 @@ public class Database {
      *            Stmt object
      */
     private native void stmt_prepare(String sql, Stmt stmt)
-            throws SQLite.Exception;
+            throws SQLite.SQLiteException;
 
     /**
      * Internal SQLite open blob method.
@@ -798,7 +798,7 @@ public class Database {
      *            Blob object
      */
     private native void _open_blob(String db, String table, String column,
-            long row, boolean rw, Blob blob) throws SQLite.Exception;
+            long row, boolean rw, Blob blob) throws SQLite.SQLiteException;
 
     /**
      * Establish a progress callback method which gets called after N SQLite VM
@@ -824,7 +824,7 @@ public class Database {
      * @param ekey
      *            the key as byte array
      */
-    public void key(byte[] ekey) throws SQLite.Exception {
+    public void key(byte[] ekey) throws SQLite.SQLiteException {
         synchronized (this) {
             _key(ekey);
         }
@@ -837,7 +837,7 @@ public class Database {
      * @param skey
      *            the key as String
      */
-    public void key(String skey) throws SQLite.Exception {
+    public void key(String skey) throws SQLite.SQLiteException {
         synchronized (this) {
             byte ekey[] = null;
             if (skey != null && skey.length() > 0) {
@@ -860,7 +860,7 @@ public class Database {
      * @param ekey
      *            the key as byte array
      */
-    public void rekey(byte[] ekey) throws SQLite.Exception {
+    public void rekey(byte[] ekey) throws SQLite.SQLiteException {
         synchronized (this) {
             _rekey(ekey);
         }
@@ -873,7 +873,7 @@ public class Database {
      * @param skey
      *            the key as String
      */
-    public void rekey(String skey) throws SQLite.Exception {
+    public void rekey(String skey) throws SQLite.SQLiteException {
         synchronized (this) {
             byte ekey[] = null;
             if (skey != null && skey.length() > 0) {
@@ -923,12 +923,12 @@ public class Database {
      *            string (double value) (julian date in SQLite3 format)
      * @return long
      */
-    public static long long_from_julian(String s) throws SQLite.Exception {
+    public static long long_from_julian(String s) throws SQLite.SQLiteException {
         try {
             double d = Double.valueOf(s).doubleValue();
             return long_from_julian(d);
         } catch (java.lang.Exception ee) {
-            throw new SQLite.Exception("not a julian date: " + s + ": " + ee);
+            throw new SQLite.SQLiteException("not a julian date: " + s + ": " + ee);
         }
     }
 

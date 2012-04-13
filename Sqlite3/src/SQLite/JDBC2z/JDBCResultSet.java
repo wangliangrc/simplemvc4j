@@ -114,7 +114,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
                     pkcols = new String[pk.tr.nrows];
                     pkcoli = new int[pk.tr.nrows];
                     for (int i = 0; i < pk.tr.nrows; i++) {
-                        String rd[] = (String[]) pk.tr.rows.elementAt(i);
+                        String rd[] = (String[]) pk.tr.rows.get(i);
                         pkcols[i] = rd[3];
                         try {
                             pkcoli[i] = findColumn(pkcols[i]) - 1;
@@ -143,7 +143,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
                 throw new SQLException("cursor outside of result set");
             }
             rowbuf = new String[tr.ncolumns];
-            System.arraycopy(tr.rows.elementAt(row), 0, rowbuf, 0, tr.ncolumns);
+            System.arraycopy(tr.rows.get(row), 0, rowbuf, 0, tr.ncolumns);
         }
     }
 
@@ -238,7 +238,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         if (tr == null || columnIndex < 1 || columnIndex > tr.ncolumns) {
             throw new SQLException("column " + columnIndex + " not found");
         }
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         lastg = rd[columnIndex - 1];
         return lastg;
     }
@@ -262,7 +262,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         if (tr == null || columnIndex < 1 || columnIndex > tr.ncolumns) {
             throw new SQLException("column " + columnIndex + " not found");
         }
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         lastg = rd[columnIndex - 1];
         try {
             return Integer.valueOf(lastg);
@@ -311,7 +311,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         if (tr == null || columnIndex < 1 || columnIndex > tr.ncolumns) {
             throw new SQLException("column " + columnIndex + " not found");
         }
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         lastg = rd[columnIndex - 1];
         try {
             return Short.valueOf(lastg);
@@ -337,7 +337,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         if (tr == null || columnIndex < 1 || columnIndex > tr.ncolumns) {
             throw new SQLException("column " + columnIndex + " not found");
         }
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         lastg = rd[columnIndex - 1];
         try {
             if (s.conn.useJulian) {
@@ -390,7 +390,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         if (tr == null || columnIndex < 1 || columnIndex > tr.ncolumns) {
             throw new SQLException("column " + columnIndex + " not found");
         }
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         lastg = rd[columnIndex - 1];
         try {
             if (s.conn.useJulian) {
@@ -444,7 +444,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         if (tr == null || columnIndex < 1 || columnIndex > tr.ncolumns) {
             throw new SQLException("column " + columnIndex + " not found");
         }
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         lastg = rd[columnIndex - 1];
         try {
             if (s.conn.useJulian) {
@@ -500,7 +500,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         if (tr == null || columnIndex < 1 || columnIndex > tr.ncolumns) {
             throw new SQLException("column " + columnIndex + " not found");
         }
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         lastg = rd[columnIndex - 1];
         try {
             return Double.valueOf(lastg);
@@ -529,7 +529,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         if (tr == null || columnIndex < 1 || columnIndex > tr.ncolumns) {
             throw new SQLException("column " + columnIndex + " not found");
         }
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         lastg = rd[columnIndex - 1];
         try {
             return Float.valueOf(lastg);
@@ -558,7 +558,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         if (tr == null || columnIndex < 1 || columnIndex > tr.ncolumns) {
             throw new SQLException("column " + columnIndex + " not found");
         }
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         lastg = rd[columnIndex - 1];
         try {
             return Long.valueOf(lastg);
@@ -665,7 +665,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
             throw new SQLException("column " + columnIndex + " not found");
         }
         byte ret[] = null;
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         lastg = rd[columnIndex - 1];
         if (lastg != null) {
             ret = SQLite.StringEncoder.decode(lastg);
@@ -689,7 +689,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         if (tr == null || columnIndex < 1 || columnIndex > tr.ncolumns) {
             throw new SQLException("column " + columnIndex + " not found");
         }
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         lastg = rd[columnIndex - 1];
         Object ret = lastg;
         if (tr instanceof TableResultX) {
@@ -943,7 +943,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         sb.append(")");
         try {
             this.s.conn.db.exec(sb.toString(), null, rowbuf);
-        } catch (SQLite.Exception e) {
+        } catch (SQLite.SQLiteException e) {
             throw new SQLException(e);
         }
         tr.newrow(rowbuf);
@@ -964,7 +964,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         if (updatable < UPD_INSUPDDEL) {
             throw new SQLException("no primary key on table defined");
         }
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         JDBCResultSetMetaData m = (JDBCResultSetMetaData) getMetaData();
         String args[] = new String[tr.ncolumns + pkcols.length];
         StringBuilder sb = new StringBuilder();
@@ -991,7 +991,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         }
         try {
             this.s.conn.db.exec(sb.toString(), null, args);
-        } catch (SQLite.Exception e) {
+        } catch (SQLite.SQLiteException e) {
             throw new SQLException(e);
         }
         System.arraycopy(rowbuf, 0, rd, 0, rowbuf.length);
@@ -1023,13 +1023,12 @@ public class JDBCResultSet implements java.sql.ResultSet {
         }
         try {
             this.s.conn.db.exec(sb.toString(), null, args);
-        } catch (SQLite.Exception e) {
+        } catch (SQLite.SQLiteException e) {
             throw new SQLException(e);
         }
         rowbuf = null;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void refreshRow() throws SQLException {
         isUpdatable();
@@ -1040,7 +1039,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
             throw new SQLException("no primary key on table defined");
         }
         JDBCResultSetMetaData m = (JDBCResultSetMetaData) getMetaData();
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT ");
         for (int i = 0; i < tr.ncolumns; i++) {
@@ -1064,7 +1063,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         SQLite.TableResult trnew = null;
         try {
             trnew = this.s.conn.db.get_table(sb.toString(), args);
-        } catch (SQLite.Exception e) {
+        } catch (SQLite.SQLiteException e) {
             throw new SQLException(e);
         }
         if (trnew.nrows != 1) {
@@ -1072,7 +1071,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
                     + trnew.nrows);
         }
         rowbuf = null;
-        tr.rows.setElementAt(trnew.rows.elementAt(0), row);
+        tr.rows.set(row, trnew.rows.get(0));
     }
 
     @Override
@@ -1400,7 +1399,7 @@ public class JDBCResultSet implements java.sql.ResultSet {
         if (tr == null || colIndex < 1 || colIndex > tr.ncolumns) {
             throw new SQLException("column " + colIndex + " not found");
         }
-        String rd[] = (String[]) tr.rows.elementAt(row);
+        String rd[] = (String[]) tr.rows.get(row);
         lastg = rd[colIndex - 1];
         java.net.URL url = null;
         if (lastg == null) {

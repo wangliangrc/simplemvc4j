@@ -1,6 +1,6 @@
 package SQLite;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * Class representing an SQLite result set as returned by the <A
@@ -51,8 +51,7 @@ public class TableResult implements Callback {
     /**
      * Rows of the result set. Each row is stored as a String array.
      */
-    @SuppressWarnings("rawtypes")
-    public Vector rows;
+    public ArrayList<String[]> rows;
 
     /**
      * Maximum number of rows to hold in the table.
@@ -82,11 +81,10 @@ public class TableResult implements Callback {
     /**
      * Clear result set.
      */
-    @SuppressWarnings("rawtypes")
     public void clear() {
         column = new String[0];
         types = null;
-        rows = new Vector();
+        rows = new ArrayList<String[]>();
         ncolumns = nrows = 0;
         atmaxrows = false;
     }
@@ -109,14 +107,13 @@ public class TableResult implements Callback {
     /**
      * Callback method used while the query is executed.
      */
-    @SuppressWarnings("unchecked")
     public boolean newrow(String rowdata[]) {
         if (rowdata != null) {
             if (maxrows > 0 && nrows >= maxrows) {
                 atmaxrows = true;
                 return true;
             }
-            rows.addElement(rowdata);
+            rows.add(rowdata);
             nrows++;
         }
         return false;
@@ -135,7 +132,7 @@ public class TableResult implements Callback {
         sb.append('\n');
         for (i = 0; i < nrows; i++) {
             int k;
-            String row[] = (String[]) rows.elementAt(i);
+            String row[] = (String[]) rows.get(i);
             for (k = 0; k < ncolumns; k++) {
                 sb.append(row[k] == null ? "NULL" : row[k]);
                 sb.append('|');

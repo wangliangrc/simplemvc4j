@@ -324,7 +324,7 @@ public class Shell implements Callback {
         if (cmd.compareTo(".exit") == 0) {
             try {
                 db.close();
-            } catch (Exception e) {
+            } catch (SQLiteException e) {
             }
             System.exit(0);
         }
@@ -385,7 +385,7 @@ public class Shell implements Callback {
                     t = db.get_table("SELECT name FROM sqlite_master "
                             + "WHERE type='table' AND " + "name LIKE '%%%q%%' "
                             + "ORDER BY name", qarg);
-                } catch (Exception e) {
+                } catch (SQLiteException e) {
                     err.println("SQL Error: " + e);
                     err.flush();
                 }
@@ -393,14 +393,14 @@ public class Shell implements Callback {
                 try {
                     t = db.get_table("SELECT name FROM sqlite_master "
                             + "WHERE type='table' ORDER BY name");
-                } catch (Exception e) {
+                } catch (SQLiteException e) {
                     err.println("SQL Error: " + e);
                     err.flush();
                 }
             }
             if (t != null) {
                 for (i = 0; i < t.nrows; i++) {
-                    String tab = ((String[]) t.rows.elementAt(i))[0];
+                    String tab = ((String[]) t.rows.get(i))[0];
                     if (tab != null) {
                         pw.println(tab);
                     }
@@ -417,7 +417,7 @@ public class Shell implements Callback {
                             + "WHERE type!='meta' AND "
                             + "name LIKE '%%%q%%' AND " + "sql NOTNULL "
                             + "ORDER BY type DESC, name", this, qarg);
-                } catch (Exception e) {
+                } catch (SQLiteException e) {
                     err.println("SQL Error: " + e);
                     err.flush();
                 }
@@ -426,7 +426,7 @@ public class Shell implements Callback {
                     db.exec("SELECT sql FROM sqlite_master "
                             + "WHERE type!='meta' AND " + "sql NOTNULL "
                             + "ORDER BY tbl_name, type DESC, name", this);
-                } catch (Exception e) {
+                } catch (SQLiteException e) {
                     err.println("SQL Error: " + e);
                     err.flush();
                 }
@@ -436,7 +436,7 @@ public class Shell implements Callback {
         if (cmd.compareTo(".enc") == 0) {
             try {
                 db.set_encoding(args.length > 0 ? args[0] : null);
-            } catch (Exception e) {
+            } catch (SQLiteException e) {
                 err.println("" + e);
                 err.flush();
             }
@@ -445,7 +445,7 @@ public class Shell implements Callback {
         if (cmd.compareTo(".rekey") == 0) {
             try {
                 db.rekey(args.length > 0 ? args[0] : null);
-            } catch (Exception e) {
+            } catch (SQLiteException e) {
                 err.println("" + e);
                 err.flush();
             }
@@ -486,7 +486,7 @@ public class Shell implements Callback {
                 if (Database.complete(sql)) {
                     try {
                         db.exec(sql, this);
-                    } catch (Exception e) {
+                    } catch (SQLiteException e) {
                         if (!echo) {
                             err.println(sql);
                         }
@@ -516,7 +516,7 @@ public class Shell implements Callback {
         } else {
             try {
                 db.exec(sql, this);
-            } catch (Exception e) {
+            } catch (SQLiteException e) {
                 err.println("SQL Error: " + e);
                 err.flush();
             }
@@ -567,14 +567,14 @@ public class Shell implements Callback {
         try {
             s.db.open(dbname, SQLite.Constants.SQLITE_OPEN_READWRITE
                     | SQLite.Constants.SQLITE_OPEN_CREATE);
-        } catch (Exception e) {
+        } catch (SQLiteException e) {
             System.err.println("Unable to open database: " + e);
             System.exit(1);
         }
         if (key != null) {
             try {
                 s.db.key(key);
-            } catch (Exception e) {
+            } catch (SQLiteException e) {
                 System.err.println("Unable to set key: " + e);
                 System.exit(1);
             }
@@ -590,7 +590,7 @@ public class Shell implements Callback {
         }
         try {
             s.db.close();
-        } catch (Exception ee) {
+        } catch (SQLiteException ee) {
         }
     }
 }
@@ -612,7 +612,7 @@ class DBDump implements Callback {
                 s.db.exec("SELECT name, type, sql FROM sqlite_master "
                         + "WHERE type!='meta' AND sql NOT NULL "
                         + "ORDER BY substr(type,2,1), name", this);
-            } catch (Exception e) {
+            } catch (SQLiteException e) {
                 s.err.println("SQL Error: " + e);
                 s.err.flush();
             }
@@ -625,7 +625,7 @@ class DBDump implements Callback {
                             + "WHERE tbl_name LIKE '%q' AND type!='meta' "
                             + " AND sql NOT NULL "
                             + " ORDER BY substr(type,2,1), name", this, arg);
-                } catch (Exception e) {
+                } catch (SQLiteException e) {
                     s.err.println("SQL Error: " + e);
                     s.err.flush();
                 }
@@ -664,7 +664,7 @@ class DBDump implements Callback {
 
                         sb.append("SELECT ");
                         for (int i = 0; i < t.nrows; i++) {
-                            String col = ((String[]) t.rows.elementAt(i))[1];
+                            String col = ((String[]) t.rows.get(i))[1];
                             sb.append(sep + "quote(" + Shell.sql_quote_dbl(col)
                                     + ")");
                             sep = ",";
@@ -679,7 +679,7 @@ class DBDump implements Callback {
                 } else {
                     s2.db.exec("SELECT * from '%q'", s2, qargs);
                 }
-            } catch (Exception e) {
+            } catch (SQLiteException e) {
                 s.err.println("SQL Error: " + e);
                 s.err.flush();
                 return true;

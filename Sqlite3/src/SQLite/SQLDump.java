@@ -31,7 +31,7 @@ public class SQLDump implements Callback {
         s.db = db;
     }
 
-    public void dump() throws SQLite.Exception {
+    public void dump() throws SQLite.SQLiteException {
         pw.println("BEGIN TRANSACTION;");
         db.exec("SELECT name, type, sql FROM sqlite_master "
                 + "WHERE type!='meta' AND sql NOT NULL "
@@ -69,7 +69,7 @@ public class SQLDump implements Callback {
 
                         sb.append("SELECT ");
                         for (int i = 0; i < t.nrows; i++) {
-                            String col = ((String[]) t.rows.elementAt(i))[1];
+                            String col = ((String[]) t.rows.get(i))[1];
                             sb.append(sep + "quote(" + Shell.sql_quote_dbl(col)
                                     + ")");
                             sep = ",";
@@ -86,7 +86,7 @@ public class SQLDump implements Callback {
                     s.db.exec("SELECT * from '%q'", s, qargs);
                     pw.flush();
                 }
-            } catch (Exception e) {
+            } catch (SQLiteException e) {
                 return true;
             }
         }
