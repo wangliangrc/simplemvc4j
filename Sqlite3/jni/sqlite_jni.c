@@ -304,7 +304,7 @@ static void freep(char **strp) {
 }
 
 static void throwex(JNIEnv *env, const char *msg) {
-    jclass except = (*env)->FindClass(env, "SQLite/Exception");
+    jclass except = (*env)->FindClass(env, "SQLite/SQLiteException");
 
     (*env)->ExceptionClear(env);
     if (except) {
