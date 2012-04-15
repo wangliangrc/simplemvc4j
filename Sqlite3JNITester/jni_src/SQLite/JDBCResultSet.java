@@ -1,4 +1,4 @@
-package SQLite.JDBC2z;
+package SQLite;
 
 import java.math.BigDecimal;
 import java.sql.NClob;

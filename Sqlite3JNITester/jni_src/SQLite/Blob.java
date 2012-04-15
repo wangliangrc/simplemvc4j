@@ -253,6 +253,9 @@ public class Blob {
      */
     protected int size = 0;
 
+    Blob() {
+    }
+
     /**
      * Return InputStream for this blob
      * 

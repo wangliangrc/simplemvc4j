@@ -19,6 +19,9 @@ public class Stmt {
      */
     protected int error_code = 0;
 
+    Stmt() {
+    }
+
     /**
      * Prepare the next SQL statement for the Stmt instance.
      * 
@@ -106,7 +109,8 @@ public class Stmt {
      * @param value
      *            value of parameter
      */
-    public native void bind(int pos, double value) throws SQLite.SQLiteException;
+    public native void bind(int pos, double value)
+            throws SQLite.SQLiteException;
 
     /**
      * Bind positional byte array to compiled SQLite3 statement.
@@ -116,7 +120,8 @@ public class Stmt {
      * @param value
      *            value of parameter, may be null
      */
-    public native void bind(int pos, byte[] value) throws SQLite.SQLiteException;
+    public native void bind(int pos, byte[] value)
+            throws SQLite.SQLiteException;
 
     /**
      * Bind positional String to compiled SQLite3 statement.
@@ -126,7 +131,8 @@ public class Stmt {
      * @param value
      *            value of parameter, may be null
      */
-    public native void bind(int pos, String value) throws SQLite.SQLiteException;
+    public native void bind(int pos, String value)
+            throws SQLite.SQLiteException;
 
     /**
      * Bind positional SQL null to compiled SQLite3 statement.
@@ -161,7 +167,8 @@ public class Stmt {
      *            parameter index, 1-based
      * @return String parameter name
      */
-    public native String bind_parameter_name(int pos) throws SQLite.SQLiteException;
+    public native String bind_parameter_name(int pos)
+            throws SQLite.SQLiteException;
 
     /**
      * Return index of named parameter in compiled SQLite3 statement.
@@ -170,7 +177,8 @@ public class Stmt {
      *            of parameter
      * @return int index of parameter, 1-based
      */
-    public native int bind_parameter_index(String name) throws SQLite.SQLiteException;
+    public native int bind_parameter_index(String name)
+            throws SQLite.SQLiteException;
 
     /**
      * Retrieve integer column from exec'ed SQLite3 statement.
@@ -261,7 +269,8 @@ public class Stmt {
      *            column number, 0-based
      * @return String or null
      */
-    public native String column_table_name(int col) throws SQLite.SQLiteException;
+    public native String column_table_name(int col)
+            throws SQLite.SQLiteException;
 
     /**
      * Return database name of column of SQLite3 statement.
@@ -270,7 +279,8 @@ public class Stmt {
      *            column number, 0-based
      * @return String or null
      */
-    public native String column_database_name(int col) throws SQLite.SQLiteException;
+    public native String column_database_name(int col)
+            throws SQLite.SQLiteException;
 
     /**
      * Return declared column type of SQLite3 statement.
@@ -297,7 +307,8 @@ public class Stmt {
      *            column number, 0-based
      * @return String or null
      */
-    public native String column_origin_name(int col) throws SQLite.SQLiteException;
+    public native String column_origin_name(int col)
+            throws SQLite.SQLiteException;
 
     /**
      * Return statement status information.

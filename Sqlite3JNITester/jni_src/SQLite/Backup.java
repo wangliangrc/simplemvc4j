@@ -11,6 +11,9 @@ public class Backup {
      */
     protected long handle = 0;
 
+    Backup() {
+    }
+
     /**
      * Finish a backup.
      */

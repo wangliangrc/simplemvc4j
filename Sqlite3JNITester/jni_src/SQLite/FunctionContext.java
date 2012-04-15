@@ -12,6 +12,9 @@ public class FunctionContext {
      */
     private long handle = 0;
 
+    FunctionContext() {
+    }
+
     /**
      * Set function result from string.
      * 

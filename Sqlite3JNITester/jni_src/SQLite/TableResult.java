@@ -66,7 +66,7 @@ public class TableResult implements Callback {
     /**
      * Create an empty result set.
      */
-    public TableResult() {
+    TableResult() {
         clear();
     }
 

@@ -7,6 +7,12 @@ package SQLite;
 public class Vm {
 
     /**
+     * 阻止外包类继承以及API扩散
+     */
+    Vm() {
+    }
+
+    /**
      * Internal handle for the compiled SQLite VM.
      */
     private long handle = 0;
