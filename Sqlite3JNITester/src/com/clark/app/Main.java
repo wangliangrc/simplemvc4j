@@ -12,9 +12,9 @@ public class Main implements Callback {
     public static void main(String[] args) throws SQLiteException {
         Main main = new Main();
 
-        Database db = new Database();
-        db.open("test.db", SQLite.Constants.SQLITE_OPEN_READWRITE
-                | SQLite.Constants.SQLITE_OPEN_CREATE);
+        Database db = Database.open("test.db",
+                SQLite.Constants.SQLITE_OPEN_READWRITE
+                        | SQLite.Constants.SQLITE_OPEN_CREATE);
         System.out.println(db.dbversion());
 
         String sql = "drop table if exists domain;"

@@ -16,6 +16,9 @@ public class Database {
      */
     protected int error_code = 0;
 
+    protected Database() {
+    }
+
     /**
      * Open an SQLite database file.
      * 
@@ -24,24 +27,29 @@ public class Database {
      * @param mode
      *            open mode (e.g. SQLITE_OPEN_READONLY)
      */
-    public void open(String filename, int mode) throws SQLite.SQLiteException {
+    public static Database open(String filename, int mode)
+            throws SQLite.SQLiteException {
+        Database db = new Database();
+
         if ((mode & 0200) != 0) {
             mode = SQLite.Constants.SQLITE_OPEN_READWRITE
                     | SQLite.Constants.SQLITE_OPEN_CREATE;
         } else if ((mode & 0400) != 0) {
             mode = SQLite.Constants.SQLITE_OPEN_READONLY;
         }
-        synchronized (this) {
+        synchronized (db) {
             try {
-                _open4(filename, mode, null, false);
+                db._open4(filename, mode, null, false);
             } catch (SQLite.SQLiteException se) {
                 throw se;
             } catch (java.lang.OutOfMemoryError me) {
                 throw me;
             } catch (Throwable t) {
-                _open(filename, mode);
+                db._open(filename, mode);
             }
         }
+
+        return db;
     }
 
     /**
@@ -54,25 +62,29 @@ public class Database {
      * @param vfs
      *            VFS name (for SQLite >= 3.5)
      */
-    public void open(String filename, int mode, String vfs)
+    public static Database open(String filename, int mode, String vfs)
             throws SQLite.SQLiteException {
+        Database db = new Database();
+
         if ((mode & 0200) != 0) {
             mode = SQLite.Constants.SQLITE_OPEN_READWRITE
                     | SQLite.Constants.SQLITE_OPEN_CREATE;
         } else if ((mode & 0400) != 0) {
             mode = SQLite.Constants.SQLITE_OPEN_READONLY;
         }
-        synchronized (this) {
+        synchronized (db) {
             try {
-                _open4(filename, mode, vfs, false);
+                db._open4(filename, mode, vfs, false);
             } catch (SQLite.SQLiteException se) {
                 throw se;
             } catch (java.lang.OutOfMemoryError me) {
                 throw me;
             } catch (Throwable t) {
-                _open(filename, mode);
+                db._open(filename, mode);
             }
         }
+
+        return db;
     }
 
     /**
@@ -88,25 +100,29 @@ public class Database {
      *            flag to force version on create (false = SQLite3, true =
      *            SQLite2)
      */
-    public void open(String filename, int mode, String vfs, boolean ver2)
-            throws SQLite.SQLiteException {
+    public static Database open(String filename, int mode, String vfs,
+            boolean ver2) throws SQLite.SQLiteException {
+        Database db = new Database();
+
         if ((mode & 0200) != 0) {
             mode = SQLite.Constants.SQLITE_OPEN_READWRITE
                     | SQLite.Constants.SQLITE_OPEN_CREATE;
         } else if ((mode & 0400) != 0) {
             mode = SQLite.Constants.SQLITE_OPEN_READONLY;
         }
-        synchronized (this) {
+        synchronized (db) {
             try {
-                _open4(filename, mode, vfs, ver2);
+                db._open4(filename, mode, vfs, ver2);
             } catch (SQLite.SQLiteException se) {
                 throw se;
             } catch (java.lang.OutOfMemoryError me) {
                 throw me;
             } catch (Throwable t) {
-                _open(filename, mode);
+                db._open(filename, mode);
             }
         }
+
+        return db;
     }
 
     /*
@@ -133,7 +149,8 @@ public class Database {
         }
     }
 
-    private native void _open_aux_file(String filename) throws SQLite.SQLiteException;
+    private native void _open_aux_file(String filename)
+            throws SQLite.SQLiteException;
 
     /**
      * Destructor for object.
@@ -170,7 +187,8 @@ public class Database {
      * @param cb
      *            the object implementing the callback methods
      */
-    public void exec(String sql, SQLite.Callback cb) throws SQLite.SQLiteException {
+    public void exec(String sql, SQLite.Callback cb)
+            throws SQLite.SQLiteException {
         synchronized (this) {
             _exec(sql, cb);
         }
@@ -755,7 +773,8 @@ public class Database {
      * @param vm
      *            Vm object
      */
-    private native void vm_compile(String sql, Vm vm) throws SQLite.SQLiteException;
+    private native void vm_compile(String sql, Vm vm)
+            throws SQLite.SQLiteException;
 
     /**
      * Internal compile method, SQLite 3.0 only.
@@ -928,7 +947,8 @@ public class Database {
             double d = Double.valueOf(s).doubleValue();
             return long_from_julian(d);
         } catch (java.lang.Exception ee) {
-            throw new SQLite.SQLiteException("not a julian date: " + s + ": " + ee);
+            throw new SQLite.SQLiteException("not a julian date: " + s + ": "
+                    + ee);
         }
     }
 
