@@ -529,7 +529,7 @@ public class Shell implements Callback {
         s.mode = Shell.MODE_List;
         s.sep = "|";
         s.showHeader = false;
-        s.db = new Database();
+//        s.db = new Database();
         String dbname = null, sql = null;
         for (int i = 0; i < args.length; i++) {
             if (args[i].compareTo("-html") == 0) {
@@ -565,7 +565,7 @@ public class Shell implements Callback {
             System.exit(1);
         }
         try {
-            s.db.open(dbname, SQLite.Constants.SQLITE_OPEN_READWRITE
+            s.db = Database.open(dbname, SQLite.Constants.SQLITE_OPEN_READWRITE
                     | SQLite.Constants.SQLITE_OPEN_CREATE);
         } catch (SQLiteException e) {
             System.err.println("Unable to open database: " + e);

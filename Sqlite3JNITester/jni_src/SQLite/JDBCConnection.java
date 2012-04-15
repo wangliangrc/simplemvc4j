@@ -142,12 +142,11 @@ public class JDBCConnection implements java.sql.Connection, SQLite.BusyHandler {
     private DatabaseX open(boolean readonly) throws SQLException {
         DatabaseX dbx = null;
         try {
-            dbx = new DatabaseX();
-            dbx.open(
-                    dbfile,
-                    readonly ? SQLite.Constants.SQLITE_OPEN_READONLY
-                            : (SQLite.Constants.SQLITE_OPEN_READWRITE | SQLite.Constants.SQLITE_OPEN_CREATE),
-                    vfs);
+            dbx = (DatabaseX) DatabaseX
+                    .open(dbfile,
+                            readonly ? SQLite.Constants.SQLITE_OPEN_READONLY
+                                    : (SQLite.Constants.SQLITE_OPEN_READWRITE | SQLite.Constants.SQLITE_OPEN_CREATE),
+                            vfs);
             dbx.set_encoding(enc);
         } catch (SQLite.SQLiteException e) {
             throw new SQLException(e);
@@ -785,10 +784,6 @@ class DatabaseX extends SQLite.Database {
 
     static Object lock = new Object();
 
-    public DatabaseX() {
-        super();
-    }
-
     void wait(int ms) {
         try {
             synchronized (lock) {
@@ -798,8 +793,34 @@ class DatabaseX extends SQLite.Database {
         }
     }
 
+    public static Database open(String filename, int mode)
+            throws SQLite.SQLiteException {
+        Database db = new DatabaseX();
+
+        if ((mode & 0200) != 0) {
+            mode = SQLite.Constants.SQLITE_OPEN_READWRITE
+                    | SQLite.Constants.SQLITE_OPEN_CREATE;
+        } else if ((mode & 0400) != 0) {
+            mode = SQLite.Constants.SQLITE_OPEN_READONLY;
+        }
+        synchronized (db) {
+            try {
+                db._open4(filename, mode, null, false);
+            } catch (SQLite.SQLiteException se) {
+                throw se;
+            } catch (java.lang.OutOfMemoryError me) {
+                throw me;
+            } catch (Throwable t) {
+                db._open(filename, mode);
+            }
+        }
+
+        return db;
+    }
+
     @Override
-    public void exec(String sql, SQLite.Callback cb) throws SQLite.SQLiteException {
+    public void exec(String sql, SQLite.Callback cb)
+            throws SQLite.SQLiteException {
         super.exec(sql, cb);
         synchronized (lock) {
             lock.notifyAll();

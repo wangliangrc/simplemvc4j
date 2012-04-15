@@ -128,13 +128,13 @@ public class Database {
     /*
      * For backward compatibility to older sqlite.jar, sqlite_jni
      */
-    private native void _open(String filename, int mode)
+    protected native void _open(String filename, int mode)
             throws SQLite.SQLiteException;
 
     /*
      * Newer full interface
      */
-    private native void _open4(String filename, int mode, String vfs,
+    protected native void _open4(String filename, int mode, String vfs,
             boolean ver2) throws SQLite.SQLiteException;
 
     /**
