@@ -310,6 +310,8 @@ static void throwex(JNIEnv *env, const char *msg) {
     if (except) {
         (*env)->ThrowNew(env, except, msg);
     }
+
+    (*env)->DeleteLocalRef(env, except);
 }
 
 static void throwoom(JNIEnv *env, const char *msg) {
@@ -319,6 +321,8 @@ static void throwoom(JNIEnv *env, const char *msg) {
     if (except) {
         (*env)->ThrowNew(env, except, msg);
     }
+
+    (*env)->DeleteLocalRef(env, except);
 }
 
 static void throwclosed(JNIEnv *env) {
@@ -335,6 +339,8 @@ throwioex(JNIEnv *env, const char *msg)
     if (except) {
         (*env)->ThrowNew(env, except, msg);
     }
+
+    (*env)->DeleteLocalRef(env, except);
 }
 #endif
 
@@ -394,6 +400,8 @@ trans2iso(JNIEnv *env, int haveutf, jstring enc, jstring src, transstr *dest) {
     } else {
         (*env)->DeleteLocalRef(env, exc);
     }
+
+    (*env)->DeleteLocalRef(env, bytes);
     return dest->result;
 }
 
