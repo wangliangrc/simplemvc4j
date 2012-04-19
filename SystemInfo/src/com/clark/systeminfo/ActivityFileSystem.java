@@ -67,7 +67,9 @@ public class ActivityFileSystem extends AbstractTextActivity {
 
     private String getSize(long block, long blockSize) {
         long size = block * blockSize;
-        if (size < ONE_KB) {
+        if (size <= 0) {
+            return "0K";
+        } else if (size < ONE_KB) {
             return String.format("%.2f", size) + "K";
         } else if (size < ONE_MB) {
             return String.format("%.2f", size / ONE_KB) + "KB";
