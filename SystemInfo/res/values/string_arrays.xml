@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string-array name="main_list_items">
-        <item >显示</item>
-        <item >文件系统</item>
+        <item>显示</item>
+        <item>文件系统</item>
+        <item>应用程序</item>
     </string-array>
-    
+
 </resources>

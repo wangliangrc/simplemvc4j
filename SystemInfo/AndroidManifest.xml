@@ -21,6 +21,8 @@
         <activity android:name="ActivityDisplay"></activity>
         <activity android:name="ActivityFileSystem"></activity>
         <activity android:name="ActivityBuild"></activity>
+        <activity android:name="ActivityApplications"></activity>
+        <activity android:name="ActivityApplicationDetail"></activity>
     </application>
 
 </manifest>

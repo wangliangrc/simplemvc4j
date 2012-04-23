@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/basic_info"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/activity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Activity信息" />
+
+        <Button
+            android:id="@+id/service"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Service信息" />
+
+        <Button
+            android:id="@+id/broadcast_receiver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BroadcastReceiver信息" />
+
+        <Button
+            android:id="@+id/content_provider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ContentProvider信息" />
+
+        <Button
+            android:id="@+id/permission"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Permission信息" />
+
+        <Button
+            android:id="@+id/instrumentation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Instrumentation信息" />
+    </LinearLayout>
+
+</ScrollView>
