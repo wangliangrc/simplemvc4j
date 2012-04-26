@@ -24,6 +24,8 @@
         <activity android:name="ActivityApplications"></activity>
         <activity android:name="ActivityApplicationDetail"></activity>
         <activity android:name="ActivityTask"></activity>
+        <activity android:name="ActivityRunningApp"></activity>
+        <activity android:name="ActivityRunningAppDetail"></activity>
     </application>
 
 </manifest>
