@@ -5,6 +5,7 @@
         <item>显示</item>
         <item>文件系统</item>
         <item>应用程序</item>
+        <item>任务</item>
     </string-array>
 
 </resources>

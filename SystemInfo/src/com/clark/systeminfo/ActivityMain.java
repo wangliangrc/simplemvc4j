@@ -42,7 +42,10 @@ public class ActivityMain extends Activity implements OnItemClickListener {
                 startActivity(new Intent(getApplicationContext(),
                         ActivityApplications.class));
                 break;
-            default:
+
+            case 3:
+                startActivity(new Intent(getApplicationContext(),
+                        ActivityTask.class));
                 break;
         }
     }
