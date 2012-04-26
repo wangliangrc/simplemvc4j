@@ -24,49 +24,64 @@ import java.util.Map;
  * a value is accessed, it is moved to the head of a queue. When a value is
  * added to a full cache, the value at the end of that queue is evicted and may
  * become eligible for garbage collection.
- *
- * <p>If your cached values hold resources that need to be explicitly released,
+ * 
+ * <p>
+ * If your cached values hold resources that need to be explicitly released,
  * override {@link #entryRemoved}.
- *
- * <p>If a cache miss should be computed on demand for the corresponding keys,
+ * 
+ * <p>
+ * If a cache miss should be computed on demand for the corresponding keys,
  * override {@link #create}. This simplifies the calling code, allowing it to
  * assume a value will always be returned, even when there's a cache miss.
- *
- * <p>By default, the cache size is measured in the number of entries. Override
+ * 
+ * <p>
+ * By default, the cache size is measured in the number of entries. Override
  * {@link #sizeOf} to size the cache in different units. For example, this cache
  * is limited to 4MiB of bitmaps:
- * <pre>   {@code
+ * 
+ * <pre>
+ * {@code
  *   int cacheSize = 4 * 1024 * 1024; // 4MiB
  *   LruCache<String, Bitmap> bitmapCache = new LruCache<String, Bitmap>(cacheSize) {
  *       protected int sizeOf(String key, Bitmap value) {
  *           return value.getByteCount();
  *       }
- *   }}</pre>
- *
- * <p>This class is thread-safe. Perform multiple cache operations atomically by
- * synchronizing on the cache: <pre>   {@code
+ *   }}
+ * </pre>
+ * 
+ * <p>
+ * This class is thread-safe. Perform multiple cache operations atomically by
+ * synchronizing on the cache:
+ * 
+ * <pre>
+ * {@code
  *   synchronized (cache) {
  *     if (cache.get(key) == null) {
  *         cache.put(key, value);
  *     }
- *   }}</pre>
- *
- * <p>This class does not allow null to be used as a key or value. A return
- * value of null from {@link #get}, {@link #put} or {@link #remove} is
- * unambiguous: the key was not in the cache.
+ *   }}
+ * </pre>
+ * 
+ * <p>
+ * This class does not allow null to be used as a key or value. A return value
+ * of null from {@link #get}, {@link #put} or {@link #remove} is unambiguous:
+ * the key was not in the cache.
  */
 public class LruCache<K, V> {
     /**
-     * @param maxSize for caches that do not override {@link #sizeOf}, this is
-     *     the maximum number of entries in the cache. For all other caches,
-     *     this is the maximum sum of the sizes of the entries in this cache.
+     * @param maxSize
+     *            for caches that do not override {@link #sizeOf}, this is the
+     *            maximum number of entries in the cache. For all other caches,
+     *            this is the maximum sum of the sizes of the entries in this
+     *            cache.
      */
     public LruCache(int maxSize) {
         if (maxSize <= 0) {
             throw new IllegalArgumentException("maxSize <= 0");
         }
         this.maxSize = maxSize;
-        this.map = new LinkedHashMap<K, V>(0, 0.75f, true);
+        this.map = new LinkedHashMap<K, V>(0, 0.75f, true); // XXX true
+                                                            // 意思是迭代顺序为插入顺序的反序
     }
 
     /**
@@ -75,6 +90,7 @@ public class LruCache<K, V> {
     public synchronized final int createCount() {
         return createCount;
     }
+
     /**
      * Clear the cache, calling {@link #entryRemoved} on each removed entry.
      */
@@ -88,6 +104,7 @@ public class LruCache<K, V> {
     public synchronized final int evictionCount() {
         return evictionCount;
     }
+
     /**
      * Returns the value for {@code key} if it exists in the cache or can be
      * created by {@code #create}. If a value was returned, it is moved to the
@@ -110,10 +127,10 @@ public class LruCache<K, V> {
         }
 
         /*
-         * Attempt to create a value. This may take a long time, and the map
-         * may be different when create() returns. If a conflicting value was
-         * added to the map while create() was working, we leave that value in
-         * the map and release the created value.
+         * Attempt to create a value. This may take a long time, and the map may
+         * be different when create() returns. If a conflicting value was added
+         * to the map while create() was working, we leave that value in the map
+         * and release the created value.
          */
 
         V createdValue = create(key);
@@ -141,6 +158,7 @@ public class LruCache<K, V> {
             return createdValue;
         }
     }
+
     /**
      * Returns the number of times {@link #get} returned a value that was
      * already present in the cache.
@@ -148,6 +166,7 @@ public class LruCache<K, V> {
     public synchronized final int hitCount() {
         return hitCount;
     }
+
     /**
      * For caches that do not override {@link #sizeOf}, this returns the maximum
      * number of entries in the cache. For all other caches, this returns the
@@ -156,6 +175,7 @@ public class LruCache<K, V> {
     public synchronized final int maxSize() {
         return maxSize;
     }
+
     /**
      * Returns the number of times {@link #get} returned null or required a new
      * value to be created.
@@ -167,7 +187,7 @@ public class LruCache<K, V> {
     /**
      * Caches {@code value} for {@code key}. The value is moved to the head of
      * the queue.
-     *
+     * 
      * @return the previous value mapped by {@code key}.
      */
     public final V put(K key, V value) {
@@ -202,7 +222,7 @@ public class LruCache<K, V> {
 
     /**
      * Removes the entry for {@code key} if it exists.
-     *
+     * 
      * @return the previous value mapped by {@code key}.
      */
     public final V remove(K key) {
@@ -242,27 +262,30 @@ public class LruCache<K, V> {
         return new LinkedHashMap<K, V>(map);
     }
 
-    @Override public synchronized final String toString() {
+    @Override
+    public synchronized final String toString() {
         int accesses = hitCount + missCount;
         int hitPercent = accesses != 0 ? (100 * hitCount / accesses) : 0;
-        return String.format("LruCache[maxSize=%d,hits=%d,misses=%d,hitRate=%d%%]",
-                maxSize, hitCount, missCount, hitPercent);
+        return String.format(
+                "LruCache[maxSize=%d,hits=%d,misses=%d,hitRate=%d%%]", maxSize,
+                hitCount, missCount, hitPercent);
     }
 
     /**
      * Called after a cache miss to compute a value for the corresponding key.
      * Returns the computed value or null if no value can be computed. The
      * default implementation returns null.
-     *
-     * <p>The method is called without synchronization: other threads may
-     * access the cache while this method is executing.
-     *
-     * <p>If a value for {@code key} exists in the cache when this method
-     * returns, the created value will be released with {@link #entryRemoved}
-     * and discarded. This can occur when multiple threads request the same key
-     * at the same time (causing multiple values to be created), or when one
-     * thread calls {@link #put} while another is creating a value for the same
-     * key.
+     * 
+     * <p>
+     * The method is called without synchronization: other threads may access
+     * the cache while this method is executing.
+     * 
+     * <p>
+     * If a value for {@code key} exists in the cache when this method returns,
+     * the created value will be released with {@link #entryRemoved} and
+     * discarded. This can occur when multiple threads request the same key at
+     * the same time (causing multiple values to be created), or when one thread
+     * calls {@link #put} while another is creating a value for the same key.
      */
     protected V create(K key) {
         return null;
@@ -273,24 +296,29 @@ public class LruCache<K, V> {
      * invoked when a value is evicted to make space, removed by a call to
      * {@link #remove}, or replaced by a call to {@link #put}. The default
      * implementation does nothing.
-     *
-     * <p>The method is called without synchronization: other threads may
-     * access the cache while this method is executing.
-     *
-     * @param evicted true if the entry is being removed to make space, false
-     *     if the removal was caused by a {@link #put} or {@link #remove}.
-     * @param newValue the new value for {@code key}, if it exists. If non-null,
-     *     this removal was caused by a {@link #put}. Otherwise it was caused by
-     *     an eviction or a {@link #remove}.
+     * 
+     * <p>
+     * The method is called without synchronization: other threads may access
+     * the cache while this method is executing.
+     * 
+     * @param evicted
+     *            true if the entry is being removed to make space, false if the
+     *            removal was caused by a {@link #put} or {@link #remove}.
+     * @param newValue
+     *            the new value for {@code key}, if it exists. If non-null, this
+     *            removal was caused by a {@link #put}. Otherwise it was caused
+     *            by an eviction or a {@link #remove}.
      */
-    protected void entryRemoved(boolean evicted, K key, V oldValue, V newValue) {}
+    protected void entryRemoved(boolean evicted, K key, V oldValue, V newValue) {
+    }
 
     /**
      * Returns the size of the entry for {@code key} and {@code value} in
-     * user-defined units.  The default implementation returns 1 so that size
-     * is the number of entries and max size is the maximum number of entries.
-     *
-     * <p>An entry's size must not change while it is in the cache.
+     * user-defined units. The default implementation returns 1 so that size is
+     * the number of entries and max size is the maximum number of entries.
+     * 
+     * <p>
+     * An entry's size must not change while it is in the cache.
      */
     protected int sizeOf(K key, V value) {
         return 1;
@@ -299,14 +327,16 @@ public class LruCache<K, V> {
     private int safeSizeOf(K key, V value) {
         int result = sizeOf(key, value);
         if (result < 0) {
-            throw new IllegalStateException("Negative size: " + key + "=" + value);
+            throw new IllegalStateException("Negative size: " + key + "="
+                    + value);
         }
         return result;
     }
 
     /**
-     * @param maxSize the maximum size of the cache before returning. May be -1
-     *     to evict even 0-sized elements.
+     * @param maxSize
+     *            the maximum size of the cache before returning. May be -1 to
+     *            evict even 0-sized elements.
      */
     private void trimToSize(int maxSize) {
         while (true) {
@@ -322,7 +352,8 @@ public class LruCache<K, V> {
                     break;
                 }
 
-                Map.Entry<K, V> toEvict = map.entrySet().iterator().next(); // XXX map.eldest();
+                // XXX map.eldest();
+                Map.Entry<K, V> toEvict = map.entrySet().iterator().next();
                 if (toEvict == null) {
                     break;
                 }
