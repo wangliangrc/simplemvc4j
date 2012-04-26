@@ -21,12 +21,18 @@ public class ActivityTask extends ListActivity implements OnItemClickListener {
                 break;
 
             case 1:
+                startActivity(new Intent(getApplicationContext(),
+                        ActivityRunningService.class));
                 break;
 
             case 2:
+                startActivity(new Intent(getApplicationContext(),
+                        ActivityRunningTask.class));
                 break;
 
             case 3:
+                startActivity(new Intent(getApplicationContext(),
+                        ActivityRecentTask.class));
                 break;
         }
     }

@@ -5,6 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk android:minSdkVersion="14" />
+    <uses-permission android:name="android.permission.GET_TASKS"/>
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -26,6 +27,10 @@
         <activity android:name="ActivityTask"></activity>
         <activity android:name="ActivityRunningApp"></activity>
         <activity android:name="ActivityRunningAppDetail"></activity>
+        <activity android:name="ActivityRunningService"></activity>
+        <activity android:name="ActivityRunningTask"></activity>
+        <activity android:name="ActivityRecentTask"></activity>
+        <activity android:name="ActivityRunningServiceDetail"></activity>
     </application>
 
 </manifest>
