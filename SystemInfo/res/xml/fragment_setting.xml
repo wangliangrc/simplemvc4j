@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <SwitchPreference android:key="wifi_switch" android:title="Wi-Fi"/>
+    <SwitchPreference android:key="wifi_direct_switch" android:title="Wi-Fi Direct"/>
+    <SwitchPreference android:key="bluetooth_switch" android:title="Bluetooth"/>
+    <SwitchPreference android:key="flight_mode" android:title="飞行模式"/>
+    <SwitchPreference android:key="rotation" android:title="自动旋转屏幕"/>
+    <SwitchPreference android:key="google_location" android:title="Google 的位置服务"/>
+    <SwitchPreference android:key="gps_location" android:title="GPS 卫星"/>
+    <SwitchPreference android:key="wifi_location" android:title="Wi-Fi 定位"/>
+    <SwitchPreference android:key="unknowen_source" android:title="未知来源"/>
+    <SwitchPreference android:key="usb_debug" android:title="USB 调试"/>
+
+</PreferenceScreen>
