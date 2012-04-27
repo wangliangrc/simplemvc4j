@@ -79,6 +79,27 @@ public class MapArray<K, V> {
         }
     }
 
+    public Map.Entry<K, V> entryOfIndex(int index) {
+        r.lock();
+        try {
+            if (index >= 0 && index < internalMap.size()) {
+                Iterator<Map.Entry<K, V>> iterator = internalMap.entrySet()
+                        .iterator();
+                int i = 0;
+                while (i != index) {
+                    i++;
+                    iterator.next();
+                }
+
+                return iterator.next();
+            }
+            throw new IndexOutOfBoundsException("size:" + size()
+                    + " ,but request index is " + index);
+        } finally {
+            r.unlock();
+        }
+    }
+
     public int indexOfKey(K key) {
         r.lock();
         try {
