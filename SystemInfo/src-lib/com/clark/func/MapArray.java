@@ -82,7 +82,7 @@ public class MapArray<K, V> {
     public int indexOfKey(K key) {
         r.lock();
         try {
-            if (containsKey(key)) {
+            if (internalMap.containsKey(key)) {
                 int index = -1;
                 for (Map.Entry<K, V> entry : internalMap.entrySet()) {
                     index++;
@@ -100,7 +100,7 @@ public class MapArray<K, V> {
     public int indexOfValue(V value) {
         r.lock();
         try {
-            if (containsValue(value)) {
+            if (internalMap.containsValue(value)) {
                 int index = -1;
                 for (Map.Entry<K, V> entry : internalMap.entrySet()) {
                     index++;
@@ -127,7 +127,7 @@ public class MapArray<K, V> {
     public K keyOfIndex(int index) {
         r.lock();
         try {
-            if (containsIndex(index)) {
+            if (index >= 0 && index < internalMap.size()) {
                 Iterator<K> iterator = internalMap.keySet().iterator();
                 int i = 0;
                 while (i != index) {
@@ -147,7 +147,7 @@ public class MapArray<K, V> {
     public V remove(int index) {
         w.lock();
         try {
-            if (containsIndex(index)) {
+            if (index >= 0 && index < internalMap.size()) {
                 Iterator<K> iterator = internalMap.keySet().iterator();
                 int i = 0;
                 while (i != index) {
@@ -176,7 +176,7 @@ public class MapArray<K, V> {
     public K set(int index, V value) {
         w.lock();
         try {
-            if (containsIndex(index)) {
+            if (index >= 0 && index < internalMap.size()) {
                 Iterator<K> iterator = internalMap.keySet().iterator();
                 int i = 0;
                 while (i != index) {
@@ -207,7 +207,7 @@ public class MapArray<K, V> {
     public V valueOfIndex(int index) {
         r.lock();
         try {
-            if (containsIndex(index)) {
+            if (index >= 0 && index < internalMap.size()) {
                 Iterator<K> iterator = internalMap.keySet().iterator();
                 int i = 0;
                 while (i != index) {
