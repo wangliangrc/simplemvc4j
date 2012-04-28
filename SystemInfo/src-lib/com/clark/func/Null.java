@@ -5,7 +5,7 @@ import java.io.Serializable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Null implements Serializable, Parcelable {
+class Null implements Serializable, Parcelable {
 
     private static final long serialVersionUID = 4157873317800864560L;
 

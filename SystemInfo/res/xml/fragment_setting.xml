@@ -1,14 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    <SwitchPreference android:key="wifi_switch" android:title="Wi-Fi"/>
-    <SwitchPreference android:key="wifi_direct_switch" android:title="Wi-Fi Direct"/>
-    <SwitchPreference android:key="bluetooth_switch" android:title="Bluetooth"/>
-    <SwitchPreference android:key="flight_mode" android:title="飞行模式"/>
-    <SwitchPreference android:key="rotation" android:title="自动旋转屏幕"/>
-    <SwitchPreference android:key="google_location" android:title="Google 的位置服务"/>
-    <SwitchPreference android:key="gps_location" android:title="GPS 卫星"/>
-    <SwitchPreference android:key="wifi_location" android:title="Wi-Fi 定位"/>
-    <SwitchPreference android:key="unknowen_source" android:title="未知来源"/>
-    <SwitchPreference android:key="usb_debug" android:title="USB 调试"/>
+
+    <PreferenceScreen
+        android:orderingFromXml="true"
+        android:title="设置页跳转" >
+        <Preference
+            android:key="accessibility"
+            android:title="辅助功能" />
+        <Preference
+            android:key="add_account"
+            android:title="添加账户" />
+        <Preference
+            android:key="airplane_mode"
+            android:title="无线和网络(飞行模式)" />
+        <Preference
+            android:key="apn"
+            android:title="APN" />
+        <Preference
+            android:key="app_detail"
+            android:summary="package:com.android.providers.settings"
+            android:title="应用程序信息" />
+        <Preference
+            android:key="develop"
+            android:title="开发人员选项" />
+        <Preference
+            android:key="app_setting"
+            android:title="应用程序(已下载)" />
+        <Preference
+            android:key="bluetooth"
+            android:title="蓝牙" />
+        <Preference
+            android:key="2g/3g"
+            android:title="移动网络设置" />
+        <Preference
+            android:key="date"
+            android:title="日期和时间设置" />
+        <Preference
+            android:key="device_info"
+            android:title="手机状态" />
+        <Preference
+            android:key="display"
+            android:title="显示" />
+        <Preference
+            android:key="inputmethod"
+            android:title="语言和输入设备" />
+        <Preference
+            android:key="input_method_subtype"
+            android:title="输入法子选项" />
+        <Preference
+            android:key="internal_storage"
+            android:title="存储设置(内部)" />
+        <Preference
+            android:key="locale"
+            android:title="语言" />
+        <Preference
+            android:key="location_source"
+            android:title="位置服务" />
+        <Preference
+            android:key="manage_all_applications"
+            android:title="应用程序(全部)" />
+        <Preference 
+            android:key="manage_applications"
+            android:title="应用程序"/>
+        <Preference
+            android:key="memory_card"
+            android:title="存储设置(外部)" />
+        <Preference
+            android:key="network_operator"
+            android:title="可用网络" />
+        <Preference
+            android:key="nfcsharing"
+            android:title="NFC 共享" />
+        <Preference
+            android:key="privacy"
+            android:title="备份和重置" />
+        <Preference
+            android:key="quick_launch"
+            android:title="快速启动" />
+        <Preference
+            android:key="search"
+            android:title="搜索设置" />
+        <Preference
+            android:key="security"
+            android:title="安全" />
+        <Preference
+            android:key="setting"
+            android:title="设置" />
+        <Preference
+            android:key="sound"
+            android:title="声音" />
+        <Preference
+            android:key="sync"
+            android:title="账户与同步" />
+        <Preference
+            android:key="user_dictionary"
+            android:title="用户词典" />
+        <Preference
+            android:key="wifi_ip"
+            android:title="IP 设置" />
+        <Preference
+            android:key="wifi"
+            android:title="Wi-Fi" />
+        <Preference
+            android:key="wireless"
+            android:title="无线和网络(无线)" />
+    </PreferenceScreen>
+    <Preference
+        android:key="switches"
+        android:title="设置页开关选项" >
+    </Preference>
 
 </PreferenceScreen>
