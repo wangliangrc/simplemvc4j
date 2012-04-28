@@ -10,4 +10,9 @@ public class FragmentSwitch extends PreferenceFragment {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.fragment_switch);
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
 }
