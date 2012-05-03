@@ -72,12 +72,16 @@ public class ActivityApplicationDetail extends Activity implements
                 .append("\n");
         builder.append("versionCode：").append(packageInfo.versionCode)
                 .append("\n");
-        builder.append("第一次安装时间：")
-                .append(new Date(packageInfo.firstInstallTime).toLocaleString())
-                .append("\n");
-        if (packageInfo.lastUpdateTime > 0) {
-            builder.append("最近一次更新时间：")
-                    .append(new Date(packageInfo.lastUpdateTime).toLocaleString()).append("\n");
+        if (SUPPORT_APILEVEL_9) {
+            // XXX API Level 9
+            builder.append("第一次安装时间：")
+                    .append(new Date(packageInfo.firstInstallTime)
+                            .toLocaleString()).append("\n");
+            if (packageInfo.lastUpdateTime > 0) {
+                builder.append("最近一次更新时间：")
+                        .append(new Date(packageInfo.lastUpdateTime)
+                                .toLocaleString()).append("\n");
+            }
         }
         basicInfoView.setText(builder.toString());
     }
@@ -87,4 +91,6 @@ public class ActivityApplicationDetail extends Activity implements
     private TextView basicInfoView;
 
     private Button[] buttons = new Button[6];
+    private static final boolean SUPPORT_APILEVEL_9 = Utils
+            .supportOsVersion(9);
 }

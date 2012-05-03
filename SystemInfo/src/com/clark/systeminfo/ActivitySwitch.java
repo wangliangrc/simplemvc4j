@@ -1,9 +1,9 @@
 package com.clark.systeminfo;
 
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
+import android.preference.PreferenceActivity;
 
-public class FragmentSwitch extends PreferenceFragment {
+public class ActivitySwitch extends PreferenceActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -11,8 +11,4 @@ public class FragmentSwitch extends PreferenceFragment {
         addPreferencesFromResource(R.xml.fragment_switch);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
 }

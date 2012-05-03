@@ -1,8 +1,6 @@
 package com.clark.systeminfo;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -56,13 +54,8 @@ public class ActivityMain extends Activity implements OnItemClickListener {
                 break;
 
             case 5:
-                FragmentTransaction transaction = getFragmentManager()
-                        .beginTransaction();
-                transaction.add(R.id.frame, Fragment.instantiate(
-                        getApplicationContext(),
-                        FragmentSetting.class.getCanonicalName()));
-                transaction.addToBackStack(null);
-                transaction.commit();
+                startActivity(new Intent(getApplicationContext(),
+                        ActivitySetting.class));
                 break;
         }
     }

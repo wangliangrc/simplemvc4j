@@ -1,148 +1,27 @@
 package com.clark.systeminfo;
 
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceFragment;
+import android.preference.PreferenceActivity;
 import android.provider.Settings;
+import android.widget.Toast;
 
-public class FragmentSetting extends PreferenceFragment implements
+public class ActivitySetting extends PreferenceActivity implements
         OnPreferenceClickListener {
+
+    private static final boolean SUPPORT_APILEVEL_9 = Utils.supportOsVersion(9);
+    private static final boolean SUPPORT_APILEVEL_11 = Utils
+            .supportOsVersion(11);
+    private static final boolean SUPPORT_APILEVEL_14 = Utils
+            .supportOsVersion(14);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.fragment_setting);
-    }
-
-    @Override
-    public boolean onPreferenceClick(Preference preference) {
-        String key = preference.getKey();
-        String title = "请选择";
-        if (key.equals("accessibility")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_ACCESSIBILITY_SETTINGS), title));
-        } else if (key.equals("add_account")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_ADD_ACCOUNT), title));
-        } else if (key.equals("airplane_mode")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_AIRPLANE_MODE_SETTINGS), title));
-        } else if (key.equals("apn")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_APN_SETTINGS), title));
-        } else if (key.equals("app_detail")) {
-            Intent target = new Intent(
-                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-            target.setData(Uri.parse("package:com.android.providers.settings"));
-            startActivity(Intent.createChooser(target, title));
-        } else if (key.equals("develop")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS), title));
-        } else if (key.equals("app_setting")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_APPLICATION_SETTINGS), title));
-        } else if (key.equals("bluetooth")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_BLUETOOTH_SETTINGS), title));
-        } else if (key.equals("2g/3g")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_DATA_ROAMING_SETTINGS), title));
-        } else if (key.equals("date")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_DATE_SETTINGS), title));
-        } else if (key.equals("device_info")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_DEVICE_INFO_SETTINGS), title));
-        } else if (key.equals("display")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_DISPLAY_SETTINGS), title));
-        } else if (key.equals("inputmethod")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_INPUT_METHOD_SETTINGS), title));
-        } else if (key.equals("input_method_subtype")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_INPUT_METHOD_SUBTYPE_SETTINGS), title));
-        } else if (key.equals("internal_storage")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_INTERNAL_STORAGE_SETTINGS), title));
-        } else if (key.equals("locale")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_LOCALE_SETTINGS), title));
-        } else if (key.equals("location_source")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_LOCATION_SOURCE_SETTINGS), title));
-        } else if (key.equals("manage_all_applications")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS), title));
-        } else if (key.equals("memory_card")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_MEMORY_CARD_SETTINGS), title));
-        } else if (key.equals("network_operator")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_NETWORK_OPERATOR_SETTINGS), title));
-        } else if (key.equals("nfcsharing")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_NFCSHARING_SETTINGS), title));
-        } else if (key.equals("privacy")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_PRIVACY_SETTINGS), title));
-        } else if (key.equals("quick_launch")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_QUICK_LAUNCH_SETTINGS), title));
-        } else if (key.equals("search")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_SEARCH_SETTINGS), title));
-        } else if (key.equals("security")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_SECURITY_SETTINGS), title));
-        } else if (key.equals("setting")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_SETTINGS), title));
-        } else if (key.equals("sound")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_SOUND_SETTINGS), title));
-        } else if (key.equals("sync")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_SYNC_SETTINGS), title));
-        } else if (key.equals("user_dictionary")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_USER_DICTIONARY_SETTINGS), title));
-        } else if (key.equals("wifi_ip")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_WIFI_IP_SETTINGS), title));
-        } else if (key.equals("wifi")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_WIFI_SETTINGS), title));
-        } else if (key.equals("wireless")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_WIRELESS_SETTINGS), title));
-        } else if (key.equals("manage_applications")) {
-            startActivity(Intent.createChooser(new Intent(
-                    Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS), title));
-        } else if (key.equals("switches")) {
-            FragmentTransaction transaction = getFragmentManager()
-                    .beginTransaction();
-            transaction.add(R.id.frame, Fragment.instantiate(getActivity()
-                    .getApplicationContext(), FragmentSwitch.class
-                    .getCanonicalName()));
-            transaction.addToBackStack(null);
-            transaction.commit();
-        }
-
-        return true;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        getView().setBackgroundColor(Color.BLACK);
-
         findPreference("accessibility").setOnPreferenceClickListener(this);
         findPreference("add_account").setOnPreferenceClickListener(this);
         findPreference("airplane_mode").setOnPreferenceClickListener(this);
@@ -180,6 +59,145 @@ public class FragmentSetting extends PreferenceFragment implements
         findPreference("manage_applications")
                 .setOnPreferenceClickListener(this);
         findPreference("switches").setOnPreferenceClickListener(this);
+    }
+
+    @Override
+    public boolean onPreferenceClick(Preference preference) {
+        String key = preference.getKey();
+        String title = "请选择";
+        if (key.equals("accessibility")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_ACCESSIBILITY_SETTINGS), title));
+        } else if (key.equals("add_account")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_ADD_ACCOUNT), title));
+        } else if (key.equals("airplane_mode")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_AIRPLANE_MODE_SETTINGS), title));
+        } else if (key.equals("apn")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_APN_SETTINGS), title));
+        } else if (key.equals("app_detail")) {
+            if (SUPPORT_APILEVEL_9) {
+                // XXX API Level 9
+                Intent target = new Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                target.setData(Uri
+                        .parse("package:com.android.providers.settings"));
+                startActivity(Intent.createChooser(target, title));
+            } else {
+                Toast.makeText(getApplicationContext(), "Device 不支持",
+                        Toast.LENGTH_SHORT).show();
+            }
+        } else if (key.equals("develop")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS), title));
+        } else if (key.equals("app_setting")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_APPLICATION_SETTINGS), title));
+        } else if (key.equals("bluetooth")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_BLUETOOTH_SETTINGS), title));
+        } else if (key.equals("2g/3g")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_DATA_ROAMING_SETTINGS), title));
+        } else if (key.equals("date")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_DATE_SETTINGS), title));
+        } else if (key.equals("device_info")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_DEVICE_INFO_SETTINGS), title));
+        } else if (key.equals("display")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_DISPLAY_SETTINGS), title));
+        } else if (key.equals("inputmethod")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_INPUT_METHOD_SETTINGS), title));
+        } else if (key.equals("input_method_subtype")) {
+            if (SUPPORT_APILEVEL_11) {
+                // XXX API Level 11
+                startActivity(Intent.createChooser(new Intent(
+                        Settings.ACTION_INPUT_METHOD_SUBTYPE_SETTINGS), title));
+            } else {
+                Toast.makeText(getApplicationContext(), "Device 不支持",
+                        Toast.LENGTH_SHORT).show();
+            }
+        } else if (key.equals("internal_storage")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_INTERNAL_STORAGE_SETTINGS), title));
+        } else if (key.equals("locale")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_LOCALE_SETTINGS), title));
+        } else if (key.equals("location_source")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_LOCATION_SOURCE_SETTINGS), title));
+        } else if (key.equals("manage_all_applications")) {
+            if (SUPPORT_APILEVEL_9) {
+                // XXX API Level 9
+                startActivity(Intent.createChooser(new Intent(
+                        Settings.ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS),
+                        title));
+            } else {
+                Toast.makeText(getApplicationContext(), "Device 不支持",
+                        Toast.LENGTH_SHORT).show();
+            }
+        } else if (key.equals("memory_card")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_MEMORY_CARD_SETTINGS), title));
+        } else if (key.equals("network_operator")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_NETWORK_OPERATOR_SETTINGS), title));
+        } else if (key.equals("nfcsharing")) {
+            if (SUPPORT_APILEVEL_14) {
+                // XXX API Level 14
+                startActivity(Intent.createChooser(new Intent(
+                        Settings.ACTION_NFCSHARING_SETTINGS), title));
+            } else {
+                Toast.makeText(getApplicationContext(), "Device 不支持",
+                        Toast.LENGTH_SHORT).show();
+            }
+        } else if (key.equals("privacy")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_PRIVACY_SETTINGS), title));
+        } else if (key.equals("quick_launch")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_QUICK_LAUNCH_SETTINGS), title));
+        } else if (key.equals("search")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_SEARCH_SETTINGS), title));
+        } else if (key.equals("security")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_SECURITY_SETTINGS), title));
+        } else if (key.equals("setting")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_SETTINGS), title));
+        } else if (key.equals("sound")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_SOUND_SETTINGS), title));
+        } else if (key.equals("sync")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_SYNC_SETTINGS), title));
+        } else if (key.equals("user_dictionary")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_USER_DICTIONARY_SETTINGS), title));
+        } else if (key.equals("wifi_ip")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_WIFI_IP_SETTINGS), title));
+        } else if (key.equals("wifi")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_WIFI_SETTINGS), title));
+        } else if (key.equals("wireless")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_WIRELESS_SETTINGS), title));
+        } else if (key.equals("manage_applications")) {
+            startActivity(Intent.createChooser(new Intent(
+                    Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS), title));
+        } else if (key.equals("switches")) {
+            startActivity(new Intent(getApplicationContext(),
+                    ActivitySwitch.class));
+        }
+
+        return true;
     }
 
 }

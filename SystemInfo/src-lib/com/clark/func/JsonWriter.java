@@ -16,6 +16,8 @@
 
 package com.clark.func;
 
+import static com.clark.func.Functions.isEmpty;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Writer;
@@ -232,7 +234,7 @@ public final class JsonWriter implements Closeable {
      * @param indent a string containing only whitespace.
      */
     public void setIndent(String indent) {
-        if (indent.isEmpty()) {
+        if (isEmpty(indent)) {
             this.indent = null;
             this.separator = ":";
         } else {

@@ -38,6 +38,12 @@ public class ActivityRunningAppDetail extends AbstractTextActivity {
     }
 
     private String printImportance(int importance) {
+        if (SUPPORT_APILEVEL_9) {
+            // XXX API Level 9
+            if (importance == RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE) {
+                return "IMPORTANCE_PERCEPTIBLE";
+            }
+        }
         switch (importance) {
             case RunningAppProcessInfo.IMPORTANCE_BACKGROUND:
                 return "IMPORTANCE_BACKGROUND";
@@ -47,9 +53,6 @@ public class ActivityRunningAppDetail extends AbstractTextActivity {
 
             case RunningAppProcessInfo.IMPORTANCE_FOREGROUND:
                 return "IMPORTANCE_FOREGROUND";
-
-            case RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE:
-                return "IMPORTANCE_PERCEPTIBLE";
 
             case RunningAppProcessInfo.IMPORTANCE_SERVICE:
                 return "IMPORTANCE_SERVICE";
@@ -79,4 +82,5 @@ public class ActivityRunningAppDetail extends AbstractTextActivity {
     }
 
     private ActivityManager.RunningAppProcessInfo appProcessInfo;
+    private static final boolean SUPPORT_APILEVEL_9 = Utils.supportOsVersion(9);
 }

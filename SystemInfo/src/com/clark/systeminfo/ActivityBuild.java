@@ -5,6 +5,10 @@ import android.os.Bundle;
 
 public class ActivityBuild extends AbstractTextActivity {
 
+    private static final boolean SUPPORT_APILEVEL_9 = Utils.supportOsVersion(9);
+    private static final boolean SUPPORT_APILEVEL_14 = Utils
+            .supportOsVersion(14);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,8 +29,14 @@ public class ActivityBuild extends AbstractTextActivity {
         builder.append("\nHARDWARE : ").append(Build.HARDWARE);
         builder.append("\nID : ").append(Build.ID);
         builder.append("\nRADIO : ").append(Build.RADIO);
-        builder.append("\nRadioVersion : ").append(Build.getRadioVersion());
-        builder.append("\nSERIAL : ").append(Build.SERIAL);
+        if (SUPPORT_APILEVEL_14) {
+            // XXX API Level 14
+            builder.append("\nRadioVersion : ").append(Build.getRadioVersion());
+        }
+        if (SUPPORT_APILEVEL_9) {
+            // XXX API Level 9
+            builder.append("\nSERIAL : ").append(Build.SERIAL);
+        }
         builder.append("\nTAGS : ").append(Build.TAGS);
         builder.append("\nTIME : ").append(Build.TIME);
         builder.append("\nTYPE : ").append(Build.TYPE);
@@ -42,5 +52,4 @@ public class ActivityBuild extends AbstractTextActivity {
 
         mTextView.setText(builder.toString());
     }
-
 }

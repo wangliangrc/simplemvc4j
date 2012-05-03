@@ -46,14 +46,18 @@ public class ActivityTask extends ListActivity implements OnItemClickListener {
         StringBuilder builder = new StringBuilder();
         builder.append("memery:").append(activityManager.getMemoryClass())
                 .append("MB\n");
-        builder.append("large memery(android:largeHeap=\"true\"):")
-                .append(activityManager.getLargeMemoryClass()).append("MB\n");
-        builder.append("launcher large icon size:")
-                .append(activityManager.getLauncherLargeIconSize())
-                .append("px\n");
-        builder.append("launcher large icon density:")
-                .append(activityManager.getLauncherLargeIconDensity())
-                .append("\n");
+        if (SUPPORT_APILEVEL_11) {
+            // XXX API Level 11
+            builder.append("large memery(android:largeHeap=\"true\"):")
+                    .append(activityManager.getLargeMemoryClass())
+                    .append("MB\n");
+            builder.append("launcher large icon size:")
+                    .append(activityManager.getLauncherLargeIconSize())
+                    .append("px\n");
+            builder.append("launcher large icon density:")
+                    .append(activityManager.getLauncherLargeIconDensity())
+                    .append("\n");
+        }
         textView.setText(builder.toString());
 
         setListAdapter(new ArrayAdapter<String>(getApplicationContext(),
@@ -65,4 +69,7 @@ public class ActivityTask extends ListActivity implements OnItemClickListener {
     private ActivityManager activityManager;
 
     private TextView textView;
+
+    private static final boolean SUPPORT_APILEVEL_11 = Utils
+            .supportOsVersion(11);
 }
