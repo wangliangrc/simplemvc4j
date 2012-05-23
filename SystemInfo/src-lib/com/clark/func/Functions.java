@@ -166,6 +166,7 @@ public final class Functions {
             spot = startFinal;
             spot.add(Calendar.DATE, -1);
         }
+
         /**
          * Has the iterator not reached the end date yet?
          * 
@@ -242,6 +243,7 @@ public final class Functions {
             this.value = value;
             this.count = 1;
         }
+
         /**
          * Wraps a token around a repeated number of a value, for example it
          * would store 'yyyy' as a value for y and a count of 4.
@@ -4200,6 +4202,16 @@ public final class Functions {
         return (int) count;
     }
 
+    public static int copyWithClose(InputStream input, OutputStream output)
+            throws IOException {
+        try {
+            return copy(input, output);
+        } finally {
+            closeQuietly(input);
+            closeQuietly(output);
+        }
+    }
+
     /**
      * Copy bytes from an <code>InputStream</code> to chars on a
      * <code>Writer</code> using the default character encoding of the platform.
@@ -4223,6 +4235,16 @@ public final class Functions {
             throws IOException {
         InputStreamReader in = new InputStreamReader(input);
         copy(in, output);
+    }
+
+    public static void copyWithClose(InputStream input, Writer output)
+            throws IOException {
+        try {
+            copy(input, output);
+        } finally {
+            closeQuietly(input);
+            closeQuietly(output);
+        }
     }
 
     /**
@@ -4259,6 +4281,16 @@ public final class Functions {
         }
     }
 
+    public static void copyWithClose(InputStream input, Writer output,
+            String encoding) throws IOException {
+        try {
+            copy(input, output, encoding);
+        } finally {
+            closeQuietly(input);
+            closeQuietly(output);
+        }
+    }
+
     /**
      * Copy chars from a <code>Reader</code> to bytes on an
      * <code>OutputStream</code> using the default character encoding of the
@@ -4289,6 +4321,16 @@ public final class Functions {
         // Unless anyone is planning on rewriting OutputStreamWriter, we
         // have to flush here.
         out.flush();
+    }
+
+    public static void copyWithClose(Reader input, OutputStream output)
+            throws IOException {
+        try {
+            copy(input, output);
+        } finally {
+            closeQuietly(input);
+            closeQuietly(output);
+        }
     }
 
     /**
@@ -4332,6 +4374,16 @@ public final class Functions {
         }
     }
 
+    public static void copyWithClose(Reader input, OutputStream output,
+            String encoding) throws IOException {
+        try {
+            copy(input, output, encoding);
+        } finally {
+            closeQuietly(input);
+            closeQuietly(output);
+        }
+    }
+
     // copy from Reader
     // -----------------------------------------------------------------------
     /**
@@ -4362,6 +4414,16 @@ public final class Functions {
             return -1;
         }
         return (int) count;
+    }
+
+    public static int copyWithClose(Reader input, Writer output)
+            throws IOException {
+        try {
+            return copy(input, output);
+        } finally {
+            closeQuietly(input);
+            closeQuietly(output);
+        }
     }
 
     /**
@@ -6579,6 +6641,20 @@ public final class Functions {
         }
     }
 
+    public static void forceCreateNewFile(File file) throws IOException {
+        final File parent = file.getParentFile();
+
+        if (parent != null && !parent.exists()) {
+            forceMkdir(parent);
+        }
+
+        if (!file.createNewFile()) {
+            if (!file.isFile()) {
+                throw new IOException("Unable to create file " + file);
+            }
+        }
+    }
+
     /**
      * <p>
      * Formats a calendar into a specific pattern.
@@ -6621,6 +6697,7 @@ public final class Functions {
             Locale locale) {
         return formatDate(calendar, pattern, null, locale);
     }
+
     /**
      * <p>
      * Formats a calendar into a specific pattern in a time zone.
@@ -6640,6 +6717,7 @@ public final class Functions {
             TimeZone timeZone) {
         return formatDate(calendar, pattern, timeZone, null);
     }
+
     /**
      * <p>
      * Formats a calendar into a specific pattern in a time zone and locale.
@@ -6663,6 +6741,7 @@ public final class Functions {
                 locale);
         return df.format(calendar);
     }
+
     /**
      * <p>
      * Formats a date/time into a specific pattern.
@@ -6677,6 +6756,7 @@ public final class Functions {
     public static String formatDate(Date date, String pattern) {
         return formatDate(date, pattern, null, null);
     }
+
     /**
      * <p>
      * Formats a date/time into a specific pattern in a locale.
@@ -6693,6 +6773,7 @@ public final class Functions {
     public static String formatDate(Date date, String pattern, Locale locale) {
         return formatDate(date, pattern, null, locale);
     }
+
     /**
      * <p>
      * Formats a date/time into a specific pattern in a time zone.
@@ -6709,6 +6790,7 @@ public final class Functions {
     public static String formatDate(Date date, String pattern, TimeZone timeZone) {
         return formatDate(date, pattern, timeZone, null);
     }
+
     /**
      * <p>
      * Formats a date/time into a specific pattern in a time zone and locale.
@@ -6730,6 +6812,7 @@ public final class Functions {
                 locale);
         return df.format(date);
     }
+
     /**
      * <p>
      * Formats a date/time into a specific pattern.
@@ -6744,6 +6827,7 @@ public final class Functions {
     public static String formatDate(long millis, String pattern) {
         return formatDate(new Date(millis), pattern, null, null);
     }
+
     /**
      * <p>
      * Formats a date/time into a specific pattern in a locale.
@@ -6760,6 +6844,7 @@ public final class Functions {
     public static String formatDate(long millis, String pattern, Locale locale) {
         return formatDate(new Date(millis), pattern, null, locale);
     }
+
     /**
      * <p>
      * Formats a date/time into a specific pattern in a time zone.
@@ -6777,6 +6862,7 @@ public final class Functions {
             TimeZone timeZone) {
         return formatDate(new Date(millis), pattern, timeZone, null);
     }
+
     /**
      * <p>
      * Formats a date/time into a specific pattern in a time zone and locale.
@@ -6796,6 +6882,7 @@ public final class Functions {
             TimeZone timeZone, Locale locale) {
         return formatDate(new Date(millis), pattern, timeZone, locale);
     }
+
     /**
      * <p>
      * Formats the time gap as a string, using the specified format, and padding
@@ -6816,6 +6903,7 @@ public final class Functions {
     public static String formatDuration(long durationMillis, String format) {
         return formatDuration(durationMillis, format, true);
     }
+
     /**
      * <p>
      * Formats the time gap as a string, using the specified format. Padding the
@@ -6870,6 +6958,7 @@ public final class Functions {
         return formatPeriodTime(tokens, 0, 0, days, hours, minutes, seconds,
                 milliseconds, padWithZeros);
     }
+
     // -----------------------------------------------------------------------
     /**
      * <p>
@@ -6887,6 +6976,7 @@ public final class Functions {
     public static String formatDurationHMS(long durationMillis) {
         return formatDuration(durationMillis, "H:mm:ss.SSS");
     }
+
     /**
      * <p>
      * Formats the time gap as a string.
@@ -6909,6 +6999,7 @@ public final class Functions {
         return formatDuration(durationMillis, ISO_EXTENDED_FORMAT_PATTERN,
                 false);
     }
+
     /**
      * <p>
      * Formats an elapsed time into a plurialization correct string.
@@ -6979,6 +7070,7 @@ public final class Functions {
         duration = replaceOnce(duration, " 1 days", " 1 day");
         return duration.trim();
     }
+
     /**
      * <p>
      * Formats the time gap as a string, using the specified format. Padding the
@@ -6997,6 +7089,7 @@ public final class Functions {
         return formatPeriod(startMillis, endMillis, format, true,
                 TimeZone.getDefault());
     }
+
     /**
      * <p>
      * Formats the time gap as a string, using the specified format. Padding the
@@ -7167,6 +7260,7 @@ public final class Functions {
         return formatPeriodTime(tokens, years, months, days, hours, minutes,
                 seconds, milliseconds, padWithZeros);
     }
+
     // -----------------------------------------------------------------------
     /**
      * <p>
@@ -13929,6 +14023,7 @@ public final class Functions {
     public static boolean isNotEmpty(byte[] array) {
         return (array != null && array.length != 0);
     }
+
     /**
      * <p>
      * Checks if an array of primitive chars is not empty or not
@@ -18772,6 +18867,7 @@ public final class Functions {
     public static <T extends CharSequence> T notBlank(T chars) {
         return notBlank(chars, DEFAULT_NOT_BLANK_EX_MESSAGE);
     }
+
     /**
      * <p>
      * Validate that the specified argument character sequence is neither
@@ -18837,6 +18933,7 @@ public final class Functions {
     public static <T extends Collection<?>> T notEmpty(T collection) {
         return notEmpty(collection, DEFAULT_NOT_EMPTY_COLLECTION_EX_MESSAGE);
     }
+
     /**
      * <p>
      * Validate that the specified argument map is neither <code>null</code> nor
@@ -21003,6 +21100,7 @@ public final class Functions {
         // already forced access above, don't repeat it here:
         return readField(field, target);
     }
+
     /**
      * Reads the contents of a file into a byte array. The file is always
      * closed.
@@ -21023,6 +21121,7 @@ public final class Functions {
             closeQuietly(in);
         }
     }
+
     /**
      * Reads the contents of a file into a String using the default encoding for
      * the VM. The file is always closed.
@@ -21037,6 +21136,7 @@ public final class Functions {
     public static String readFileToString(File file) throws IOException {
         return readFileToString(file, null);
     }
+
     // -----------------------------------------------------------------------
     /**
      * Reads the contents of a file into a String. The file is always closed.
@@ -21061,6 +21161,7 @@ public final class Functions {
             closeQuietly(in);
         }
     }
+
     /**
      * Reads the contents of a file line by line to a List of Strings using the
      * default encoding for the VM. The file is always closed.
@@ -21076,6 +21177,7 @@ public final class Functions {
     public static List<String> readLines(File file) throws IOException {
         return readLines(file, null);
     }
+
     /**
      * Reads the contents of a file line by line to a List of Strings. The file
      * is always closed.
@@ -21102,6 +21204,7 @@ public final class Functions {
             closeQuietly(in);
         }
     }
+
     // readLines
     // -----------------------------------------------------------------------
     /**
@@ -21124,6 +21227,7 @@ public final class Functions {
         InputStreamReader reader = new InputStreamReader(input);
         return readLines(reader);
     }
+
     /**
      * Get the contents of an <code>InputStream</code> as a list of Strings, one
      * entry per line, using the specified character encoding.
@@ -21154,6 +21258,7 @@ public final class Functions {
             return readLines(reader);
         }
     }
+
     /**
      * Get the contents of a <code>Reader</code> as a list of Strings, one entry
      * per line.
@@ -21180,6 +21285,7 @@ public final class Functions {
         }
         return list;
     }
+
     /**
      * Read the named public static field. Superclasses will be considered.
      * 
@@ -21197,6 +21303,7 @@ public final class Functions {
             throws IllegalAccessException {
         return readStaticField(cls, fieldName, false);
     }
+
     /**
      * Read the named static field. Superclasses will be considered.
      * 
@@ -21224,6 +21331,7 @@ public final class Functions {
         // already forced access above, don't repeat it here:
         return readStaticField(field, false);
     }
+
     /**
      * Read an accessible static Field.
      * 
@@ -21239,6 +21347,7 @@ public final class Functions {
             throws IllegalAccessException {
         return readStaticField(field, false);
     }
+
     /**
      * Read a static Field.
      * 
@@ -21264,6 +21373,7 @@ public final class Functions {
         }
         return readField(field, (Object) null, forceAccess);
     }
+
     /**
      * Reads a "double" value from a byte array at a given offset. The value is
      * converted to the opposed endian system while reading.
@@ -21277,6 +21387,7 @@ public final class Functions {
     public static double readSwappedDouble(byte[] data, int offset) {
         return Double.longBitsToDouble(readSwappedLong(data, offset));
     }
+
     /**
      * Reads a "double" value from an InputStream. The value is converted to the
      * opposed endian system while reading.
@@ -21291,6 +21402,7 @@ public final class Functions {
             throws IOException {
         return Double.longBitsToDouble(readSwappedLong(input));
     }
+
     /**
      * Reads a "float" value from a byte array at a given offset. The value is
      * converted to the opposed endian system while reading.
@@ -21304,6 +21416,7 @@ public final class Functions {
     public static float readSwappedFloat(byte[] data, int offset) {
         return Float.intBitsToFloat(readSwappedInteger(data, offset));
     }
+
     /**
      * Reads a "float" value from an InputStream. The value is converted to the
      * opposed endian system while reading.
@@ -21317,6 +21430,7 @@ public final class Functions {
     public static float readSwappedFloat(InputStream input) throws IOException {
         return Float.intBitsToFloat(readSwappedInteger(input));
     }
+
     /**
      * Reads a "int" value from a byte array at a given offset. The value is
      * converted to the opposed endian system while reading.
@@ -22700,6 +22814,7 @@ public final class Functions {
             String replacement) {
         return replace(text, searchString, replacement, -1);
     }
+
     /**
      * <p>
      * Replaces a String with another String inside a larger String, for the
@@ -22764,6 +22879,7 @@ public final class Functions {
         buf.append(text.substring(start));
         return buf.toString();
     }
+
     // Replace, character based
     // -----------------------------------------------------------------------
     /**
@@ -22800,6 +22916,7 @@ public final class Functions {
         }
         return str.replace(searchChar, replaceChar);
     }
+
     /**
      * <p>
      * Replaces multiple characters in a String in one go. This method can also
@@ -22875,6 +22992,7 @@ public final class Functions {
         }
         return str;
     }
+
     /**
      * <p>
      * Replaces all occurrences of Strings within another String.
@@ -22918,6 +23036,7 @@ public final class Functions {
             String[] replacementList) {
         return replaceEach(text, searchList, replacementList, false, 0);
     }
+
     /**
      * <p>
      * Replaces all occurrences of Strings within another String.
@@ -22970,6 +23089,7 @@ public final class Functions {
         int timeToLive = searchList == null ? 0 : searchList.length;
         return replaceEach(text, searchList, replacementList, true, timeToLive);
     }
+
     // Replacing
     // -----------------------------------------------------------------------
     /**
@@ -23007,6 +23127,7 @@ public final class Functions {
             String replacement) {
         return replace(text, searchString, replacement, 1);
     }
+
     /**
      * <p>
      * Reverses the order of the given array.
@@ -23034,6 +23155,7 @@ public final class Functions {
             i++;
         }
     }
+
     /**
      * <p>
      * Reverses the order of the given array.
@@ -23061,6 +23183,7 @@ public final class Functions {
             i++;
         }
     }
+
     /**
      * <p>
      * Reverses the order of the given array.
@@ -23088,6 +23211,7 @@ public final class Functions {
             i++;
         }
     }
+
     /**
      * <p>
      * Reverses the order of the given array.
@@ -23115,6 +23239,7 @@ public final class Functions {
             i++;
         }
     }
+
     /**
      * <p>
      * Reverses the order of the given array.
@@ -23142,6 +23267,7 @@ public final class Functions {
             i++;
         }
     }
+
     /**
      * <p>
      * Reverses the order of the given array.
@@ -23169,6 +23295,7 @@ public final class Functions {
             i++;
         }
     }
+
     /**
      * <p>
      * Reverses the order of the given array.
@@ -23196,6 +23323,7 @@ public final class Functions {
             i++;
         }
     }
+
     // Reverse
     // -----------------------------------------------------------------------
     /**
@@ -23229,6 +23357,7 @@ public final class Functions {
             i++;
         }
     }
+
     /**
      * <p>
      * Reverses the order of the given array.
@@ -23256,6 +23385,7 @@ public final class Functions {
             i++;
         }
     }
+
     // Reversing
     // -----------------------------------------------------------------------
     /**
@@ -23283,6 +23413,7 @@ public final class Functions {
         }
         return new StringBuilder(str).reverse().toString();
     }
+
     /**
      * <p>
      * Reverses a String that is delimited by a specific character.
@@ -27695,6 +27826,7 @@ public final class Functions {
         }
         return result;
     }
+
     /**
      * <p>
      * Converts an array of primitive ints to objects.
@@ -27722,6 +27854,7 @@ public final class Functions {
         }
         return result;
     }
+
     /**
      * <p>
      * Converts an array of primitive longs to objects.
@@ -27748,6 +27881,7 @@ public final class Functions {
         }
         return result;
     }
+
     /**
      * <p>
      * Converts an array of primitive shorts to objects.
@@ -27774,6 +27908,7 @@ public final class Functions {
         }
         return result;
     }
+
     // Boolean array converters
     // ----------------------------------------------------------------------
     /**
@@ -30773,6 +30908,7 @@ public final class Functions {
         }
         return decoded;
     }
+
     // -----------------------------------------------------------------------
     /**
      * <p>
@@ -30860,6 +30996,7 @@ public final class Functions {
         }
         return buffer.toString();
     }
+
     // -----------------------------------------------------------------------
     /**
      * Returns the free space on a drive or volume in a cross-platform manner.
@@ -30910,6 +31047,7 @@ public final class Functions {
                         "Exception caught when determining operating system");
         }
     }
+
     // -----------------------------------------------------------------------
     /**
      * Find free space on the *nix platform using the 'df' command.
@@ -30975,6 +31113,7 @@ public final class Functions {
         String freeSpace = tok.nextToken();
         return parseBytes(freeSpace, path);
     }
+
     // -----------------------------------------------------------------------
     /**
      * Find free space on the Windows platform using the 'dir' command.
@@ -31015,6 +31154,7 @@ public final class Functions {
         throw new IOException("Command line 'dir /-c' did not return any info "
                 + "for path '" + path + "'");
     }
+
     /**
      * <p>
      * Produces a <code>List</code> of stack frames - the message is not
@@ -31051,6 +31191,7 @@ public final class Functions {
         }
         return list;
     }
+
     // -----------------------------------------------------------------------
     /**
      * <p>
