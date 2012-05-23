@@ -44,7 +44,7 @@ public class ActivityTask extends ListActivity implements OnItemClickListener {
         setContentView(R.layout.activity_task);
         textView = (TextView) findViewById(R.id.text);
         StringBuilder builder = new StringBuilder();
-        builder.append("memery:").append(activityManager.getMemoryClass())
+        builder.append("MemoryClass:").append(activityManager.getMemoryClass())
                 .append("MB\n");
         if (SUPPORT_APILEVEL_11) {
             // XXX API Level 11
@@ -58,12 +58,37 @@ public class ActivityTask extends ListActivity implements OnItemClickListener {
                     .append(activityManager.getLauncherLargeIconDensity())
                     .append("\n");
         }
+
+        Runtime runtime = Runtime.getRuntime();
+        final int cpus = runtime.availableProcessors();
+        long freeMemory = runtime.freeMemory();
+        long totalMemory = runtime.totalMemory();
+        long maxMemory = runtime.maxMemory();
+        builder.append("cpus: ").append(cpus).append("\n");
+        builder.append("当前 Java heap free space: ")
+                .append(formatSize(freeMemory)).append("\n");
+        builder.append("当前 Java heap total space: ")
+                .append(formatSize(totalMemory)).append("\n");
+        builder.append("当前 Java heap max space: ")
+                .append(formatSize(maxMemory)).append("\n");
         textView.setText(builder.toString());
 
         setListAdapter(new ArrayAdapter<String>(getApplicationContext(),
                 android.R.layout.simple_list_item_1, android.R.id.text1,
                 getResources().getStringArray(R.array.task_list_items)));
         getListView().setOnItemClickListener(this);
+    }
+
+    private static String formatSize(long size) {
+        if (size < 1024) {
+            return size + "B";
+        } else if (size < 1024 * 1024) {
+            return size / 1024 + "KB";
+        } else if (size < 1024 * 1024 * 1024) {
+            return size / (1024 * 1024) + "MB";
+        } else {
+            return size / (1024 * 1024 * 1024) + "GB";
+        }
     }
 
     private ActivityManager activityManager;
