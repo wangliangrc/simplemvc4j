@@ -10,6 +10,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.clark.func.OverscrollUtils;
+
 public class ActivityTask extends ListActivity implements OnItemClickListener {
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position,
@@ -73,6 +75,7 @@ public class ActivityTask extends ListActivity implements OnItemClickListener {
                 .append(formatSize(maxMemory)).append("\n");
         textView.setText(builder.toString());
 
+        OverscrollUtils.initAbsListView(getListView());
         setListAdapter(new ArrayAdapter<String>(getApplicationContext(),
                 android.R.layout.simple_list_item_1, android.R.id.text1,
                 getResources().getStringArray(R.array.task_list_items)));

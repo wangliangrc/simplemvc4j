@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.clark.func.OverscrollUtils;
+
 public class ActivityRunningTask extends ListActivity {
 
     private class MyAdapter extends BaseAdapter {
@@ -42,6 +44,7 @@ public class ActivityRunningTask extends ListActivity {
         activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         super.onCreate(savedInstanceState);
         runningTasks = activityManager.getRunningTasks(1000);
+        OverscrollUtils.initAbsListView(getListView());
         setListAdapter(new MyAdapter());
     }
 

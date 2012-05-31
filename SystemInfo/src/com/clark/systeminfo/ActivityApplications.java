@@ -19,6 +19,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.clark.func.OverscrollUtils;
+
 public class ActivityApplications extends ListActivity implements
         OnItemClickListener {
 
@@ -137,6 +139,7 @@ public class ActivityApplications extends ListActivity implements
         layoutInflater = getLayoutInflater();
         super.onCreate(savedInstanceState);
         ListView listView = getListView();
+        OverscrollUtils.initAbsListView(listView);
         setListAdapter(new MyAdapter());
         listView.setOnItemClickListener(this);
         if (savedInstanceState == null) {

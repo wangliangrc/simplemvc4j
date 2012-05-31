@@ -10,6 +10,8 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
+import com.clark.func.OverscrollUtils;
+
 public class ActivityMain extends Activity implements OnItemClickListener {
 
     @Override
@@ -17,6 +19,7 @@ public class ActivityMain extends Activity implements OnItemClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mListView = (ListView) findViewById(R.id.list);
+        OverscrollUtils.initAbsListView(mListView);
         mItems = getResources().getStringArray(R.array.main_list_items);
         mListAdapter = new ArrayAdapter<String>(getApplicationContext(),
                 android.R.layout.simple_list_item_1, android.R.id.text1, mItems);

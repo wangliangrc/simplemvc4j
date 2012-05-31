@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.clark.func.MapArray;
+import com.clark.func.OverscrollUtils;
 
 public class ActivityRunningService extends ListActivity implements
         OnItemClickListener {
@@ -123,6 +124,7 @@ public class ActivityRunningService extends ListActivity implements
     private void init() {
         setListAdapter(new MyAdapter());
         getListView().setOnItemClickListener(this);
+        OverscrollUtils.initAbsListView(getListView());
     }
 
     private ActivityManager activityManager;
