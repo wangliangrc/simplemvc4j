@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="MyTheme" parent="android:Theme">
+        <item name="android:windowAnimationStyle">@style/MyAnimationActivity</item>
+    </style>
+
+    <style name="MyAnimationActivity">
+        <item name="android:activityOpenEnterAnimation">@anim/enter_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/exit_left</item>
+        <item name="android:activityCloseEnterAnimation">@anim/enter_left</item>
+        <item name="android:activityCloseExitAnimation">@anim/exit_right</item>
+        
+        <item name="android:taskOpenEnterAnimation">@anim/enter_right</item>
+        <item name="android:taskOpenExitAnimation">@anim/exit_left</item>
+        <item name="android:taskCloseEnterAnimation">@anim/enter_left</item>
+        <item name="android:taskCloseExitAnimation">@anim/exit_right</item>
+        
+        <item name="android:taskToFrontEnterAnimation">@anim/enter_right</item>
+        <item name="android:taskToFrontExitAnimation">@anim/exit_left</item>
+        <item name="android:taskToBackEnterAnimation">@anim/enter_left</item>
+        <item name="android:taskToBackExitAnimation">@anim/exit_right</item>
+        
+        <!-- 从程序退回到桌面，相当于打开wallpaper。如果不是我们自己定制的Launcher程序，这两个属性没用？ -->
+        <item name="android:wallpaperOpenEnterAnimation">@anim/enter_left</item>
+        <item name="android:wallpaperOpenExitAnimation">@anim/exit_right</item>
+        
+        <!-- 从桌面点击图标进入程序，相当于关闭wallpaper -->
+        <item name="android:wallpaperCloseEnterAnimation">@anim/enter_right</item>
+        <item name="android:wallpaperCloseExitAnimation">@anim/exit_left</item>
+        
+        <item name="android:wallpaperIntraOpenEnterAnimation">@anim/enter_right</item>
+        <item name="android:wallpaperIntraOpenExitAnimation">@anim/exit_left</item>
+        <item name="android:wallpaperIntraCloseEnterAnimation">@anim/enter_left</item>
+        <item name="android:wallpaperIntraCloseExitAnimation">@anim/exit_right</item>
+        
+        <item name="android:fragmentOpenEnterAnimation">@animator/fragment_open_enter</item>
+        <item name="android:fragmentOpenExitAnimation">@animator/fragment_open_exit</item>
+        <item name="android:fragmentCloseEnterAnimation">@animator/fragment_close_enter</item>
+        <item name="android:fragmentCloseExitAnimation">@animator/fragment_close_exit</item>
+        <item name="android:fragmentFadeEnterAnimation">@animator/fragment_fade_enter</item>
+        <item name="android:fragmentFadeExitAnimation">@animator/fragment_fade_exit</item>
+    </style>
+
+</resources>
