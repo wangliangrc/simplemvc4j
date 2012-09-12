@@ -4,7 +4,7 @@ package org.osmdroid.tileprovider;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.osmdroid.tileprovider.constants.OpenStreetMapTileProviderConstants;
+import org.osmdroid.tileprovider.constants.MapTileProviderConstantsFactory;
 
 import android.graphics.drawable.Drawable;
 
@@ -13,7 +13,7 @@ import android.graphics.drawable.Drawable;
  * @author Nicolas Gramlich
  * 
  */
-public final class MapTileCache implements OpenStreetMapTileProviderConstants {
+public final class MapTileCache {
     // ===========================================================
     // Constants
     // ===========================================================
@@ -31,7 +31,8 @@ public final class MapTileCache implements OpenStreetMapTileProviderConstants {
     // ===========================================================
 
     public MapTileCache() {
-        this(CACHE_MAPTILECOUNT_DEFAULT);
+        this(MapTileProviderConstantsFactory.getDefault()
+                .getCacheMaptileCountDefault());
     }
 
     /**

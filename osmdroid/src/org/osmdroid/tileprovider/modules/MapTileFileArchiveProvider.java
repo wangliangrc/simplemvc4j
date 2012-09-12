@@ -9,6 +9,8 @@ import org.osmdroid.tileprovider.IRegisterReceiver;
 import org.osmdroid.tileprovider.MapTile;
 import org.osmdroid.tileprovider.MapTileProviderBase;
 import org.osmdroid.tileprovider.MapTileRequestState;
+import org.osmdroid.tileprovider.constants.IMapTileProviderConstants;
+import org.osmdroid.tileprovider.constants.MapTileProviderConstantsFactory;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.util.StreamUtils;
 import org.slf4j.Logger;
@@ -34,6 +36,9 @@ public class MapTileFileArchiveProvider extends MapTileFileStorageProviderBase {
     private static final Logger logger = LoggerFactory
             .getLogger(MapTileFileArchiveProvider.class);
 
+    private static IMapTileProviderConstants tileProviderConstants = MapTileProviderConstantsFactory
+            .getDefault();
+
     // ===========================================================
     // Fields
     // ===========================================================
@@ -57,8 +62,9 @@ public class MapTileFileArchiveProvider extends MapTileFileStorageProviderBase {
     public MapTileFileArchiveProvider(
             final IRegisterReceiver pRegisterReceiver,
             final ITileSource pTileSource, final IArchiveFile[] pArchives) {
-        super(pRegisterReceiver, NUMBER_OF_TILE_FILESYSTEM_THREADS,
-                TILE_FILESYSTEM_MAXIMUM_QUEUE_SIZE);
+        super(pRegisterReceiver, tileProviderConstants
+                .getNumberOfTileFilesystemThreads(), tileProviderConstants
+                .getTileFilesystemMaximumQueueSize());
 
         mTileSource = pTileSource;
 
@@ -111,13 +117,13 @@ public class MapTileFileArchiveProvider extends MapTileFileStorageProviderBase {
     @Override
     public int getMinimumZoomLevel() {
         return mTileSource != null ? mTileSource.getMinimumZoomLevel()
-                : MINIMUM_ZOOMLEVEL;
+                : tileProviderConstants.getMinimumZoomlevel();
     }
 
     @Override
     public int getMaximumZoomLevel() {
         return mTileSource != null ? mTileSource.getMaximumZoomLevel()
-                : MAXIMUM_ZOOMLEVEL;
+                : tileProviderConstants.getMaximumZoomlevel();
     }
 
     @Override
@@ -160,7 +166,8 @@ public class MapTileFileArchiveProvider extends MapTileFileStorageProviderBase {
         }
 
         // path should be optionally configurable
-        final File[] files = OSMDROID_PATH.listFiles();
+        final File[] files = tileProviderConstants.getOsmdroidPath()
+                .listFiles();
         if (files != null) {
             for (final File file : files) {
                 final IArchiveFile archiveFile = ArchiveFileFactory
@@ -177,7 +184,7 @@ public class MapTileFileArchiveProvider extends MapTileFileStorageProviderBase {
             final InputStream in = archiveFile.getInputStream(mTileSource,
                     pTile);
             if (in != null) {
-                if (DEBUGMODE) {
+                if (IMapTileProviderConstants.DEBUGMODE) {
                     logger.debug("Found tile " + pTile + " in " + archiveFile);
                 }
                 return in;
@@ -204,7 +211,7 @@ public class MapTileFileArchiveProvider extends MapTileFileStorageProviderBase {
 
             // if there's no sdcard then don't do anything
             if (!getSdCardAvailable()) {
-                if (DEBUGMODE) {
+                if (IMapTileProviderConstants.DEBUGMODE) {
                     logger.debug("No sdcard - do nothing for tile: " + pTile);
                 }
                 return null;
@@ -212,13 +219,13 @@ public class MapTileFileArchiveProvider extends MapTileFileStorageProviderBase {
 
             InputStream inputStream = null;
             try {
-                if (DEBUGMODE) {
+                if (IMapTileProviderConstants.DEBUGMODE) {
                     logger.debug("Tile doesn't exist: " + pTile);
                 }
 
                 inputStream = getInputStream(pTile);
                 if (inputStream != null) {
-                    if (DEBUGMODE) {
+                    if (IMapTileProviderConstants.DEBUGMODE) {
                         logger.debug("Use tile from archive: " + pTile);
                     }
                     final Drawable drawable = mTileSource

@@ -9,7 +9,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.osmdroid.tileprovider.constants.OpenStreetMapTileProviderConstants;
+import org.osmdroid.tileprovider.constants.IMapTileProviderConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ import android.provider.Settings;
  * "you will always get the same token for the unique user id"
  * 
  */
-public class CloudmadeUtil implements OpenStreetMapTileProviderConstants {
+public class CloudmadeUtil {
 
     private static final Logger logger = LoggerFactory
             .getLogger(CloudmadeUtil.class);
@@ -77,7 +77,7 @@ public class CloudmadeUtil implements OpenStreetMapTileProviderConstants {
                 if (key == null) {
                     logger.info("Cloudmade key not found in manifest");
                 } else {
-                    if (DEBUGMODE) {
+                    if (IMapTileProviderConstants.DEBUGMODE) {
                         logger.debug("Cloudmade key: " + key);
                     }
                     mKey = key.trim();
@@ -133,7 +133,7 @@ public class CloudmadeUtil implements OpenStreetMapTileProviderConstants {
                     try {
                         final HttpResponse response = httpClient
                                 .execute(httpPost);
-                        if (DEBUGMODE) {
+                        if (IMapTileProviderConstants.DEBUGMODE) {
                             logger.debug("Response from Cloudmade auth: "
                                     + response.getStatusLine());
                         }
@@ -143,7 +143,7 @@ public class CloudmadeUtil implements OpenStreetMapTileProviderConstants {
                                             .getContent()),
                                     StreamUtils.IO_BUFFER_SIZE);
                             final String line = br.readLine();
-                            if (DEBUGMODE) {
+                            if (IMapTileProviderConstants.DEBUGMODE) {
                                 logger.debug("First line from Cloudmade auth: "
                                         + line);
                             }

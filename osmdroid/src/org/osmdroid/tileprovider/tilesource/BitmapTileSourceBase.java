@@ -8,7 +8,6 @@ import org.osmdroid.ResourceProxy;
 import org.osmdroid.ResourceProxy.string;
 import org.osmdroid.tileprovider.ExpirableBitmapDrawable;
 import org.osmdroid.tileprovider.MapTile;
-import org.osmdroid.tileprovider.constants.OpenStreetMapTileProviderConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +15,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 
-public abstract class BitmapTileSourceBase implements ITileSource,
-        OpenStreetMapTileProviderConstants {
+public abstract class BitmapTileSourceBase implements ITileSource {
 
     private static final Logger logger = LoggerFactory
             .getLogger(BitmapTileSourceBase.class);

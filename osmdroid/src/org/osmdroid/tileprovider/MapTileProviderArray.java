@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.osmdroid.tileprovider.constants.IMapTileProviderConstants;
+import org.osmdroid.tileprovider.constants.MapTileProviderConstantsFactory;
 import org.osmdroid.tileprovider.modules.MapTileModuleProviderBase;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.slf4j.Logger;
@@ -36,6 +38,9 @@ public class MapTileProviderArray extends MapTileProviderBase {
 
     private static final Logger logger = LoggerFactory
             .getLogger(MapTileProviderArray.class);
+
+    private IMapTileProviderConstants tileProviderConstants = MapTileProviderConstantsFactory
+            .getDefault();
 
     protected final List<MapTileModuleProviderBase> mTileProviderList;
 
@@ -83,7 +88,7 @@ public class MapTileProviderArray extends MapTileProviderBase {
     public Drawable getMapTile(final MapTile pTile) {
         final Drawable tile = mTileCache.getMapTile(pTile);
         if (tile != null && !ExpirableBitmapDrawable.isDrawableExpired(tile)) {
-            if (DEBUGMODE) {
+            if (IMapTileProviderConstants.DEBUGMODE) {
                 logger.debug("MapTileCache succeeded for: " + pTile);
             }
             return tile;
@@ -94,7 +99,7 @@ public class MapTileProviderArray extends MapTileProviderBase {
             }
 
             if (!alreadyInProgress) {
-                if (DEBUGMODE) {
+                if (IMapTileProviderConstants.DEBUGMODE) {
                     logger.debug("Cache failed, trying from async providers: "
                             + pTile);
                 }
@@ -176,7 +181,7 @@ public class MapTileProviderArray extends MapTileProviderBase {
 
     @Override
     public int getMinimumZoomLevel() {
-        int result = MAXIMUM_ZOOMLEVEL;
+        int result = tileProviderConstants.getMaximumZoomlevel();
         synchronized (mTileProviderList) {
             for (final MapTileModuleProviderBase tileProvider : mTileProviderList) {
                 if (tileProvider.getMinimumZoomLevel() < result) {
@@ -189,7 +194,7 @@ public class MapTileProviderArray extends MapTileProviderBase {
 
     @Override
     public int getMaximumZoomLevel() {
-        int result = MINIMUM_ZOOMLEVEL;
+        int result = tileProviderConstants.getMinimumZoomlevel();
         synchronized (mTileProviderList) {
             for (final MapTileModuleProviderBase tileProvider : mTileProviderList) {
                 if (tileProvider.getMaximumZoomLevel() > result) {

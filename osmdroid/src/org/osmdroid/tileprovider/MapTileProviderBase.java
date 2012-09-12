@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import microsoft.mappoint.TileSystem;
 
-import org.osmdroid.tileprovider.constants.OpenStreetMapTileProviderConstants;
+import org.osmdroid.tileprovider.constants.IMapTileProviderConstants;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.util.TileLooper;
 import org.slf4j.Logger;
@@ -32,8 +32,7 @@ import android.os.Handler;
  * @author Nicolas Gramlich
  * 
  */
-public abstract class MapTileProviderBase implements IMapTileProviderCallback,
-        OpenStreetMapTileProviderConstants {
+public abstract class MapTileProviderBase implements IMapTileProviderCallback {
 
     private static final Logger logger = LoggerFactory
             .getLogger(MapTileProviderBase.class);
@@ -117,7 +116,7 @@ public abstract class MapTileProviderBase implements IMapTileProviderCallback,
                     .sendEmptyMessage(MapTile.MAPTILE_SUCCESS_ID);
         }
 
-        if (DEBUGMODE) {
+        if (IMapTileProviderConstants.DEBUGMODE) {
             logger.debug("MapTile request complete: " + tile);
         }
     }
@@ -137,7 +136,7 @@ public abstract class MapTileProviderBase implements IMapTileProviderCallback,
                     .sendEmptyMessage(MapTile.MAPTILE_FAIL_ID);
         }
 
-        if (DEBUGMODE) {
+        if (IMapTileProviderConstants.DEBUGMODE) {
             logger.debug("MapTile request failed: " + tile);
         }
     }
@@ -299,7 +298,7 @@ public abstract class MapTileProviderBase implements IMapTileProviderCallback,
                         pTileSizePx, Bitmap.Config.ARGB_8888);
                 final Canvas canvas = new Canvas(bitmap);
                 canvas.drawBitmap(oldBitmap, mSrcRect, mDestRect, null);
-                if (DEBUGMODE) {
+                if (IMapTileProviderConstants.DEBUGMODE) {
                     logger.debug("Created scaled tile: " + pTile);
                     mDebugPaint.setTextSize(40);
                     canvas.drawText("scaled", 50, 50, mDebugPaint);
@@ -360,7 +359,7 @@ public abstract class MapTileProviderBase implements IMapTileProviderCallback,
 
             if (bitmap != null) {
                 mNewTiles.put(pTile, bitmap);
-                if (DEBUGMODE) {
+                if (IMapTileProviderConstants.DEBUGMODE) {
                     logger.debug("Created scaled tile: " + pTile);
                     mDebugPaint.setTextSize(40);
                     canvas.drawText("scaled", 50, 50, mDebugPaint);

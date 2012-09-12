@@ -6,6 +6,8 @@ import org.osmdroid.tileprovider.ExpirableBitmapDrawable;
 import org.osmdroid.tileprovider.IRegisterReceiver;
 import org.osmdroid.tileprovider.MapTile;
 import org.osmdroid.tileprovider.MapTileRequestState;
+import org.osmdroid.tileprovider.constants.IMapTileProviderConstants;
+import org.osmdroid.tileprovider.constants.MapTileProviderConstantsFactory;
 import org.osmdroid.tileprovider.tilesource.BitmapTileSourceBase.LowMemoryException;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -31,6 +33,9 @@ public class MapTileFilesystemProvider extends MapTileFileStorageProviderBase {
     private static final Logger logger = LoggerFactory
             .getLogger(MapTileFilesystemProvider.class);
 
+    private static IMapTileProviderConstants tileProviderConstants = MapTileProviderConstantsFactory
+            .getDefault();
+
     // ===========================================================
     // Fields
     // ===========================================================
@@ -49,7 +54,8 @@ public class MapTileFilesystemProvider extends MapTileFileStorageProviderBase {
 
     public MapTileFilesystemProvider(final IRegisterReceiver pRegisterReceiver,
             final ITileSource aTileSource) {
-        this(pRegisterReceiver, aTileSource, DEFAULT_MAXIMUM_CACHED_FILE_AGE);
+        this(pRegisterReceiver, aTileSource, tileProviderConstants
+                .getDefaultMaximumCachedFileAge());
     }
 
     /**
@@ -60,8 +66,9 @@ public class MapTileFilesystemProvider extends MapTileFileStorageProviderBase {
      */
     public MapTileFilesystemProvider(final IRegisterReceiver pRegisterReceiver,
             final ITileSource pTileSource, final long pMaximumCachedFileAge) {
-        super(pRegisterReceiver, NUMBER_OF_TILE_FILESYSTEM_THREADS,
-                TILE_FILESYSTEM_MAXIMUM_QUEUE_SIZE);
+        super(pRegisterReceiver, tileProviderConstants
+                .getNumberOfTileFilesystemThreads(), tileProviderConstants
+                .getTileFilesystemMaximumQueueSize());
         mTileSource = pTileSource;
 
         mMaximumCachedFileAge = pMaximumCachedFileAge;
@@ -98,13 +105,13 @@ public class MapTileFilesystemProvider extends MapTileFileStorageProviderBase {
     @Override
     public int getMinimumZoomLevel() {
         return mTileSource != null ? mTileSource.getMinimumZoomLevel()
-                : MINIMUM_ZOOMLEVEL;
+                : tileProviderConstants.getMinimumZoomlevel();
     }
 
     @Override
     public int getMaximumZoomLevel() {
         return mTileSource != null ? mTileSource.getMaximumZoomLevel()
-                : MAXIMUM_ZOOMLEVEL;
+                : tileProviderConstants.getMaximumZoomlevel();
     }
 
     @Override
@@ -130,7 +137,7 @@ public class MapTileFilesystemProvider extends MapTileFileStorageProviderBase {
 
             // if there's no sdcard then don't do anything
             if (!getSdCardAvailable()) {
-                if (DEBUGMODE) {
+                if (IMapTileProviderConstants.DEBUGMODE) {
                     logger.debug("No sdcard - do nothing for tile: " + tile);
                 }
                 return null;
@@ -139,9 +146,9 @@ public class MapTileFilesystemProvider extends MapTileFileStorageProviderBase {
             // Check the tile source to see if its file is available and if so,
             // then render the
             // drawable and return the tile
-            final File file = new File(TILE_PATH_BASE,
+            final File file = new File(tileProviderConstants.getTilePathBase(),
                     mTileSource.getTileRelativeFilenameString(tile)
-                            + TILE_PATH_EXTENSION);
+                            + tileProviderConstants.getTilePathExtension());
             if (file.exists()) {
 
                 try {
@@ -155,7 +162,7 @@ public class MapTileFilesystemProvider extends MapTileFileStorageProviderBase {
                             - mMaximumCachedFileAge;
 
                     if (fileExpired) {
-                        if (DEBUGMODE) {
+                        if (IMapTileProviderConstants.DEBUGMODE) {
                             logger.debug("Tile expired: " + tile);
                         }
                         drawable.setState(new int[] { ExpirableBitmapDrawable.EXPIRED });

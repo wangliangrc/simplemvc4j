@@ -17,6 +17,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.osmdroid.tileprovider.MapTile;
 import org.osmdroid.tileprovider.MapTileRequestState;
+import org.osmdroid.tileprovider.constants.IMapTileProviderConstants;
+import org.osmdroid.tileprovider.constants.MapTileProviderConstantsFactory;
 import org.osmdroid.tileprovider.tilesource.BitmapTileSourceBase.LowMemoryException;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase;
@@ -45,6 +47,9 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
     private static final Logger logger = LoggerFactory
             .getLogger(MapTileDownloader.class);
 
+    private static IMapTileProviderConstants tileProviderConstants = MapTileProviderConstantsFactory
+            .getDefault();
+
     // ===========================================================
     // Fields
     // ===========================================================
@@ -71,7 +76,8 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
     public MapTileDownloader(final ITileSource pTileSource,
             final IFilesystemCache pFilesystemCache,
             final INetworkAvailablityCheck pNetworkAvailablityCheck) {
-        super(NUMBER_OF_TILE_DOWNLOAD_THREADS, TILE_DOWNLOAD_MAXIMUM_QUEUE_SIZE);
+        super(tileProviderConstants.getNumberOfTileDownloadThreads(),
+                tileProviderConstants.getTileDownloadMaximumQueueSize());
 
         mFilesystemCache = pFilesystemCache;
         mNetworkAvailablityCheck = pNetworkAvailablityCheck;
@@ -113,13 +119,13 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
     @Override
     public int getMinimumZoomLevel() {
         return (mTileSource != null ? mTileSource.getMinimumZoomLevel()
-                : MINIMUM_ZOOMLEVEL);
+                : tileProviderConstants.getMinimumZoomlevel());
     }
 
     @Override
     public int getMaximumZoomLevel() {
         return (mTileSource != null ? mTileSource.getMaximumZoomLevel()
-                : MAXIMUM_ZOOMLEVEL);
+                : tileProviderConstants.getMaximumZoomlevel());
     }
 
     @Override
@@ -155,7 +161,7 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
 
                 if (mNetworkAvailablityCheck != null
                         && !mNetworkAvailablityCheck.getNetworkAvailable()) {
-                    if (DEBUGMODE) {
+                    if (IMapTileProviderConstants.DEBUGMODE) {
                         logger.debug("Skipping " + getName()
                                 + " due to NetworkAvailabliltyCheck.");
                     }
@@ -164,7 +170,7 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
 
                 final String tileURLString = mTileSource.getTileURLString(tile);
 
-                if (DEBUGMODE) {
+                if (IMapTileProviderConstants.DEBUGMODE) {
                     logger.debug("Downloading Maptile from url: "
                             + tileURLString);
                 }

@@ -12,7 +12,7 @@ import java.util.concurrent.RejectedExecutionException;
 import org.osmdroid.tileprovider.ExpirableBitmapDrawable;
 import org.osmdroid.tileprovider.MapTile;
 import org.osmdroid.tileprovider.MapTileRequestState;
-import org.osmdroid.tileprovider.constants.OpenStreetMapTileProviderConstants;
+import org.osmdroid.tileprovider.constants.IMapTileProviderConstants;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +25,7 @@ import android.graphics.drawable.Drawable;
  * @author Marc Kurtz
  * @author Neil Boyd
  */
-public abstract class MapTileModuleProviderBase implements
-        OpenStreetMapTileProviderConstants {
+public abstract class MapTileModuleProviderBase {
 
     /**
      * Gets the human-friendly name assigned to this tile provider.
@@ -196,7 +195,7 @@ public abstract class MapTileModuleProviderBase implements
                             result = tile;
                         }
                     } catch (final ConcurrentModificationException e) {
-                        if (DEBUGMODE) {
+                        if (IMapTileProviderConstants.DEBUGMODE) {
                             logger.warn("ConcurrentModificationException break: "
                                     + (result != null));
                         }
@@ -252,7 +251,7 @@ public abstract class MapTileModuleProviderBase implements
             MapTileRequestState state;
             Drawable result = null;
             while ((state = nextTile()) != null) {
-                if (DEBUGMODE) {
+                if (IMapTileProviderConstants.DEBUGMODE) {
                     logger.debug("Next tile: " + state.getMapTile());
                 }
                 try {
@@ -276,7 +275,7 @@ public abstract class MapTileModuleProviderBase implements
                     tileLoaded(state, result);
                 }
 
-                if (DEBUGMODE) {
+                if (IMapTileProviderConstants.DEBUGMODE) {
                     logger.debug("No more tiles");
                 }
             }

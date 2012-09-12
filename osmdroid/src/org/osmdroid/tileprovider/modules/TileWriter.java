@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.osmdroid.tileprovider.MapTile;
-import org.osmdroid.tileprovider.constants.OpenStreetMapTileProviderConstants;
+import org.osmdroid.tileprovider.constants.IMapTileProviderConstants;
+import org.osmdroid.tileprovider.constants.MapTileProviderConstantsFactory;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.util.StreamUtils;
 import org.slf4j.Logger;
@@ -25,8 +26,7 @@ import org.slf4j.LoggerFactory;
  * @author Neil Boyd
  * 
  */
-public class TileWriter implements IFilesystemCache,
-        OpenStreetMapTileProviderConstants {
+public class TileWriter implements IFilesystemCache {
 
     // ===========================================================
     // Constants
@@ -34,6 +34,8 @@ public class TileWriter implements IFilesystemCache,
 
     private static final Logger logger = LoggerFactory
             .getLogger(TileWriter.class);
+    private static IMapTileProviderConstants tileProviderConstants = MapTileProviderConstantsFactory
+            .getDefault();
 
     // ===========================================================
     // Fields
@@ -53,11 +55,12 @@ public class TileWriter implements IFilesystemCache,
             @Override
             public void run() {
                 mUsedCacheSpace = 0; // because it's static
-                calculateDirectorySize(TILE_PATH_BASE);
-                if (mUsedCacheSpace > TILE_MAX_CACHE_SIZE_BYTES) {
+                calculateDirectorySize(tileProviderConstants.getTilePathBase());
+                if (mUsedCacheSpace > tileProviderConstants
+                        .getTileMaxCacheSizeBytes()) {
                     cutCurrentCache();
                 }
-                if (DEBUGMODE) {
+                if (IMapTileProviderConstants.DEBUGMODE) {
                     logger.debug("Finished init thread");
                 }
             }
@@ -88,9 +91,9 @@ public class TileWriter implements IFilesystemCache,
     public boolean saveFile(final ITileSource pTileSource, final MapTile pTile,
             final InputStream pStream) {
 
-        final File file = new File(TILE_PATH_BASE,
+        final File file = new File(tileProviderConstants.getTilePathBase(),
                 pTileSource.getTileRelativeFilenameString(pTile)
-                        + TILE_PATH_EXTENSION);
+                        + tileProviderConstants.getTilePathExtension());
 
         final File parent = file.getParentFile();
         if (!parent.exists() && !createFolderAndCheckIfExists(parent)) {
@@ -104,7 +107,8 @@ public class TileWriter implements IFilesystemCache,
             final long length = StreamUtils.copy(pStream, outputStream);
 
             mUsedCacheSpace += length;
-            if (mUsedCacheSpace > TILE_MAX_CACHE_SIZE_BYTES) {
+            if (mUsedCacheSpace > tileProviderConstants
+                    .getTileMaxCacheSizeBytes()) {
                 cutCurrentCache(); // TODO perhaps we should do this in the
                                    // background
             }
@@ -126,7 +130,7 @@ public class TileWriter implements IFilesystemCache,
         if (pFile.mkdirs()) {
             return true;
         }
-        if (DEBUGMODE) {
+        if (IMapTileProviderConstants.DEBUGMODE) {
             logger.debug("Failed to create " + pFile
                     + " - wait and check again");
         }
@@ -138,12 +142,12 @@ public class TileWriter implements IFilesystemCache,
         }
         // and then check again
         if (pFile.exists()) {
-            if (DEBUGMODE) {
+            if (IMapTileProviderConstants.DEBUGMODE) {
                 logger.debug("Seems like another thread created " + pFile);
             }
             return true;
         } else {
-            if (DEBUGMODE) {
+            if (IMapTileProviderConstants.DEBUGMODE) {
                 logger.debug("File still doesn't exist: " + pFile);
             }
             return false;
@@ -217,14 +221,17 @@ public class TileWriter implements IFilesystemCache,
      */
     private void cutCurrentCache() {
 
-        synchronized (TILE_PATH_BASE) {
+        synchronized (tileProviderConstants.getTilePathBase()) {
 
-            if (mUsedCacheSpace > TILE_TRIM_CACHE_SIZE_BYTES) {
+            if (mUsedCacheSpace > tileProviderConstants
+                    .getTileTrimCacheSizeBytes()) {
 
                 logger.info("Trimming tile cache from " + mUsedCacheSpace
-                        + " to " + TILE_TRIM_CACHE_SIZE_BYTES);
+                        + " to "
+                        + tileProviderConstants.getTileTrimCacheSizeBytes());
 
-                final List<File> z = getDirectoryFileList(TILE_PATH_BASE);
+                final List<File> z = getDirectoryFileList(tileProviderConstants
+                        .getTilePathBase());
 
                 // order list by files day created from old to new
                 final File[] files = z.toArray(new File[0]);
@@ -237,7 +244,8 @@ public class TileWriter implements IFilesystemCache,
                 });
 
                 for (final File file : files) {
-                    if (mUsedCacheSpace <= TILE_TRIM_CACHE_SIZE_BYTES) {
+                    if (mUsedCacheSpace <= tileProviderConstants
+                            .getTileTrimCacheSizeBytes()) {
                         break;
                     }
 
