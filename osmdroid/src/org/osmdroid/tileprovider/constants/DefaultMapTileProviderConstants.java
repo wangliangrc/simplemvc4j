@@ -4,7 +4,8 @@ import java.io.File;
 
 import android.os.Environment;
 
-class DefaultMapTileProviderConstants implements IMapTileProviderConstants {
+public class DefaultMapTileProviderConstants implements
+        IMapTileProviderConstants {
     private static final File OSMDROID_PATH = new File(
             Environment.getExternalStorageDirectory(), "osmdroid");
     private static final File TILE_PATH_BASE = new File(OSMDROID_PATH, "tiles");
@@ -86,7 +87,7 @@ class DefaultMapTileProviderConstants implements IMapTileProviderConstants {
         return 500L * 1024 * 1024;
     }
 
-    private DefaultMapTileProviderConstants() {
+    protected DefaultMapTileProviderConstants() {
     }
 
     private static class Holder {
