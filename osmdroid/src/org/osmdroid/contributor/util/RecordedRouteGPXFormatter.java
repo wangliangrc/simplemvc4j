@@ -86,7 +86,6 @@ public class RecordedRouteGPXFormatter implements
      * </PRE>
      * 
      */
-    @SuppressWarnings("resource")
     public static String create(final List<RecordedGeoPoint> someRecords)
             throws IllegalArgumentException {
         if (someRecords == null)

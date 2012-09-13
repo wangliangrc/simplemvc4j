@@ -50,7 +50,6 @@ public class DecoderUtil {
         try {
             byte[] bytes = s.getBytes("US-ASCII");
 
-            @SuppressWarnings("resource")
             QuotedPrintableInputStream is = new QuotedPrintableInputStream(
                     new ByteArrayInputStream(bytes), monitor);
 
@@ -80,7 +79,6 @@ public class DecoderUtil {
         try {
             byte[] bytes = s.getBytes("US-ASCII");
 
-            @SuppressWarnings("resource")
             Base64InputStream is = new Base64InputStream(
                     new ByteArrayInputStream(bytes), monitor);
 

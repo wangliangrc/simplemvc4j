@@ -188,7 +188,6 @@ public class MimeTokenStream {
     private void doParse(InputStream stream, EntityState start) {
         LineNumberSource lineSource = null;
         if (config.isCountLineNumbers()) {
-            @SuppressWarnings("resource")
             LineNumberInputStream lineInput = new LineNumberInputStream(stream);
             lineSource = lineInput;
             stream = lineInput;
