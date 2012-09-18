@@ -112,7 +112,6 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants, Mu
     private final Point mPoint = new Point();
 
     // 限制地图显示范围
-    @SuppressWarnings("unused")
     private int mMapLeft, mMapRight, mMapTop, mMapBottom;
     // 限制zoomlevel
     private int mMinZoomLevel;
@@ -841,12 +840,12 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants, Mu
 
     @Override
     public void scrollTo(int x, int y) {
-//        if (x < mMapLeft) {
-//            x = mMapLeft;
-//        }
-//        if (x > mMapRight) {
-//            x = mMapRight;
-//        }
+        // if (x < mMapLeft) {
+        // x = mMapLeft;
+        // }
+        // if (x > mMapRight) {
+        // x = mMapRight;
+        // }
         if (y < mMapTop) {
             y = mMapTop;
         }
@@ -1304,8 +1303,7 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants, Mu
                 return true;
             }
 
-            final int worldSize = TileSystem.mapSize(MapView.this.getZoomLevel(true));
-            mScroller.fling(getScrollX(), getScrollY(), (int) -velocityX, (int) -velocityY, -worldSize, worldSize, -worldSize, worldSize);
+            mScroller.fling(getScrollX(), getScrollY(), (int) -velocityX, (int) -velocityY, Integer.MIN_VALUE, Integer.MAX_VALUE, mMapTop, mMapBottom);
             return true;
         }
 
