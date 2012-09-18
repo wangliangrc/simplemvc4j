@@ -33,26 +33,31 @@ public class DatabaseFileArchive implements IArchiveFile {
     @Override
     public InputStream getInputStream(final ITileSource pTileSource,
             final MapTile pTile) {
+        Cursor cur = null;
         try {
             InputStream ret = null;
             final String[] tile = { "tile" };
             final long x = (long) pTile.getX();
             final long y = (long) pTile.getY();
             final long z = (long) pTile.getZoomLevel();
+            // MapTile hashCode 算法
             final long index = ((z << z) + x << z) + y;
-            final Cursor cur = mDatabase.query("tiles", tile, "key = " + index
+            cur = mDatabase.query("tiles", tile, "key = " + index
                     + " and provider = '" + pTileSource.name() + "'", null,
                     null, null, null);
             if (cur.getCount() != 0) {
                 cur.moveToFirst();
                 ret = new ByteArrayInputStream(cur.getBlob(0));
             }
-            cur.close();
             if (ret != null) {
                 return ret;
             }
         } catch (final Throwable e) {
             logger.warn("Error getting db stream: " + pTile, e);
+        } finally {
+            if(cur != null) {
+                cur.close();
+            }
         }
 
         return null;
