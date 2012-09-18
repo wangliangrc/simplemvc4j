@@ -66,7 +66,7 @@ public class MapTileFileArchiveProvider extends MapTileFileStorageProviderBase {
                 .getNumberOfTileFilesystemThreads(), tileProviderConstants
                 .getTileFilesystemMaximumQueueSize());
 
-        mTileSource = pTileSource;
+        setTileSource(pTileSource);
 
         if (pArchives == null) {
             mSpecificArchivesProvided = false;
@@ -142,14 +142,18 @@ public class MapTileFileArchiveProvider extends MapTileFileStorageProviderBase {
 
     @Override
     public void setTileSource(final ITileSource pTileSource) {
-        mTileSource = pTileSource;
+        ITileSource curTileSource = mTileSource;
+        if(!curTileSource.equals(pTileSource)) {
+            mTileSource = pTileSource;
+            if (!mSpecificArchivesProvided) {
+                findArchiveFiles();
+            }
+        }
     }
 
     @Override
     public void detach() {
-        while (!mArchiveFiles.isEmpty()) {
-            mArchiveFiles.remove(0);
-        }
+        clearArchiveFiles();
         super.detach();
     }
 
@@ -158,8 +162,7 @@ public class MapTileFileArchiveProvider extends MapTileFileStorageProviderBase {
     // ===========================================================
 
     private void findArchiveFiles() {
-
-        mArchiveFiles.clear();
+        clearArchiveFiles();
 
         if (!getSdCardAvailable()) {
             return;
@@ -176,6 +179,15 @@ public class MapTileFileArchiveProvider extends MapTileFileStorageProviderBase {
                     mArchiveFiles.add(archiveFile);
                 }
             }
+        }
+    }
+
+    private void clearArchiveFiles() {
+        if(mArchiveFiles != null && mArchiveFiles.size() > 0) {
+            for(IArchiveFile archiveFile : mArchiveFiles) {
+                archiveFile.close();
+            }
+            mArchiveFiles.clear();
         }
     }
 

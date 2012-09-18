@@ -15,8 +15,7 @@ import android.database.sqlite.SQLiteException;
 
 public class MBTilesFileArchive implements IArchiveFile {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(MBTilesFileArchive.class);
+    private static final Logger logger = LoggerFactory.getLogger(MBTilesFileArchive.class);
 
     private final SQLiteDatabase mDatabase;
 
@@ -32,29 +31,22 @@ public class MBTilesFileArchive implements IArchiveFile {
         mDatabase = pDatabase;
     }
 
-    public static MBTilesFileArchive getDatabaseFileArchive(final File pFile)
-            throws SQLiteException {
-        return new MBTilesFileArchive(SQLiteDatabase.openDatabase(
-                pFile.getAbsolutePath(), null,
-                SQLiteDatabase.NO_LOCALIZED_COLLATORS
-                        | SQLiteDatabase.OPEN_READONLY));
+    public static MBTilesFileArchive getDatabaseFileArchive(final File pFile) throws SQLiteException {
+        return new MBTilesFileArchive(SQLiteDatabase.openDatabase(pFile.getAbsolutePath(), null, SQLiteDatabase.NO_LOCALIZED_COLLATORS | SQLiteDatabase.OPEN_READONLY));
     }
 
     @Override
-    public InputStream getInputStream(final ITileSource pTileSource,
-            final MapTile pTile) {
+    public InputStream getInputStream(final ITileSource pTileSource, final MapTile pTile) {
         try {
             InputStream ret = null;
             final String[] tile = { COL_TILES_TILE_DATA };
-            final String[] xyz = {
-                    Integer.toString(pTile.getX()),
-                    Double.toString(Math.pow(2, pTile.getZoomLevel())
-                            - pTile.getY() - 1) // Use Google Tiling Spec
+            final String[] xyz = { Integer.toString(pTile.getX()), Double.toString(Math.pow(2, pTile.getZoomLevel()) - pTile.getY() - 1) // Use
+                                                                                                                                         // Google
+                                                                                                                                         // Tiling
+                                                                                                                                         // Spec
                     , Integer.toString(pTile.getZoomLevel()) };
 
-            final Cursor cur = mDatabase.query(TABLE_TILES, tile,
-                    "tile_column=? and tile_row=? and zoom_level=?", xyz, null,
-                    null, null);
+            final Cursor cur = mDatabase.query(TABLE_TILES, tile, "tile_column=? and tile_row=? and zoom_level=?", xyz, null, null, null);
 
             if (cur.getCount() != 0) {
                 cur.moveToFirst();
@@ -74,6 +66,11 @@ public class MBTilesFileArchive implements IArchiveFile {
     @Override
     public String toString() {
         return "DatabaseFileArchive [mDatabase=" + mDatabase.getPath() + "]";
+    }
+
+    @Override
+    public void close() {
+        mDatabase.close();
     }
 
 }

@@ -63,4 +63,9 @@ public class DatabaseFileArchive implements IArchiveFile {
         return "DatabaseFileArchive [mDatabase=" + mDatabase.getPath() + "]";
     }
 
+    @Override
+    public void close() {
+        mDatabase.close();
+    }
+
 }

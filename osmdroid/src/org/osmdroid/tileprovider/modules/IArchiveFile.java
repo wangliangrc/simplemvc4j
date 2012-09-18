@@ -15,4 +15,8 @@ public interface IArchiveFile {
      */
     InputStream getInputStream(ITileSource tileSource, MapTile tile);
 
+    /**
+     * 回收资源
+     */
+    void close();
 }

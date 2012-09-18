@@ -35,4 +35,8 @@ public class GEMFFileArchive implements IArchiveFile {
         return "GEMFFileArchive [mGEMFFile=" + mFile.getName() + "]";
     }
 
+    @Override
+    public void close() {
+    }
+
 }

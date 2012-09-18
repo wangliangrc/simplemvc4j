@@ -48,4 +48,8 @@ public class ZipFileArchive implements IArchiveFile {
         return "ZipFileArchive [mZipFile=" + mZipFile.getName() + "]";
     }
 
+    @Override
+    public void close() {
+    }
+
 }
