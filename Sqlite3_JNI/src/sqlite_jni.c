@@ -864,17 +864,17 @@ static void doclose(JNIEnv *env, jobject obj, int final) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1close(JNIEnv *env, jobject obj) {
+Java_sqlite_Database__1close(JNIEnv *env, jobject obj) {
     doclose(env, obj, 0);
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1finalize(JNIEnv *env, jobject obj) {
+Java_sqlite_Database__1finalize(JNIEnv *env, jobject obj) {
     doclose(env, obj, 1);
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1busy_1timeout(JNIEnv *env, jobject obj, jint ms) {
+Java_sqlite_Database__1busy_1timeout(JNIEnv *env, jobject obj, jint ms) {
     handle *h = gethandle(env, obj);
 
     if (h && h->sqlite) {
@@ -898,7 +898,7 @@ Java_SQLite_Database__1busy_1timeout(JNIEnv *env, jobject obj, jint ms) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_SQLite_Database_version(JNIEnv *env, jclass cls) {
+Java_sqlite_Database_version(JNIEnv *env, jclass cls) {
     /* CHECK THIS */
 #if HAVE_BOTH_SQLITE
     return (*env)->NewStringUTF(env, sqlite_libversion());
@@ -912,7 +912,7 @@ Java_SQLite_Database_version(JNIEnv *env, jclass cls) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_SQLite_Database_dbversion(JNIEnv *env, jobject obj) {
+Java_sqlite_Database_dbversion(JNIEnv *env, jobject obj) {
     handle *h = gethandle(env, obj);
 
     if (h && h->sqlite) {
@@ -934,7 +934,7 @@ Java_SQLite_Database_dbversion(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT jlong JNICALL
-Java_SQLite_Database__1last_1insert_1rowid(JNIEnv *env, jobject obj) {
+Java_sqlite_Database__1last_1insert_1rowid(JNIEnv *env, jobject obj) {
     handle *h = gethandle(env, obj);
 
     if (h && h->sqlite) {
@@ -958,7 +958,7 @@ Java_SQLite_Database__1last_1insert_1rowid(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT jlong JNICALL
-Java_SQLite_Database__1changes(JNIEnv *env, jobject obj) {
+Java_sqlite_Database__1changes(JNIEnv *env, jobject obj) {
     handle *h = gethandle(env, obj);
 
     if (h && h->sqlite) {
@@ -982,7 +982,7 @@ Java_SQLite_Database__1changes(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT jboolean JNICALL
-Java_SQLite_Database__1complete(JNIEnv *env, jclass cls, jstring sql) {
+Java_sqlite_Database__1complete(JNIEnv *env, jclass cls, jstring sql) {
     transstr sqlstr;
     jboolean result;
 
@@ -1002,7 +1002,7 @@ Java_SQLite_Database__1complete(JNIEnv *env, jclass cls, jstring sql) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1interrupt(JNIEnv *env, jobject obj) {
+Java_sqlite_Database__1interrupt(JNIEnv *env, jobject obj) {
     handle *h = gethandle(env, obj);
 
     if (h && h->sqlite) {
@@ -1026,7 +1026,7 @@ Java_SQLite_Database__1interrupt(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1open4(JNIEnv *env, jobject obj, jstring file, jint mode,
+Java_sqlite_Database__1open4(JNIEnv *env, jobject obj, jstring file, jint mode,
         jstring vfs, jboolean ver2) {
     handle *h = gethandle(env, obj);
     jthrowable exc;
@@ -1239,12 +1239,12 @@ Java_SQLite_Database__1open4(JNIEnv *env, jobject obj, jstring file, jint mode,
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1open(JNIEnv *env, jobject obj, jstring file, jint mode) {
-    Java_SQLite_Database__1open4(env, obj, file, mode, 0, 0);
+Java_sqlite_Database__1open(JNIEnv *env, jobject obj, jstring file, jint mode) {
+    Java_sqlite_Database__1open4(env, obj, file, mode, 0, 0);
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1open_1aux_1file(JNIEnv *env, jobject obj, jstring file) {
+Java_sqlite_Database__1open_1aux_1file(JNIEnv *env, jobject obj, jstring file) {
     handle *h = gethandle(env, obj);
 #if HAVE_SQLITE_OPEN_AUX_FILE
     jthrowable exc;
@@ -1292,7 +1292,7 @@ Java_SQLite_Database__1open_1aux_1file(JNIEnv *env, jobject obj, jstring file) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1busy_1handler(JNIEnv *env, jobject obj, jobject bh) {
+Java_sqlite_Database__1busy_1handler(JNIEnv *env, jobject obj, jobject bh) {
     handle *h = gethandle(env, obj);
 
     if (h && h->sqlite) {
@@ -1318,7 +1318,7 @@ Java_SQLite_Database__1busy_1handler(JNIEnv *env, jobject obj, jobject bh) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1exec__Ljava_lang_String_2LSQLite_Callback_2(JNIEnv *env,
+Java_sqlite_Database__1exec__Ljava_lang_String_2LSQLite_Callback_2(JNIEnv *env,
         jobject obj, jstring sql, jobject cb) {
     handle *h = gethandle(env, obj);
     freemem *freeproc;
@@ -1396,7 +1396,7 @@ Java_SQLite_Database__1exec__Ljava_lang_String_2LSQLite_Callback_2(JNIEnv *env,
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1exec__Ljava_lang_String_2LSQLite_Callback_2_3Ljava_lang_String_2(
+Java_sqlite_Database__1exec__Ljava_lang_String_2LSQLite_Callback_2_3Ljava_lang_String_2(
         JNIEnv *env, jobject obj, jstring sql, jobject cb, jobjectArray args) {
     handle *h = gethandle(env, obj);
     freemem *freeproc = 0;
@@ -1904,19 +1904,19 @@ static void mkfunc_common(JNIEnv *env, int isagg, jobject obj, jstring name,
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1create_1aggregate(JNIEnv *env, jobject obj, jstring name,
+Java_sqlite_Database__1create_1aggregate(JNIEnv *env, jobject obj, jstring name,
         jint nargs, jobject fi) {
     mkfunc_common(env, 1, obj, name, nargs, fi);
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1create_1function(JNIEnv *env, jobject obj, jstring name,
+Java_sqlite_Database__1create_1function(JNIEnv *env, jobject obj, jstring name,
         jint nargs, jobject fi) {
     mkfunc_common(env, 0, obj, name, nargs, fi);
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1function_1type(JNIEnv *env, jobject obj, jstring name,
+Java_sqlite_Database__1function_1type(JNIEnv *env, jobject obj, jstring name,
         jint type) {
     handle *h = gethandle(env, obj);
 
@@ -1953,7 +1953,7 @@ Java_SQLite_Database__1function_1type(JNIEnv *env, jobject obj, jstring name,
 }
 
 JNIEXPORT jint JNICALL
-Java_SQLite_FunctionContext_count(JNIEnv *env, jobject obj) {
+Java_sqlite_FunctionContext_count(JNIEnv *env, jobject obj) {
     hfunc *f = getfunc(env, obj);
     jint r = 0;
 
@@ -1977,7 +1977,7 @@ Java_SQLite_FunctionContext_count(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_FunctionContext_set_1error(JNIEnv *env, jobject obj, jstring err) {
+Java_sqlite_FunctionContext_set_1error(JNIEnv *env, jobject obj, jstring err) {
     hfunc *f = getfunc(env, obj);
 
     if (f && f->sf) {
@@ -2036,7 +2036,7 @@ Java_SQLite_FunctionContext_set_1error(JNIEnv *env, jobject obj, jstring err) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_FunctionContext_set_1result__D(JNIEnv *env, jobject obj, jdouble d) {
+Java_sqlite_FunctionContext_set_1result__D(JNIEnv *env, jobject obj, jdouble d) {
     hfunc *f = getfunc(env, obj);
 
     if (f && f->sf) {
@@ -2058,7 +2058,7 @@ Java_SQLite_FunctionContext_set_1result__D(JNIEnv *env, jobject obj, jdouble d) 
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_FunctionContext_set_1result__I(JNIEnv *env, jobject obj, jint i) {
+Java_sqlite_FunctionContext_set_1result__I(JNIEnv *env, jobject obj, jint i) {
     hfunc *f = getfunc(env, obj);
 
     if (f && f->sf) {
@@ -2080,7 +2080,7 @@ Java_SQLite_FunctionContext_set_1result__I(JNIEnv *env, jobject obj, jint i) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_FunctionContext_set_1result__Ljava_lang_String_2(JNIEnv *env,
+Java_sqlite_FunctionContext_set_1result__Ljava_lang_String_2(JNIEnv *env,
         jobject obj, jstring ret) {
     hfunc *f = getfunc(env, obj);
 
@@ -2140,7 +2140,7 @@ Java_SQLite_FunctionContext_set_1result__Ljava_lang_String_2(JNIEnv *env,
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_FunctionContext_set_1result___3B(JNIEnv *env, jobject obj,
+Java_sqlite_FunctionContext_set_1result___3B(JNIEnv *env, jobject obj,
         jbyteArray b) {
 #if HAVE_SQLITE3
     hfunc *f = getfunc(env, obj);
@@ -2169,7 +2169,7 @@ Java_SQLite_FunctionContext_set_1result___3B(JNIEnv *env, jobject obj,
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_FunctionContext_set_1result_1zeroblob(JNIEnv *env, jobject obj,
+Java_sqlite_FunctionContext_set_1result_1zeroblob(JNIEnv *env, jobject obj,
         jint n) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_RESULT_ZEROBLOB
     hfunc *f = getfunc(env, obj);
@@ -2187,7 +2187,7 @@ Java_SQLite_FunctionContext_set_1result_1zeroblob(JNIEnv *env, jobject obj,
 }
 
 JNIEXPORT jstring JNICALL
-Java_SQLite_Database_error_1string(JNIEnv *env, jclass c, jint err) {
+Java_sqlite_Database_error_1string(JNIEnv *env, jclass c, jint err) {
 #if HAVE_SQLITE2
     return (*env)->NewStringUTF(env, sqlite_error_string((int) err));
 #else
@@ -2196,7 +2196,7 @@ Java_SQLite_Database_error_1string(JNIEnv *env, jclass c, jint err) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_SQLite_Database__1errmsg(JNIEnv *env, jobject obj) {
+Java_sqlite_Database__1errmsg(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE3
     handle *h = gethandle(env, obj);
 
@@ -2213,7 +2213,7 @@ Java_SQLite_Database__1errmsg(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1set_1encoding(JNIEnv *env, jobject obj, jstring enc) {
+Java_sqlite_Database__1set_1encoding(JNIEnv *env, jobject obj, jstring enc) {
     handle *h = gethandle(env, obj);
 
     if (h && !h->haveutf) {
@@ -2300,7 +2300,7 @@ doauth(void *arg, int what, const char *arg1, const char *arg2,
 #endif
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1set_1authorizer(JNIEnv *env, jobject obj, jobject auth) {
+Java_sqlite_Database__1set_1authorizer(JNIEnv *env, jobject obj, jobject auth) {
     handle *h = gethandle(env, obj);
 
     if (h && h->sqlite) {
@@ -2362,7 +2362,7 @@ static void dotrace(void *arg, const char *msg) {
 #endif
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1trace(JNIEnv *env, jobject obj, jobject tr) {
+Java_sqlite_Database__1trace(JNIEnv *env, jobject obj, jobject tr) {
     handle *h = gethandle(env, obj);
 
     if (h && h->sqlite) {
@@ -2502,7 +2502,7 @@ doblobfinal(JNIEnv *env, jobject obj)
 #endif
 
 JNIEXPORT void JNICALL
-Java_SQLite_Vm_stop(JNIEnv *env, jobject obj) {
+Java_sqlite_Vm_stop(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE_COMPILE
     dovmfinal(env, obj, 0);
 #else
@@ -2511,7 +2511,7 @@ Java_SQLite_Vm_stop(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Vm_finalize(JNIEnv *env, jobject obj) {
+Java_sqlite_Vm_finalize(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE_COMPILE
     dovmfinal(env, obj, 1);
 #endif
@@ -2541,7 +2541,7 @@ static void free_tab(void *mem) {
 #endif
 
 JNIEXPORT jboolean JNICALL
-Java_SQLite_Vm_step(JNIEnv *env, jobject obj, jobject cb) {
+Java_sqlite_Vm_step(JNIEnv *env, jobject obj, jobject cb) {
 #if HAVE_SQLITE_COMPILE
     hvm *v = gethvm(env, obj);
 
@@ -2814,7 +2814,7 @@ Java_SQLite_Vm_step(JNIEnv *env, jobject obj, jobject cb) {
 }
 
 JNIEXPORT jboolean JNICALL
-Java_SQLite_Vm_compile(JNIEnv *env, jobject obj) {
+Java_sqlite_Vm_compile(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE_COMPILE
     hvm *v = gethvm(env, obj);
     void *svm = 0;
@@ -2936,7 +2936,7 @@ Java_SQLite_Vm_compile(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database_vm_1compile(JNIEnv *env, jobject obj, jstring sql,
+Java_sqlite_Database_vm_1compile(JNIEnv *env, jobject obj, jstring sql,
         jobject vm) {
 #if HAVE_SQLITE_COMPILE
     handle *h = gethandle(env, obj);
@@ -3093,7 +3093,7 @@ Java_SQLite_Database_vm_1compile(JNIEnv *env, jobject obj, jstring sql,
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database_vm_1compile_1args(JNIEnv *env, jobject obj, jstring sql,
+Java_sqlite_Database_vm_1compile_1args(JNIEnv *env, jobject obj, jstring sql,
         jobject vm, jobjectArray args) {
 #if HAVE_SQLITE_COMPILE
 #if HAVE_SQLITE3
@@ -3311,13 +3311,13 @@ Java_SQLite_Database_vm_1compile_1args(JNIEnv *env, jobject obj, jstring sql,
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_FunctionContext_internal_1init(JNIEnv *env, jclass cls) {
+Java_sqlite_FunctionContext_internal_1init(JNIEnv *env, jclass cls) {
     F_SQLite_FunctionContext_handle = (*env)->GetFieldID(env, cls, "handle",
             "J");
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1progress_1handler(JNIEnv *env, jobject obj, jint n,
+Java_sqlite_Database__1progress_1handler(JNIEnv *env, jobject obj, jint n,
         jobject ph) {
     handle *h = gethandle(env, obj);
 
@@ -3376,7 +3376,7 @@ Java_SQLite_Database__1progress_1handler(JNIEnv *env, jobject obj, jint n,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_SQLite_Database_is3(JNIEnv *env, jobject obj) {
+Java_sqlite_Database_is3(JNIEnv *env, jobject obj) {
 #if HAVE_BOTH_SQLITE
     handle *h = gethandle(env, obj);
 
@@ -3395,7 +3395,7 @@ Java_SQLite_Database_is3(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT jboolean JNICALL
-Java_SQLite_Stmt_prepare(JNIEnv *env, jobject obj) {
+Java_sqlite_Stmt_prepare(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE3
     hvm *v = gethstmt(env, obj);
     void *svm = 0;
@@ -3450,7 +3450,7 @@ Java_SQLite_Stmt_prepare(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database_stmt_1prepare(JNIEnv *env, jobject obj, jstring sql,
+Java_sqlite_Database_stmt_1prepare(JNIEnv *env, jobject obj, jstring sql,
         jobject stmt) {
 #if HAVE_SQLITE3
     handle *h = gethandle(env, obj);
@@ -3551,7 +3551,7 @@ Java_SQLite_Database_stmt_1prepare(JNIEnv *env, jobject obj, jstring sql,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_SQLite_Stmt_step(JNIEnv *env, jobject obj) {
+Java_sqlite_Stmt_step(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -3578,7 +3578,7 @@ Java_SQLite_Stmt_step(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Stmt_close(JNIEnv *env, jobject obj) {
+Java_sqlite_Stmt_close(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -3603,7 +3603,7 @@ Java_SQLite_Stmt_close(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Stmt_reset(JNIEnv *env, jobject obj) {
+Java_sqlite_Stmt_reset(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -3618,7 +3618,7 @@ Java_SQLite_Stmt_reset(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Stmt_clear_1bindings(JNIEnv *env, jobject obj) {
+Java_sqlite_Stmt_clear_1bindings(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_CLEAR_BINDINGS
     hvm *v = gethstmt(env, obj);
 
@@ -3633,7 +3633,7 @@ Java_SQLite_Stmt_clear_1bindings(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Stmt_bind__II(JNIEnv *env, jobject obj, jint pos, jint val) {
+Java_sqlite_Stmt_bind__II(JNIEnv *env, jobject obj, jint pos, jint val) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -3659,7 +3659,7 @@ Java_SQLite_Stmt_bind__II(JNIEnv *env, jobject obj, jint pos, jint val) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Stmt_bind__IJ(JNIEnv *env, jobject obj, jint pos, jlong val) {
+Java_sqlite_Stmt_bind__IJ(JNIEnv *env, jobject obj, jint pos, jlong val) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -3685,7 +3685,7 @@ Java_SQLite_Stmt_bind__IJ(JNIEnv *env, jobject obj, jint pos, jlong val) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Stmt_bind__ID(JNIEnv *env, jobject obj, jint pos, jdouble val) {
+Java_sqlite_Stmt_bind__ID(JNIEnv *env, jobject obj, jint pos, jdouble val) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -3711,7 +3711,7 @@ Java_SQLite_Stmt_bind__ID(JNIEnv *env, jobject obj, jint pos, jdouble val) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Stmt_bind__I_3B(JNIEnv *env, jobject obj, jint pos, jbyteArray val) {
+Java_sqlite_Stmt_bind__I_3B(JNIEnv *env, jobject obj, jint pos, jbyteArray val) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -3759,7 +3759,7 @@ Java_SQLite_Stmt_bind__I_3B(JNIEnv *env, jobject obj, jint pos, jbyteArray val) 
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Stmt_bind__ILjava_lang_String_2(JNIEnv *env, jobject obj, jint pos,
+Java_sqlite_Stmt_bind__ILjava_lang_String_2(JNIEnv *env, jobject obj, jint pos,
         jstring val) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
@@ -3818,7 +3818,7 @@ Java_SQLite_Stmt_bind__ILjava_lang_String_2(JNIEnv *env, jobject obj, jint pos,
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Stmt_bind__I(JNIEnv *env, jobject obj, jint pos) {
+Java_sqlite_Stmt_bind__I(JNIEnv *env, jobject obj, jint pos) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -3844,7 +3844,7 @@ Java_SQLite_Stmt_bind__I(JNIEnv *env, jobject obj, jint pos) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Stmt_bind_1zeroblob(JNIEnv *env, jobject obj, jint pos, jint len) {
+Java_sqlite_Stmt_bind_1zeroblob(JNIEnv *env, jobject obj, jint pos, jint len) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_BIND_ZEROBLOB
     hvm *v = gethstmt(env, obj);
 
@@ -3870,7 +3870,7 @@ Java_SQLite_Stmt_bind_1zeroblob(JNIEnv *env, jobject obj, jint pos, jint len) {
 }
 
 JNIEXPORT jint JNICALL
-Java_SQLite_Stmt_bind_1parameter_1count(JNIEnv *env, jobject obj) {
+Java_sqlite_Stmt_bind_1parameter_1count(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -3885,7 +3885,7 @@ Java_SQLite_Stmt_bind_1parameter_1count(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_SQLite_Stmt_bind_1parameter_1name(JNIEnv *env, jobject obj, jint pos) {
+Java_sqlite_Stmt_bind_1parameter_1name(JNIEnv *env, jobject obj, jint pos) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_BIND_PARAMETER_NAME
     hvm *v = gethstmt(env, obj);
 
@@ -3911,7 +3911,7 @@ Java_SQLite_Stmt_bind_1parameter_1name(JNIEnv *env, jobject obj, jint pos) {
 }
 
 JNIEXPORT jint JNICALL
-Java_SQLite_Stmt_bind_1parameter_1index(JNIEnv *env, jobject obj, jstring name) {
+Java_sqlite_Stmt_bind_1parameter_1index(JNIEnv *env, jobject obj, jstring name) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_BIND_PARAMETER_INDEX
     hvm *v = gethstmt(env, obj);
 
@@ -3940,7 +3940,7 @@ Java_SQLite_Stmt_bind_1parameter_1index(JNIEnv *env, jobject obj, jstring name) 
 }
 
 JNIEXPORT jint JNICALL
-Java_SQLite_Stmt_column_1int(JNIEnv *env, jobject obj, jint col) {
+Java_sqlite_Stmt_column_1int(JNIEnv *env, jobject obj, jint col) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -3961,7 +3961,7 @@ Java_SQLite_Stmt_column_1int(JNIEnv *env, jobject obj, jint col) {
 }
 
 JNIEXPORT jlong JNICALL
-Java_SQLite_Stmt_column_1long(JNIEnv *env, jobject obj, jint col) {
+Java_sqlite_Stmt_column_1long(JNIEnv *env, jobject obj, jint col) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -3982,7 +3982,7 @@ Java_SQLite_Stmt_column_1long(JNIEnv *env, jobject obj, jint col) {
 }
 
 JNIEXPORT jdouble JNICALL
-Java_SQLite_Stmt_column_1double(JNIEnv *env, jobject obj, jint col) {
+Java_sqlite_Stmt_column_1double(JNIEnv *env, jobject obj, jint col) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -4003,7 +4003,7 @@ Java_SQLite_Stmt_column_1double(JNIEnv *env, jobject obj, jint col) {
 }
 
 JNIEXPORT jbyteArray JNICALL
-Java_SQLite_Stmt_column_1bytes(JNIEnv *env, jobject obj, jint col) {
+Java_sqlite_Stmt_column_1bytes(JNIEnv *env, jobject obj, jint col) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -4039,7 +4039,7 @@ Java_SQLite_Stmt_column_1bytes(JNIEnv *env, jobject obj, jint col) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_SQLite_Stmt_column_1string(JNIEnv *env, jobject obj, jint col) {
+Java_sqlite_Stmt_column_1string(JNIEnv *env, jobject obj, jint col) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -4075,7 +4075,7 @@ Java_SQLite_Stmt_column_1string(JNIEnv *env, jobject obj, jint col) {
 }
 
 JNIEXPORT jint JNICALL
-Java_SQLite_Stmt_column_1type(JNIEnv *env, jobject obj, jint col) {
+Java_sqlite_Stmt_column_1type(JNIEnv *env, jobject obj, jint col) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -4096,7 +4096,7 @@ Java_SQLite_Stmt_column_1type(JNIEnv *env, jobject obj, jint col) {
 }
 
 JNIEXPORT jint JNICALL
-Java_SQLite_Stmt_column_1count(JNIEnv *env, jobject obj) {
+Java_sqlite_Stmt_column_1count(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -4111,7 +4111,7 @@ Java_SQLite_Stmt_column_1count(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_SQLite_Stmt_column_1table_1name(JNIEnv *env, jobject obj, jint col) {
+Java_sqlite_Stmt_column_1table_1name(JNIEnv *env, jobject obj, jint col) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_COLUMN_TABLE_NAME16
     hvm *v = gethstmt(env, obj);
 
@@ -4137,7 +4137,7 @@ Java_SQLite_Stmt_column_1table_1name(JNIEnv *env, jobject obj, jint col) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_SQLite_Stmt_column_1database_1name(JNIEnv *env, jobject obj, jint col) {
+Java_sqlite_Stmt_column_1database_1name(JNIEnv *env, jobject obj, jint col) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_COLUMN_DATABASE_NAME16
     hvm *v = gethstmt(env, obj);
 
@@ -4163,7 +4163,7 @@ Java_SQLite_Stmt_column_1database_1name(JNIEnv *env, jobject obj, jint col) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_SQLite_Stmt_column_1decltype(JNIEnv *env, jobject obj, jint col) {
+Java_sqlite_Stmt_column_1decltype(JNIEnv *env, jobject obj, jint col) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -4189,7 +4189,7 @@ Java_SQLite_Stmt_column_1decltype(JNIEnv *env, jobject obj, jint col) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_SQLite_Stmt_column_1name(JNIEnv *env, jobject obj, jint col) {
+Java_sqlite_Stmt_column_1name(JNIEnv *env, jobject obj, jint col) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     hvm *v = gethstmt(env, obj);
 
@@ -4215,7 +4215,7 @@ Java_SQLite_Stmt_column_1name(JNIEnv *env, jobject obj, jint col) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_SQLite_Stmt_column_1origin_1name(JNIEnv *env, jobject obj, jint col) {
+Java_sqlite_Stmt_column_1origin_1name(JNIEnv *env, jobject obj, jint col) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_COLUMN_ORIGIN_NAME16
     hvm *v = gethstmt(env, obj);
 
@@ -4241,7 +4241,7 @@ Java_SQLite_Stmt_column_1origin_1name(JNIEnv *env, jobject obj, jint col) {
 }
 
 JNIEXPORT jint JNICALL
-Java_SQLite_Stmt_status(JNIEnv *env, jobject obj, jint op, jboolean flg) {
+Java_sqlite_Stmt_status(JNIEnv *env, jobject obj, jint op, jboolean flg) {
     jint count = 0;
 #if HAVE_SQLITE3 && HAVE_SQLITE3_STMT_STATUS
     hvm *v = gethstmt(env, obj);
@@ -4255,14 +4255,14 @@ Java_SQLite_Stmt_status(JNIEnv *env, jobject obj, jint op, jboolean flg) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Stmt_finalize(JNIEnv *env, jobject obj) {
+Java_sqlite_Stmt_finalize(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
     dostmtfinal(env, obj);
 #endif
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1open_1blob(JNIEnv *env, jobject obj, jstring dbname,
+Java_sqlite_Database__1open_1blob(JNIEnv *env, jobject obj, jstring dbname,
         jstring table, jstring column, jlong row, jboolean rw, jobject blobj) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_INCRBLOBIO
     handle *h = gethandle(env, obj);
@@ -4342,7 +4342,7 @@ Java_SQLite_Database__1open_1blob(JNIEnv *env, jobject obj, jstring dbname,
 }
 
 JNIEXPORT jint JNICALL
-Java_SQLite_Blob_write(JNIEnv *env, jobject obj, jbyteArray b, jint off,
+Java_sqlite_Blob_write(JNIEnv *env, jobject obj, jbyteArray b, jint off,
         jint pos, jint len) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_INCRBLOBIO
     hbl *bl = gethbl(env, obj);
@@ -4382,7 +4382,7 @@ Java_SQLite_Blob_write(JNIEnv *env, jobject obj, jbyteArray b, jint off,
 }
 
 JNIEXPORT jint JNICALL
-Java_SQLite_Blob_read(JNIEnv *env, jobject obj, jbyteArray b, jint off,
+Java_sqlite_Blob_read(JNIEnv *env, jobject obj, jbyteArray b, jint off,
         jint pos, jint len) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_INCRBLOBIO
     hbl *bl = gethbl(env, obj);
@@ -4422,21 +4422,21 @@ Java_SQLite_Blob_read(JNIEnv *env, jobject obj, jbyteArray b, jint off,
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Blob_close(JNIEnv *env, jobject obj) {
+Java_sqlite_Blob_close(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_INCRBLOBIO
     doblobfinal(env, obj);
 #endif
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Blob_finalize(JNIEnv *env, jobject obj) {
+Java_sqlite_Blob_finalize(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_INCRBLOBIO
     doblobfinal(env, obj);
 #endif
 }
 
 JNIEXPORT void
-JNICALL Java_SQLite_Database__1key(JNIEnv *env, jobject obj, jbyteArray key) {
+JNICALL Java_sqlite_Database__1key(JNIEnv *env, jobject obj, jbyteArray key) {
     jsize len;
     jbyte *data;
 #if HAVE_SQLITE3_KEY
@@ -4480,7 +4480,7 @@ JNICALL Java_SQLite_Database__1key(JNIEnv *env, jobject obj, jbyteArray key) {
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1rekey(JNIEnv *env, jobject obj, jbyteArray key) {
+Java_sqlite_Database__1rekey(JNIEnv *env, jobject obj, jbyteArray key) {
     jsize len;
     jbyte *data;
 #if HAVE_SQLITE3_KEY
@@ -4524,7 +4524,7 @@ Java_SQLite_Database__1rekey(JNIEnv *env, jobject obj, jbyteArray key) {
 }
 
 JNIEXPORT jboolean JNICALL
-Java_SQLite_Database__1enable_1shared_1cache(JNIEnv *env, jclass cls,
+Java_sqlite_Database__1enable_1shared_1cache(JNIEnv *env, jclass cls,
         jboolean onoff) {
 #if HAVE_SQLITE3_SHARED_CACHE
     return (sqlite3_enable_shared_cache(onoff == JNI_TRUE) == SQLITE_OK) ?
@@ -4535,7 +4535,7 @@ Java_SQLite_Database__1enable_1shared_1cache(JNIEnv *env, jclass cls,
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1backup(JNIEnv *env, jclass cls, jobject bkupj,
+Java_sqlite_Database__1backup(JNIEnv *env, jclass cls, jobject bkupj,
         jobject dest, jstring destName, jobject src, jstring srcName) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_BACKUPAPI
     handle *hsrc = gethandle(env, src);
@@ -4616,7 +4616,7 @@ Java_SQLite_Database__1backup(JNIEnv *env, jclass cls, jobject bkupj,
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Backup__1finalize(JNIEnv *env, jobject obj) {
+Java_sqlite_Backup__1finalize(JNIEnv *env, jobject obj) {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_BACKUPAPI
     hbk *bk = gethbk(env, obj);
     int ret = SQLITE_OK;
@@ -4655,7 +4655,7 @@ Java_SQLite_Backup__1finalize(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT jboolean JNICALL
-Java_SQLite_Backup__1step(JNIEnv *env, jobject obj, jint n) {
+Java_sqlite_Backup__1step(JNIEnv *env, jobject obj, jint n) {
     jboolean result = JNI_TRUE;
 #if HAVE_SQLITE3 && HAVE_SQLITE3_BACKUPAPI
     hbk *bk = gethbk(env, obj);
@@ -4688,7 +4688,7 @@ Java_SQLite_Backup__1step(JNIEnv *env, jobject obj, jint n) {
 }
 
 JNIEXPORT jint JNICALL
-Java_SQLite_Backup__1remaining(JNIEnv *env, jobject obj) {
+Java_sqlite_Backup__1remaining(JNIEnv *env, jobject obj) {
     jint result = 0;
 #if HAVE_SQLITE3 && HAVE_SQLITE3_BACKUPAPI
     hbk *bk = gethbk(env, obj);
@@ -4705,7 +4705,7 @@ Java_SQLite_Backup__1remaining(JNIEnv *env, jobject obj) {
 }
 
 JNIEXPORT jint JNICALL
-Java_SQLite_Backup__1pagecount(JNIEnv *env, jobject obj) {
+Java_sqlite_Backup__1pagecount(JNIEnv *env, jobject obj) {
     jint result = 0;
 #if HAVE_SQLITE3 && HAVE_SQLITE3_BACKUPAPI
     hbk *bk = gethbk(env, obj);
@@ -4761,7 +4761,7 @@ doprofile(void *arg, const char *msg, sqlite_uint64 est)
 #endif
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database__1profile(JNIEnv *env, jobject obj, jobject tr) {
+Java_sqlite_Database__1profile(JNIEnv *env, jobject obj, jobject tr) {
 #if HAVE_SQLITE3_PROFILE
     handle *h = gethandle(env, obj);
 
@@ -4782,7 +4782,7 @@ Java_SQLite_Database__1profile(JNIEnv *env, jobject obj, jobject tr) {
 }
 
 JNIEXPORT jint JNICALL
-Java_SQLite_Database__1status(JNIEnv *env, jclass cls, jint op, jintArray info,
+Java_sqlite_Database__1status(JNIEnv *env, jclass cls, jint op, jintArray info,
         jboolean flag) {
     jint ret = SQLITE_ERROR;
 #if HAVE_SQLITE3_STATUS
@@ -4801,7 +4801,7 @@ Java_SQLite_Database__1status(JNIEnv *env, jclass cls, jint op, jintArray info,
 }
 
 JNIEXPORT jint JNICALL
-Java_SQLite_Database__1db_1status(JNIEnv *env, jobject obj, jint op,
+Java_sqlite_Database__1db_1status(JNIEnv *env, jobject obj, jint op,
         jintArray info, jboolean flag) {
     jint ret = SQLITE_ERROR;
 #if HAVE_SQLITE3_DB_STATUS
@@ -4832,30 +4832,30 @@ Java_SQLite_Database__1db_1status(JNIEnv *env, jobject obj, jint op,
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Stmt_internal_1init(JNIEnv *env, jclass cls) {
+Java_sqlite_Stmt_internal_1init(JNIEnv *env, jclass cls) {
     F_SQLite_Stmt_handle = (*env)->GetFieldID(env, cls, "handle", "J");
     F_SQLite_Stmt_error_code = (*env)->GetFieldID(env, cls, "error_code", "I");
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Vm_internal_1init(JNIEnv *env, jclass cls) {
+Java_sqlite_Vm_internal_1init(JNIEnv *env, jclass cls) {
     F_SQLite_Vm_handle = (*env)->GetFieldID(env, cls, "handle", "J");
     F_SQLite_Vm_error_code = (*env)->GetFieldID(env, cls, "error_code", "I");
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Blob_internal_1init(JNIEnv *env, jclass cls) {
+Java_sqlite_Blob_internal_1init(JNIEnv *env, jclass cls) {
     F_SQLite_Blob_handle = (*env)->GetFieldID(env, cls, "handle", "J");
     F_SQLite_Blob_size = (*env)->GetFieldID(env, cls, "size", "I");
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Backup_internal_1init(JNIEnv *env, jclass cls) {
+Java_sqlite_Backup_internal_1init(JNIEnv *env, jclass cls) {
     F_SQLite_Backup_handle = (*env)->GetFieldID(env, cls, "handle", "J");
 }
 
 JNIEXPORT void JNICALL
-Java_SQLite_Database_internal_1init(JNIEnv *env, jclass cls) {
+Java_sqlite_Database_internal_1init(JNIEnv *env, jclass cls) {
 #if defined(DONT_USE_JNI_ONLOAD) || !defined(JNI_VERSION_1_2)
     while (C_java_lang_String == 0) {
         jclass jls = (*env)->FindClass(env, "java/lang/String");
