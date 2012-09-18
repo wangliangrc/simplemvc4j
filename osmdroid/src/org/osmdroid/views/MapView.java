@@ -112,6 +112,7 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants, Mu
     private final Point mPoint = new Point();
 
     // 限制地图显示范围
+    @SuppressWarnings("unused")
     private int mMapLeft, mMapRight, mMapTop, mMapBottom;
     // 限制zoomlevel
     private int mMinZoomLevel;
