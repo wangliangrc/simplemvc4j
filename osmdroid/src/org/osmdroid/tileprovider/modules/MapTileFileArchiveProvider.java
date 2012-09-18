@@ -143,7 +143,7 @@ public class MapTileFileArchiveProvider extends MapTileFileStorageProviderBase {
     @Override
     public void setTileSource(final ITileSource pTileSource) {
         ITileSource curTileSource = mTileSource;
-        if(!curTileSource.equals(pTileSource)) {
+        if(!pTileSource.equals(curTileSource)) {
             mTileSource = pTileSource;
             if (!mSpecificArchivesProvided) {
                 findArchiveFiles();
