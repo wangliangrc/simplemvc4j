@@ -304,14 +304,12 @@ static void freep(char **strp) {
 }
 
 static void throwex(JNIEnv *env, const char *msg) {
-    jclass except = (*env)->FindClass(env, "SQLite/SQLiteException");
+    jclass except = (*env)->FindClass(env, "sqlite/SQLiteException");
 
     (*env)->ExceptionClear(env);
     if (except) {
         (*env)->ThrowNew(env, except, msg);
     }
-
-    (*env)->DeleteLocalRef(env, except);
 }
 
 static void throwoom(JNIEnv *env, const char *msg) {
@@ -321,8 +319,6 @@ static void throwoom(JNIEnv *env, const char *msg) {
     if (except) {
         (*env)->ThrowNew(env, except, msg);
     }
-
-    (*env)->DeleteLocalRef(env, except);
 }
 
 static void throwclosed(JNIEnv *env) {
@@ -339,8 +335,6 @@ throwioex(JNIEnv *env, const char *msg)
     if (except) {
         (*env)->ThrowNew(env, except, msg);
     }
-
-    (*env)->DeleteLocalRef(env, except);
 }
 #endif
 
@@ -400,8 +394,6 @@ trans2iso(JNIEnv *env, int haveutf, jstring enc, jstring src, transstr *dest) {
     } else {
         (*env)->DeleteLocalRef(env, exc);
     }
-
-    (*env)->DeleteLocalRef(env, bytes);
     return dest->result;
 }
 
@@ -1686,7 +1678,7 @@ call_common(sqlite_func *sf, int isstep, int nargs, const char **args)
         jmethodID mid =
         (*env)->GetMethodID(env, cls,
                 isstep ? "step" : "function",
-                "(LSQLite/FunctionContext;[Ljava/lang/String;)V");
+                "(Lsqlite/FunctionContext;[Ljava/lang/String;)V");
         jobjectArray arr;
         int i;
 
@@ -1738,7 +1730,7 @@ call_final(sqlite_func *sf)
         JNIEnv *env = f->env;
         jclass cls = (*env)->GetObjectClass(env, f->fi);
         jmethodID mid = (*env)->GetMethodID(env, cls, "last_step",
-                "(LSQLite/FunctionContext;)V");
+                "(Lsqlite/FunctionContext;)V");
         if (mid == 0) {
             (*env)->DeleteLocalRef(env, cls);
             return;
@@ -1760,7 +1752,7 @@ static void call3_common(sqlite3_context *sf, int isstep, int nargs,
         jclass cls = (*env)->GetObjectClass(env, f->fi);
         jmethodID mid = (*env)->GetMethodID(env, cls,
                 isstep ? "step" : "function",
-                "(LSQLite/FunctionContext;[Ljava/lang/String;)V");
+                "(Lsqlite/FunctionContext;[Ljava/lang/String;)V");
         jobjectArray arr;
         int i;
 
@@ -1807,7 +1799,7 @@ static void call3_final(sqlite3_context *sf) {
         JNIEnv *env = f->env;
         jclass cls = (*env)->GetObjectClass(env, f->fi);
         jmethodID mid = (*env)->GetMethodID(env, cls, "last_step",
-                "(LSQLite/FunctionContext;)V");
+                "(Lsqlite/FunctionContext;)V");
         if (mid == 0) {
             (*env)->DeleteLocalRef(env, cls);
             return;
@@ -1824,7 +1816,7 @@ static void mkfunc_common(JNIEnv *env, int isagg, jobject obj, jstring name,
     handle *h = gethandle(env, obj);
 
     if (h && h->sqlite) {
-        jclass cls = (*env)->FindClass(env, "SQLite/FunctionContext");
+        jclass cls = (*env)->FindClass(env, "sqlite/FunctionContext");
         jobject fc;
         hfunc *f;
         int ret;
