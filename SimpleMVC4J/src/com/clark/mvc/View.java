@@ -90,6 +90,7 @@ class View implements Constants {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private boolean findMediatorMethods(final Object object, Class<?> clazz) {
         // final boolean isInSamePackage = object.getClass().getPackage()
         // .equals(clazz.getPackage());

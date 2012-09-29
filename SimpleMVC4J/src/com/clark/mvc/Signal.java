@@ -6,13 +6,13 @@ package com.clark.mvc;
  * @author clark
  *
  */
-public class Signal {
+public class Signal<T> {
 
     public final String name;
-    public final Object body;
+    public final T body;
     public final String type;
 
-    Signal(String name, Object body, String type) {
+    Signal(String name, T body, String type) {
         super();
         this.name = name;
         this.body = body;
@@ -35,7 +35,7 @@ public class Signal {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Signal other = (Signal) obj;
+        Signal<?> other = (Signal<?>) obj;
         if (name == null) {
             if (other.name != null)
                 return false;

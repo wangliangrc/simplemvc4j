@@ -26,12 +26,12 @@ public class Facade {
     private final Controller controller = new Controller(this);
     private final Model model = new Model(this);
 
-    private final HashMap<String, Set<SignalReceiver>> receiverMap = new HashMap<String, Set<SignalReceiver>>();
+    private final HashMap<String, Set<SignalReceiver<?>>> receiverMap = new HashMap<String, Set<SignalReceiver<?>>>();
     private volatile UIRunnable uiRunner;
 
     // 添加防止信号过多的检测代码
     private static class SignalTimeHolder {
-        public Signal signal;
+        public Signal<?> signal;
         public long time;
     }
 
@@ -44,9 +44,9 @@ public class Facade {
      * @param receiver
      */
     synchronized void registerSignalReceiver(String name,
-            SignalReceiver receiver) {
+            SignalReceiver<?> receiver) {
         if (name != null && receiver != null) {
-            Set<SignalReceiver> signalReceivers = getSignalReceivers(name);
+            Set<SignalReceiver<?>> signalReceivers = getSignalReceivers(name);
             signalReceivers.add(receiver);
         }
     }
@@ -58,9 +58,9 @@ public class Facade {
      * @param name
      * @param receiver
      */
-    synchronized void removeSignalReceiver(String name, SignalReceiver receiver) {
+    synchronized void removeSignalReceiver(String name, SignalReceiver<?> receiver) {
         if (name != null && receiver != null && receiverMap.containsKey(name)) {
-            Set<SignalReceiver> set = receiverMap.get(name);
+            Set<SignalReceiver<?>> set = receiverMap.get(name);
             set.remove(receiver);
         }
     }
@@ -81,7 +81,7 @@ public class Facade {
      * 
      * @param signal
      */
-    synchronized void notify(final Signal signal) {
+    synchronized void notify(final Signal<?> signal) {
         if (signal != null) {
             // 防 signal 重复判断
             if (lastSignalTimeHolder != null
@@ -132,8 +132,9 @@ public class Facade {
      * 
      * @param signal
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void sendSignalInternal(Signal signal) {
-        Set<SignalReceiver> set = receiverMap.get(signal.name);
+        Set<SignalReceiver<?>> set = receiverMap.get(signal.name);
         if (set != null && set.size() > 0) {
             System.out.println(toString() + " notified at "
                     + Thread.currentThread().toString());
@@ -149,10 +150,10 @@ public class Facade {
         }
     }
 
-    private Set<SignalReceiver> getSignalReceivers(String name) {
-        Set<SignalReceiver> set = receiverMap.get(name);
+    private Set<SignalReceiver<?>> getSignalReceivers(String name) {
+        Set<SignalReceiver<?>> set = receiverMap.get(name);
         if (set == null) {
-            set = new HashSet<SignalReceiver>();
+            set = new HashSet<SignalReceiver<?>>();
             receiverMap.put(name.intern(), set);
         }
         return set;
@@ -232,7 +233,7 @@ public class Facade {
      * @param type
      *            通知类型。
      */
-    public void sendSignal(String signalName, String type, Object body) {
+    public <T> void sendSignal(String signalName, String type, T body) {
         if (signalName == null) {
             throw new NullPointerException();
         }
@@ -240,7 +241,7 @@ public class Facade {
         if (signalName.trim().length() == 0) {
             throw new IllegalArgumentException("signalName mustn't be empty!");
         }
-        notify(new Signal(signalName, body, type));
+        notify(new Signal<T>(signalName, body, type));
     }
 
     /**
@@ -255,8 +256,8 @@ public class Facade {
      * @param type
      *            通知类型。
      */
-    public void sendSignal(String signalName, String type, Object... body) {
-        sendSignal(signalName, type, (Object) body);
+    public <T> void sendSignal(String signalName, String type, T... body) {
+        sendSignal(signalName, type, body);
     }
 
     /**
@@ -269,7 +270,7 @@ public class Facade {
      * @param body
      *            通知包含消息体。
      */
-    public void sendSignal(String signalName, Object body) {
+    public <T> void sendSignal(String signalName, T body) {
         sendSignal(signalName, null, body);
     }
 
@@ -283,8 +284,8 @@ public class Facade {
      * @param body
      *            通知包含消息体。
      */
-    public void sendSignal(String signalName, Object... body) {
-        sendSignal(signalName, (Object) body);
+    public <T> void sendSignal(String signalName, T... body) {
+        sendSignal(signalName, body);
     }
 
     /**

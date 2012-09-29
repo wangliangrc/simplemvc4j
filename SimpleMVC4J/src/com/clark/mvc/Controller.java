@@ -92,6 +92,7 @@ class Controller implements Constants {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private boolean findCommandMethods(Class<?> clazz) {
         Command cmd = null;
         String name = null;

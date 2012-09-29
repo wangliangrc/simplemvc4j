@@ -1,5 +1,6 @@
 package com.clark.mvc;
 
+@SuppressWarnings("rawtypes")
 class SignalReceiverHolder {
     final String name;
     final SignalReceiver function;

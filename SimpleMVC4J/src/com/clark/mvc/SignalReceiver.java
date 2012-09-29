@@ -1,7 +1,7 @@
 package com.clark.mvc;
 
-interface SignalReceiver {
+interface SignalReceiver<T> {
 
-    void onReceive(Signal notification);
+    void onReceive(Signal<T> notification);
 
 }
