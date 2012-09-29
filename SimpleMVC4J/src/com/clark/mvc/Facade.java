@@ -29,13 +29,13 @@ public class Facade implements Constants {
     private final HashMap<String, Set<SignalReceiver<?>>> receiverMap = new HashMap<String, Set<SignalReceiver<?>>>();
     private volatile UIRunnable uiRunner;
 
-    // 添加防止信号过多的检测代码
-    private static class SignalTimeHolder {
-        public Signal<?> signal;
-        public long time;
-    }
-
-    private SignalTimeHolder lastSignalTimeHolder;
+    //    // 添加防止信号过多的检测代码
+    //    private static class SignalTimeHolder {
+    //        public Signal<?> signal;
+    //        public long time;
+    //    }
+    //
+    //    private SignalTimeHolder lastSignalTimeHolder;
 
     /**
      * 注册一个 {@link SignalReceiver} 对象到 name 指定的 key 上。
@@ -58,7 +58,8 @@ public class Facade implements Constants {
      * @param name
      * @param receiver
      */
-    synchronized void removeSignalReceiver(String name, SignalReceiver<?> receiver) {
+    synchronized void removeSignalReceiver(String name,
+            SignalReceiver<?> receiver) {
         if (name != null && receiver != null && receiverMap.containsKey(name)) {
             Set<SignalReceiver<?>> set = receiverMap.get(name);
             set.remove(receiver);
@@ -83,14 +84,14 @@ public class Facade implements Constants {
      */
     synchronized void notify(final Signal<?> signal) {
         if (signal != null) {
-            // 防 signal 重复判断
-            if (lastSignalTimeHolder != null
-                    && signal.equals(lastSignalTimeHolder.signal)) {
-                if (System.currentTimeMillis() - lastSignalTimeHolder.time < 1000) {
-                    // less than 1s，drop signal
-                    return;
-                }
-            }
+            //            // 防 signal 重复判断
+            //            if (lastSignalTimeHolder != null
+            //                    && signal.equals(lastSignalTimeHolder.signal)) {
+            //                if (System.currentTimeMillis() - lastSignalTimeHolder.time < 1000) {
+            //                    // less than 1s，drop signal
+            //                    return;
+            //                }
+            //            }
 
             UIRunnable worker = findUIRunner(this);
             if (worker != null) {
@@ -105,12 +106,12 @@ public class Facade implements Constants {
                 sendSignalInternal(signal);
             }
 
-            // 更新 SignalTimeHolder
-            if (lastSignalTimeHolder == null) {
-                lastSignalTimeHolder = new SignalTimeHolder();
-            }
-            lastSignalTimeHolder.signal = signal;
-            lastSignalTimeHolder.time = System.currentTimeMillis();
+            //            // 更新 SignalTimeHolder
+            //            if (lastSignalTimeHolder == null) {
+            //                lastSignalTimeHolder = new SignalTimeHolder();
+            //            }
+            //            lastSignalTimeHolder.signal = signal;
+            //            lastSignalTimeHolder.time = System.currentTimeMillis();
         }
     }
 
