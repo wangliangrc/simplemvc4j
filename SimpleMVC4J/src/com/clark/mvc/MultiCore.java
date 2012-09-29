@@ -119,28 +119,28 @@ public final class MultiCore implements Constants {
         }
     }
 
-    public static void setUIWorker(UIRunnable worker) {
-        GLOBAL.setRunner(worker);
+    public static void setRunner(UIRunnable runner) {
+        GLOBAL.setRunner(runner);
     }
 
     public static <T> T sendSignal(Class<T> clazz, String signal) {
         return GLOBAL.sendSignal(clazz, signal);
     }
 
-    public static void sendSignal(String signalName, String type, Object body) {
+    public static <T> void sendSignal(String signalName, String type, T body) {
         GLOBAL.sendSignal(signalName, type, body);
     }
 
-    public static void sendSignal(String signalName, String type,
-            Object... body) {
+    public static <T> void sendSignal(String signalName, String type,
+            T... body) {
         GLOBAL.sendSignal(signalName, type, body);
     }
 
-    public static void sendSignal(String signalName, Object body) {
+    public static <T> void sendSignal(String signalName, T body) {
         GLOBAL.sendSignal(signalName, body);
     }
 
-    public static void sendSignal(String signalName, Object... body) {
+    public static <T> void sendSignal(String signalName, T... body) {
         GLOBAL.sendSignal(signalName, body);
     }
 
