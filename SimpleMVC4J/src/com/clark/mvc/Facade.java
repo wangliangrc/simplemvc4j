@@ -27,7 +27,7 @@ public class Facade {
     private final Model model = new Model(this);
 
     private final HashMap<String, Set<SignalReceiver>> receiverMap = new HashMap<String, Set<SignalReceiver>>();
-    private volatile UIWorker uiWorker;
+    private volatile UIRunnable uiRunner;
 
     // 添加防止信号过多的检测代码
     private static class SignalTimeHolder {
@@ -75,9 +75,9 @@ public class Facade {
     }
 
     /**
-     * 该方法确定是否运行在 {@link UIWorker} 所在线程上。<br />
-     * 注意：该方法会继承 parent 的 {@link UIWorker} 属性，即如果自身没有设置 {@link UIWorker}
-     * 属性还会自动查看 parent 的 {@link UIWorker} 属性，直到 MAIN Facade 为止.
+     * 该方法确定是否运行在 {@link UIRunnable} 所在线程上。<br />
+     * 注意：该方法会继承 parent 的 {@link UIRunnable} 属性，即如果自身没有设置 {@link UIRunnable}
+     * 属性还会自动查看 parent 的 {@link UIRunnable} 属性，直到 MAIN Facade 为止.
      * 
      * @param signal
      */
@@ -92,9 +92,9 @@ public class Facade {
                 }
             }
 
-            UIWorker worker = findUIWorker(this);
+            UIRunnable worker = findUIRunner(this);
             if (worker != null) {
-                worker.postTask(new Runnable() {
+                worker.runOnUIThread(new Runnable() {
 
                     @Override
                     public void run() {
@@ -114,13 +114,13 @@ public class Facade {
         }
     }
 
-    private static UIWorker findUIWorker(Facade facade) {
+    private static UIRunnable findUIRunner(Facade facade) {
         if (facade == null) {
             return null;
-        } else if (facade.uiWorker != null) {
-            return facade.uiWorker;
+        } else if (facade.uiRunner != null) {
+            return facade.uiRunner;
         } else {
-            return findUIWorker(facade.parent);
+            return findUIRunner(facade.parent);
         }
     }
 
@@ -196,15 +196,15 @@ public class Facade {
     /**
      * 设置UI线程执行者。
      * 
-     * @param worker
+     * @param runner
      *            可以为 null。如果为 null 则表示 sendNotification 方法的执行线程与调用者线程一致。
      */
-    public void setUIWorker(UIWorker worker) {
-        if (worker instanceof java.lang.reflect.Proxy) {
+    public void setRunner(UIRunnable runner) {
+        if (runner instanceof java.lang.reflect.Proxy) {
             throw new IllegalArgumentException(
-                    "Can't use \"callback(Class, String)\" method in the setUIWorker(UIWorker) CALLBACK!");
+                    "Can't use \"callback(Class, String)\" method in the setRunner(UIRunnable) CALLBACK!");
         }
-        uiWorker = worker;
+        uiRunner = runner;
     }
 
     /**
@@ -296,7 +296,7 @@ public class Facade {
      *            通知名称。不能为 null。
      */
     public void sendSignal(String signalName) {
-        sendSignal(signalName, null);
+        sendSignal(signalName, new Object[0]);
     }
 
     public void registerView(Object object) {

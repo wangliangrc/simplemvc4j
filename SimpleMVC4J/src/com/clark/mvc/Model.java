@@ -2,7 +2,7 @@ package com.clark.mvc;
 
 import java.util.HashMap;
 
-class Model {
+class Model implements Constants {
     private Facade facade;
 
     Model(Facade facade) {
@@ -30,9 +30,13 @@ class Model {
         String name = proxy.getProxyName();
         if (!hashMap.containsKey(name)) {
             hashMap.put(name.intern(), proxy);
-            System.out.println(facade + " register proxy: [" + proxy + "]");
+            if (DEBUG) {
+                System.out.println(facade + " register proxy: [" + proxy + "]");
+            }
         } else {
-            System.err.println("Repeat registered proxy: [" + proxy + "]");
+            if (DEBUG) {
+                System.err.println("Repeat registered proxy: [" + proxy + "]");
+            }
         }
     }
 
@@ -55,10 +59,14 @@ class Model {
 
         if (hashMap.containsKey(proxyName)) {
             hashMap.remove(proxyName);
-            System.out.println(facade + " remove proxy: [" + proxy + "]");
+            if (DEBUG) {
+                System.out.println(facade + " remove proxy: [" + proxy + "]");
+            }
         } else {
-            System.err.println("There is no proxy name: [" + proxyName
-                    + "] already registered");
+            if (DEBUG) {
+                System.err.println("There is no proxy name: [" + proxyName
+                        + "] already registered");
+            }
         }
     }
 

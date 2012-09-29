@@ -20,10 +20,10 @@ import java.lang.annotation.Target;
  * <ol>
  * <li>public 不是必须的，理论上可以接受任意修饰类型。</li>
  * <li>static 是必须的，需要保证实现 Command 机制的类不依赖于任何实例状态。</li>
- * <li>返回值并没有做出限制，但是有返回值的话也不会被利用，一般为 void。</li>
+ * <li>返回值并没有做出限制，但是有返回值的话也不会被使用，一般为 void。</li>
  * <li>方法名称没有限定。</li>
  * <li>参数列表要求只能接受一个 {@link Signal} 类型参数，参数个数类型不对会抛出非受检异常。</li>
- * <li>如果注册的 Class 对象有 super class 的话，并不会触发 super class 的 Command 方法。</li>
+ * <li>如果注册的 Class 对象有 super class 的话，并不会触发 super class 相关的的 {@link Command} 方法。</li>
  * </ol>
  * 
  * @author clark

@@ -1,11 +1,12 @@
 package com.clark.mvc;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-class View {
+class View implements Constants {
 
     private HashMap<Object, Set<SignalReceiverHolder>> views = new HashMap<Object, Set<SignalReceiverHolder>>();
     private Facade facade;
@@ -17,8 +18,8 @@ class View {
     /**
      * 注册一个包含 {@link Mediator} 注解方法的类的实例到 View 注册表中。
      * <p>
-     * 所谓 Mediator 对象，实际上就是具有 {@link Mediator} 注解修饰的方法的类实例而已。 注册时是基于实例的区别于
-     * {@link Controller} 是基于 {@link Class} 对象的。 也就是说如果一个包含 {@link Mediator}
+     * 所谓 Mediator 对象，实际上就是具有 {@link Mediator} 注解修饰的方法的类实例而已。 注册时是基于实例的(区别于
+     * {@link Controller} 是基于 {@link Class} 对象的)。 也就是说如果一个包含 {@link Mediator}
      * 注解方法的类的两个实例同时注册，那么触发回调的时候两个实例都会接到通知：
      * 
      * <pre>
@@ -29,15 +30,15 @@ class View {
      *         SomeMediator mediator2 = new SomeMediator();
      * 
      *         // 注册 Mediator
-     *         mvc().view().register(mediator1);
-     *         mvc().view().register(mediator2);
+     *         MultiCore.registerView(mediator1);
+     *         MultiCore.registerView(mediator2);
      * 
      *         // 发送 &quot;doSomdthing&quot; 通知
-     *         mvc().sendSignal(&quot;doSomdthing&quot;);
+     *         MultiCore.sendSignal(&quot;doSomdthing&quot;);
      * 
      *         // 移除 Mediator
-     *         mvc().view().remove(mediator1);
-     *         mvc().view().remove(mediator2);
+     *         MultiCore.removeView(mediator1);
+     *         MultiCore.removeView(mediator2);
      *     }
      * 
      *     public static class SomeMediator {
@@ -65,7 +66,9 @@ class View {
         }
 
         if (views.containsKey(object)) {
-            System.err.println("Already registered mediator: " + object);
+            if (DEBUG) {
+                System.err.println("Already registered mediator: " + object);
+            }
             return;
         }
 
@@ -76,9 +79,14 @@ class View {
         boolean found = findMediatorMethods(object, clazz);
 
         if (found) {
-            System.out.println(facade + " register mediator: [" + object + "]");
+            if (DEBUG) {
+                System.out.println(facade + " register mediator: [" + object
+                        + "]");
+            }
         } else {
-            System.err.println(errorString);
+            if (DEBUG) {
+                System.err.println(errorString);
+            }
         }
     }
 
@@ -133,7 +141,13 @@ class View {
                                         // 可以调用 private、protected 方法等
                                         method.setAccessible(true);
                                         method.invoke(object, signal);
-                                    } catch (Exception e) {
+                                    } catch (SecurityException e) {
+                                        throw new RuntimeException(e);
+                                    } catch (IllegalArgumentException e) {
+                                        throw new RuntimeException(e);
+                                    } catch (IllegalAccessException e) {
+                                        throw new RuntimeException(e);
+                                    } catch (InvocationTargetException e) {
                                         throw new RuntimeException(e);
                                     }
                                 }
@@ -188,11 +202,16 @@ class View {
                 }
             }
             views.remove(object);
-            System.out.println(facade + " remove mediator: [" + object + "]");
+            if (DEBUG) {
+                System.out.println(facade + " remove mediator: [" + object
+                        + "]");
+            }
         } else {
-            String errorString = "There is no mediator which is already registered: ["
-                    + object + "]";
-            System.err.println(errorString);
+            if (DEBUG) {
+                String errorString = "There is no mediator which is already registered: ["
+                        + object + "]";
+                System.err.println(errorString);
+            }
         }
     }
 

@@ -2,7 +2,7 @@ package com.clark.mvc;
 
 import java.util.HashMap;
 
-public final class MultiCore {
+public final class MultiCore implements Constants {
     private static HashMap<String, Facade> facades = new HashMap<String, Facade>();
 
     public static final Facade GLOBAL = new Facade("", null);
@@ -20,7 +20,9 @@ public final class MultiCore {
         if (facade == null) {
             facade = new Facade(name, parent);
             facades.put(name, facade);
-            System.out.println("register facade:" + facade);
+            if (DEBUG) {
+                System.out.println("register facade:" + facade);
+            }
             return facade;
         }
 
@@ -85,7 +87,9 @@ public final class MultiCore {
         if (name != null) {
             final Facade facade = facades.remove(name);
             if (facade != null) {
-                System.out.println("remove facade:" + facade);
+                if (DEBUG) {
+                    System.out.println("remove facade:" + facade);
+                }
                 // 将 parent 中为 name 的 Facade 删除
                 for (Facade facade2 : facades.values()) {
                     if (facade2.parent != null
@@ -94,7 +98,10 @@ public final class MultiCore {
                     }
                 }
             } else {
-                System.err.println("Can't find facade named \"" + name + "\"!");
+                if (DEBUG) {
+                    System.err.println("Can't find facade named \"" + name
+                            + "\"!");
+                }
             }
         }
     }
@@ -112,8 +119,8 @@ public final class MultiCore {
         }
     }
 
-    public static void setUIWorker(UIWorker worker) {
-        GLOBAL.setUIWorker(worker);
+    public static void setUIWorker(UIRunnable worker) {
+        GLOBAL.setRunner(worker);
     }
 
     public static <T> T sendSignal(Class<T> clazz, String signal) {

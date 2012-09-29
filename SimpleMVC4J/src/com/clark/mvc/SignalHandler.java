@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 
-class SignalHandler implements InvocationHandler {
+class SignalHandler implements InvocationHandler, Constants {
     private Facade facade;
     private String signal;
 
@@ -35,18 +35,20 @@ class SignalHandler implements InvocationHandler {
         if (method.getReturnType() != Void.class) {
             throw new IllegalArgumentException("不能代理又返回值的回调方法");
         }
-        System.out.println("***********************************");
-        System.out.println("            SignalHandler          ");
-        System.out.println("方法签名： " + methodToString(method));
-        System.out.println("方法参数列表：");
-        if (args != null && args.length != 0) {
-            for (int i = 0; i < args.length; i++) {
-                System.out.println("参数" + (i + 1) + ": " + args[i]);
+        if (DEBUG) {
+            System.out.println("***********************************");
+            System.out.println("            SignalHandler          ");
+            System.out.println("方法签名： " + methodToString(method));
+            System.out.println("方法参数列表：");
+            if (args != null && args.length != 0) {
+                for (int i = 0; i < args.length; i++) {
+                    System.out.println("参数" + (i + 1) + ": " + args[i]);
+                }
+            } else {
+                System.out.println("null");
             }
-        } else {
-            System.out.println("null");
+            System.out.println("***********************************");
         }
-        System.out.println("***********************************");
         facade.sendSignal(signal, new Invocation(proxy, method, args));
         return null;
     }

@@ -1,6 +1,7 @@
 package com.clark.mvc;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -8,7 +9,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-class Controller {
+/**
+ * 该类可以注册带有实现 {@link Command} 方法的类。
+ * 
+ * @author guangongbo
+ *
+ */
+class Controller implements Constants {
 
     Controller(Facade facade) {
         this.facade = facade;
@@ -31,8 +38,10 @@ class Controller {
         }
 
         if (signalReceiverHolderMap.containsKey(clazz)) {
-            System.err.println("Already registered command: "
-                    + clazz.getCanonicalName());
+            if (DEBUG) {
+                System.err.println("Already registered command: "
+                        + clazz.getCanonicalName());
+            }
             return;
         }
 
@@ -72,10 +81,14 @@ class Controller {
         boolean found = findCommandMethods(clazz);
 
         if (found) {
-            System.out.println(facade + " register command: ["
-                    + clazz.getCanonicalName() + "]");
+            if (DEBUG) {
+                System.out.println(facade + " register command: ["
+                        + clazz.getCanonicalName() + "]");
+            }
         } else {
-            System.err.println(errorString);
+            if (DEBUG) {
+                System.err.println(errorString);
+            }
         }
     }
 
@@ -106,12 +119,24 @@ class Controller {
                                     // 保证任何修饰符都可以被调用
                                     method.setAccessible(true);
                                     method.invoke(null, signal);
-                                } catch (Exception e) {
+                                } catch (IllegalAccessException e) {
+                                    // 理论上运行不到这里
+                                    throw new RuntimeException(e);
+                                } catch (IllegalArgumentException e) {
+                                    // 参数错误
+                                    throw new RuntimeException(e);
+                                } catch (SecurityException e) {
+                                    // 理论上运行不到这里，setAccessible 方法抛出的异常
+                                    throw new RuntimeException(e);
+                                } catch (InvocationTargetException e) {
+                                    // 被调用方法抛出的异常
                                     throw new RuntimeException(e);
                                 }
                             }
                         };
+                        // 注册到 facade 上保证收到信号时回调
                         facade.registerSignalReceiver(name, function);
+                        // 注册到 signalReceiverHolderMap 中保证 remove，contain 操作的判断正常
                         signalReceiverHolderMap.put(clazz,
                                 new SignalReceiverHolder(name, function));
                         found = true;
@@ -146,11 +171,15 @@ class Controller {
             facade.removeSignalReceiver(functionHolder.name,
                     functionHolder.function);
             signalReceiverHolderMap.remove(clazz);
-            System.out.println(facade + " remove command: ["
-                    + clazz.getCanonicalName() + "]");
+            if (DEBUG) {
+                System.out.println(facade + " remove command: ["
+                        + clazz.getCanonicalName() + "]");
+            }
         } else {
-            System.err.println("Not found registered command: ["
-                    + clazz.getCanonicalName() + "]");
+            if (DEBUG) {
+                System.err.println("Not found registered command: ["
+                        + clazz.getCanonicalName() + "]");
+            }
         }
     }
 
