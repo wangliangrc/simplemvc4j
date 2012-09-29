@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Facade {
+public class Facade implements Constants {
 
     /**
      * 构造函数，拒绝包外继承。
@@ -136,9 +136,10 @@ public class Facade {
     private void sendSignalInternal(Signal signal) {
         Set<SignalReceiver<?>> set = receiverMap.get(signal.name);
         if (set != null && set.size() > 0) {
-            System.out.println(toString() + " notified at "
-                    + Thread.currentThread().toString());
-
+            if (DEBUG) {
+                System.out.println(toString() + " notified at "
+                        + Thread.currentThread().toString());
+            }
             for (SignalReceiver function : set) {
                 function.onReceive(signal);
             }
@@ -253,22 +254,6 @@ public class Facade {
      *            通知名称。不能为 null。
      * @param body
      *            通知包含消息体。
-     * @param type
-     *            通知类型。
-     */
-    public <T> void sendSignal(String signalName, String type, T... body) {
-        sendSignal(signalName, type, body);
-    }
-
-    /**
-     * 发送 {@link Signal} 通知实例。
-     * <p>
-     * 注意：回调方法运行线程由该方法所在线程决定。
-     * 
-     * @param signalName
-     *            通知名称。不能为 null。
-     * @param body
-     *            通知包含消息体。
      */
     public <T> void sendSignal(String signalName, T body) {
         sendSignal(signalName, null, body);
@@ -281,23 +266,9 @@ public class Facade {
      * 
      * @param signalName
      *            通知名称。不能为 null。
-     * @param body
-     *            通知包含消息体。
-     */
-    public <T> void sendSignal(String signalName, T... body) {
-        sendSignal(signalName, body);
-    }
-
-    /**
-     * 发送 {@link Signal} 通知实例。
-     * <p>
-     * 注意：回调方法运行线程由该方法所在线程决定。
-     * 
-     * @param signalName
-     *            通知名称。不能为 null。
      */
     public void sendSignal(String signalName) {
-        sendSignal(signalName, new Object[0]);
+        sendSignal(signalName, null);
     }
 
     public void registerView(Object object) {

@@ -131,16 +131,7 @@ public final class MultiCore implements Constants {
         GLOBAL.sendSignal(signalName, type, body);
     }
 
-    public static <T> void sendSignal(String signalName, String type,
-            T... body) {
-        GLOBAL.sendSignal(signalName, type, body);
-    }
-
     public static <T> void sendSignal(String signalName, T body) {
-        GLOBAL.sendSignal(signalName, body);
-    }
-
-    public static <T> void sendSignal(String signalName, T... body) {
         GLOBAL.sendSignal(signalName, body);
     }
 
