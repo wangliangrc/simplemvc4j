@@ -873,8 +873,12 @@ public abstract class AbstractComponent {
     private Intent fixIntent(Intent intent) {
         final ComponentName component = intent.getComponent();
         final Intent newIntent = new Intent();
-        newIntent.setClassName(getApplication(), component.getClassName());
-        newIntent.setAction(intent.getAction());
+        newIntent.setClassName(getApplication(),
+                Activity.class.getCanonicalName());
+        final String action = intent.getAction();
+        if (action != null) {
+            newIntent.setAction(action);
+        }
         newIntent.setFlags(intent.getFlags());
         newIntent.setDataAndType(intent.getData(), intent.getType());
         final Set<String> categories = intent.getCategories();
@@ -883,7 +887,14 @@ public abstract class AbstractComponent {
                 newIntent.addCategory(string);
             }
         }
-        newIntent.putExtras(intent.getExtras());
+        final Bundle extras = intent.getExtras();
+        if (extras != null) {
+            newIntent.putExtras(extras);
+        }
+        if (component != null) {
+            newIntent.putExtra(Activity.KEY_BUNDLE_SHELL,
+                    component.getClassName());
+        }
         return newIntent;
     }
 

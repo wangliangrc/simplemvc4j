@@ -1,5 +1,7 @@
 package coms;
 
+import java.util.Set;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -33,8 +35,13 @@ public final class Activity extends android.app.Activity {
             try {
                 final String className;
                 final Bundle extras = intent.getExtras();
-                if (intent.getAction().equals(Intent.ACTION_MAIN)
-                        && intent.getCategories().contains(
+                final String action = intent.getAction();
+                final Set<String> categories = intent.getCategories();
+
+                if (action != null 
+                        && action.equals(Intent.ACTION_MAIN)
+                        && categories != null
+                        && categories.contains(
                                 Intent.CATEGORY_LAUNCHER)
                         && (extras == null || !extras
                                 .containsKey(KEY_BUNDLE_SHELL))) {
@@ -58,29 +65,39 @@ public final class Activity extends android.app.Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mShell.onActivityResult(requestCode, resultCode, data);
+        if (mShell != null) {
+            mShell.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Override
     public void onAttachedToWindow() {
-        mShell.onAttachedToWindow();
+        if (mShell != null) {
+            mShell.onAttachedToWindow();
+        }
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        mShell.onBackPressed();
+        if (mShell != null) {
+            mShell.onBackPressed();
+        }
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mShell.onConfigurationChanged(newConfig);
+        if (mShell != null) {
+            mShell.onConfigurationChanged(newConfig);
+        }
     }
 
     @Override
     public void onContentChanged() {
-        mShell.onContentChanged();
+        if (mShell != null) {
+            mShell.onContentChanged();
+        }
     }
 
     @Override
@@ -93,24 +110,32 @@ public final class Activity extends android.app.Activity {
     @Override
     public void onContextMenuClosed(Menu menu) {
         super.onContextMenuClosed(menu);
-        mShell.onContextMenuClosed(menu);
+        if (mShell != null) {
+            mShell.onContextMenuClosed(menu);
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         handleIntent();
-        mShell.bind(this);
+        if (mShell != null) {
+            mShell.bind(this);
+        }
         super.onCreate(savedInstanceState);
         mApplication = (Application) getApplicationContext();
         mApplication.attach(this);
-        mShell.onCreate(savedInstanceState);
+        if (mShell != null) {
+            mShell.onCreate(savedInstanceState);
+        }
     }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
             ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        mShell.onCreateContextMenu(menu, v, menuInfo);
+        if (mShell != null) {
+            mShell.onCreateContextMenu(menu, v, menuInfo);
+        }
     }
 
     @Override
@@ -155,15 +180,21 @@ public final class Activity extends android.app.Activity {
 
     @Override
     protected void onDestroy() {
-        mShell.onDestroy();
+        if (mShell != null) {
+            mShell.onDestroy();
+        }
         super.onDestroy();
-        mShell.unbind();
+        if (mShell != null) {
+            mShell.unbind();
+        }
         mApplication.detach(this);
     }
 
     @Override
     public void onDetachedFromWindow() {
-        mShell.onDetachedFromWindow();
+        if (mShell != null) {
+            mShell.onDetachedFromWindow();
+        }
     }
 
     @Override
@@ -190,7 +221,9 @@ public final class Activity extends android.app.Activity {
 
     @Override
     public void onLowMemory() {
-        mShell.onLowMemory();
+        if (mShell != null) {
+            mShell.onLowMemory();
+        }
         super.onLowMemory();
     }
 
@@ -211,7 +244,9 @@ public final class Activity extends android.app.Activity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        mShell.onNewIntent(intent);
+        if (mShell != null) {
+            mShell.onNewIntent(intent);
+        }
     }
 
     @Override
@@ -224,37 +259,49 @@ public final class Activity extends android.app.Activity {
     @Override
     public void onOptionsMenuClosed(Menu menu) {
         super.onOptionsMenuClosed(menu);
-        mShell.onOptionsMenuClosed(menu);
+        if (mShell != null) {
+            mShell.onOptionsMenuClosed(menu);
+        }
     }
 
     @Override
     public void onPanelClosed(int featureId, Menu menu) {
         super.onPanelClosed(featureId, menu);
-        mShell.onPanelClosed(featureId, menu);
+        if (mShell != null) {
+            mShell.onPanelClosed(featureId, menu);
+        }
     }
 
     @Override
     protected void onPause() {
-        mShell.onPause();
+        if (mShell != null) {
+            mShell.onPause();
+        }
         super.onPause();
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        mShell.onPostCreate(savedInstanceState);
+        if (mShell != null) {
+            mShell.onPostCreate(savedInstanceState);
+        }
     }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        mShell.onPostResume();
+        if (mShell != null) {
+            mShell.onPostResume();
+        }
     }
 
     @Override
     protected void onPrepareDialog(int id, Dialog dialog, Bundle args) {
         super.onPrepareDialog(id, dialog, args);
-        mShell.onPrepareDialog(id, dialog, args);
+        if (mShell != null) {
+            mShell.onPrepareDialog(id, dialog, args);
+        }
     }
 
     @Override
@@ -275,19 +322,25 @@ public final class Activity extends android.app.Activity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        mShell.onRestart();
+        if (mShell != null) {
+            mShell.onRestart();
+        }
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        mShell.onRestoreInstanceState(savedInstanceState);
+        if (mShell != null) {
+            mShell.onRestoreInstanceState(savedInstanceState);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mShell.onResume();
+        if (mShell != null) {
+            mShell.onResume();
+        }
     }
 
     @Override
@@ -298,7 +351,9 @@ public final class Activity extends android.app.Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mShell.onSaveInstanceState(outState);
+        if (mShell != null) {
+            mShell.onSaveInstanceState(outState);
+        }
     }
 
     @Override
@@ -311,19 +366,25 @@ public final class Activity extends android.app.Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        mShell.onStart();
+        if (mShell != null) {
+            mShell.onStart();
+        }
     }
 
     @Override
     protected void onStop() {
-        mShell.onStop();
+        if (mShell != null) {
+            mShell.onStop();
+        }
         super.onStop();
     }
 
     @Override
     protected void onTitleChanged(CharSequence title, int color) {
         super.onTitleChanged(title, color);
-        mShell.onTitleChanged(title, color);
+        if (mShell != null) {
+            mShell.onTitleChanged(title, color);
+        }
     }
 
     @Override
@@ -339,23 +400,31 @@ public final class Activity extends android.app.Activity {
 
     @Override
     public void onUserInteraction() {
-        mShell.onUserInteraction();
+        if (mShell != null) {
+            mShell.onUserInteraction();
+        }
     }
 
     @Override
     protected void onUserLeaveHint() {
-        mShell.onUserLeaveHint();
+        if (mShell != null) {
+            mShell.onUserLeaveHint();
+        }
     }
 
     @Override
     public void onWindowAttributesChanged(LayoutParams params) {
         super.onWindowAttributesChanged(params);
-        mShell.onWindowAttributesChanged(params);
+        if (mShell != null) {
+            mShell.onWindowAttributesChanged(params);
+        }
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
-        mShell.onWindowFocusChanged(hasFocus);
+        if (mShell != null) {
+            mShell.onWindowFocusChanged(hasFocus);
+        }
     }
 
     public void exit() {
