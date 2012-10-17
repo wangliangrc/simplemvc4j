@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.Bundle;
@@ -33,13 +32,21 @@ public final class Activity extends android.app.Activity {
         if (mShell == null) {
             try {
                 final String className;
-                if (intent.getAction().equals(Intent.ACTION_MAIN) && intent.getCategories().contains(Intent.CATEGORY_LAUNCHER) && !intent.getExtras().containsKey(KEY_BUNDLE_SHELL)) {
-                    final ActivityInfo activityInfo = getPackageManager().getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
+                final Bundle extras = intent.getExtras();
+                if (intent.getAction().equals(Intent.ACTION_MAIN)
+                        && intent.getCategories().contains(
+                                Intent.CATEGORY_LAUNCHER)
+                        && (extras == null || !extras
+                                .containsKey(KEY_BUNDLE_SHELL))) {
+                    final ActivityInfo activityInfo = getPackageManager()
+                            .getActivityInfo(getComponentName(),
+                                    PackageManager.GET_META_DATA);
                     className = activityInfo.metaData.getString("main");
                 } else {
                     className = intent.getStringExtra(KEY_BUNDLE_SHELL);
                 }
-                mShell = (AbstractComponent) Class.forName(className).newInstance();
+                mShell = (AbstractComponent) Class.forName(className)
+                        .newInstance();
             } catch (Exception e) {
                 Log.e(TAG, "", e);
             }
@@ -52,12 +59,6 @@ public final class Activity extends android.app.Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mShell.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
-    protected void onApplyThemeResource(Theme theme, int resid, boolean first) {
-        super.onApplyThemeResource(theme, resid, first);
-        mShell.onApplyThemeResource(theme, resid, first);
     }
 
     @Override
@@ -85,7 +86,8 @@ public final class Activity extends android.app.Activity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         final boolean onContextItemSelected = super.onContextItemSelected(item);
-        return !onContextItemSelected ? mShell.onContextItemSelected(item) : onContextItemSelected;
+        return !onContextItemSelected ? mShell.onContextItemSelected(item)
+                : onContextItemSelected;
     }
 
     @Override
@@ -96,16 +98,17 @@ public final class Activity extends android.app.Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        handleIntent();
+        mShell.bind(this);
         super.onCreate(savedInstanceState);
         mApplication = (Application) getApplicationContext();
         mApplication.attach(this);
-        handleIntent();
-        mShell.bind(this);
         mShell.onCreate(savedInstanceState);
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(ContextMenu menu, View v,
+            ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         mShell.onCreateContextMenu(menu, v, menuInfo);
     }
@@ -123,13 +126,16 @@ public final class Activity extends android.app.Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         final boolean onCreateOptionsMenu = super.onCreateOptionsMenu(menu);
-        return onCreateOptionsMenu ? onCreateOptionsMenu : mShell.onCreateOptionsMenu(menu);
+        return onCreateOptionsMenu ? onCreateOptionsMenu : mShell
+                .onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onCreatePanelMenu(int featureId, Menu menu) {
-        final boolean onCreatePanelMenu = super.onCreatePanelMenu(featureId, menu);
-        return onCreatePanelMenu ? onCreatePanelMenu : mShell.onCreatePanelMenu(featureId, menu);
+        final boolean onCreatePanelMenu = super.onCreatePanelMenu(featureId,
+                menu);
+        return onCreatePanelMenu ? onCreatePanelMenu : mShell
+                .onCreatePanelMenu(featureId, menu);
     }
 
     @Override
@@ -190,14 +196,17 @@ public final class Activity extends android.app.Activity {
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        final boolean onMenuItemSelected = super.onMenuItemSelected(featureId, item);
-        return onMenuItemSelected ? onMenuItemSelected : mShell.onMenuItemSelected(featureId, item);
+        final boolean onMenuItemSelected = super.onMenuItemSelected(featureId,
+                item);
+        return onMenuItemSelected ? onMenuItemSelected : mShell
+                .onMenuItemSelected(featureId, item);
     }
 
     @Override
     public boolean onMenuOpened(int featureId, Menu menu) {
         final boolean onMenuOpened = super.onMenuOpened(featureId, menu);
-        return onMenuOpened ? onMenuOpened : mShell.onMenuOpened(featureId, menu);
+        return onMenuOpened ? onMenuOpened : mShell.onMenuOpened(featureId,
+                menu);
     }
 
     @Override
@@ -208,7 +217,8 @@ public final class Activity extends android.app.Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         final boolean onOptionsItemSelected = super.onOptionsItemSelected(item);
-        return onOptionsItemSelected ? onOptionsItemSelected : mShell.onOptionsItemSelected(item);
+        return onOptionsItemSelected ? onOptionsItemSelected : mShell
+                .onOptionsItemSelected(item);
     }
 
     @Override
@@ -250,13 +260,16 @@ public final class Activity extends android.app.Activity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         final boolean onPrepareOptionsMenu = super.onPrepareOptionsMenu(menu);
-        return onPrepareOptionsMenu ? onPrepareOptionsMenu : mShell.onPrepareOptionsMenu(menu);
+        return onPrepareOptionsMenu ? onPrepareOptionsMenu : mShell
+                .onPrepareOptionsMenu(menu);
     }
 
     @Override
     public boolean onPreparePanel(int featureId, View view, Menu menu) {
-        final boolean onPreparePanel = super.onPreparePanel(featureId, view, menu);
-        return onPreparePanel ? onPreparePanel : mShell.onPreparePanel(featureId, view, menu);
+        final boolean onPreparePanel = super.onPreparePanel(featureId, view,
+                menu);
+        return onPreparePanel ? onPreparePanel : mShell.onPreparePanel(
+                featureId, view, menu);
     }
 
     @Override
@@ -291,7 +304,8 @@ public final class Activity extends android.app.Activity {
     @Override
     public boolean onSearchRequested() {
         final boolean onSearchRequested = mShell.onSearchRequested();
-        return onSearchRequested ? onSearchRequested : super.onSearchRequested();
+        return onSearchRequested ? onSearchRequested : super
+                .onSearchRequested();
     }
 
     @Override

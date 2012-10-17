@@ -71,7 +71,8 @@ public abstract class AbstractComponent {
         mActivity.addContentView(view, params);
     }
 
-    public final boolean bindService(Intent service, ServiceConnection conn, int flags) {
+    public final boolean bindService(Intent service, ServiceConnection conn,
+            int flags) {
         return mActivity.bindService(service, conn, flags);
     }
 
@@ -99,8 +100,10 @@ public abstract class AbstractComponent {
         return mActivity.checkUriPermission(uri, pid, uid, modeFlags);
     }
 
-    public final int checkUriPermission(Uri uri, String readPermission, String writePermission, int pid, int uid, int modeFlags) {
-        return mActivity.checkUriPermission(uri, readPermission, writePermission, pid, uid, modeFlags);
+    public final int checkUriPermission(Uri uri, String readPermission,
+            String writePermission, int pid, int uid, int modeFlags) {
+        return mActivity.checkUriPermission(uri, readPermission,
+                writePermission, pid, uid, modeFlags);
     }
 
     public final void clearWallpaper() throws IOException {
@@ -115,11 +118,13 @@ public abstract class AbstractComponent {
         mActivity.closeOptionsMenu();
     }
 
-    public final Context createPackageContext(String packageName, int flags) throws NameNotFoundException {
+    public final Context createPackageContext(String packageName, int flags)
+            throws NameNotFoundException {
         return mActivity.createPackageContext(packageName, flags);
     }
 
-    public final PendingIntent createPendingResult(int requestCode, Intent data, int flags) {
+    public final PendingIntent createPendingResult(int requestCode,
+            Intent data, int flags) {
         return mActivity.createPendingResult(requestCode, data, flags);
     }
 
@@ -143,7 +148,8 @@ public abstract class AbstractComponent {
         return mActivity.dispatchKeyEvent(event);
     }
 
-    public final boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+    public final boolean dispatchPopulateAccessibilityEvent(
+            AccessibilityEvent event) {
         return mActivity.dispatchPopulateAccessibilityEvent(event);
     }
 
@@ -155,11 +161,13 @@ public abstract class AbstractComponent {
         return mActivity.dispatchTrackballEvent(ev);
     }
 
-    public final void enforceCallingOrSelfPermission(String permission, String message) {
+    public final void enforceCallingOrSelfPermission(String permission,
+            String message) {
         mActivity.enforceCallingOrSelfPermission(permission, message);
     }
 
-    public final void enforceCallingOrSelfUriPermission(Uri uri, int modeFlags, String message) {
+    public final void enforceCallingOrSelfUriPermission(Uri uri, int modeFlags,
+            String message) {
         mActivity.enforceCallingOrSelfUriPermission(uri, modeFlags, message);
     }
 
@@ -167,20 +175,26 @@ public abstract class AbstractComponent {
         mActivity.enforceCallingPermission(permission, message);
     }
 
-    public final void enforceCallingUriPermission(Uri uri, int modeFlags, String message) {
+    public final void enforceCallingUriPermission(Uri uri, int modeFlags,
+            String message) {
         mActivity.enforceCallingUriPermission(uri, modeFlags, message);
     }
 
-    public final void enforcePermission(String permission, int pid, int uid, String message) {
+    public final void enforcePermission(String permission, int pid, int uid,
+            String message) {
         mActivity.enforcePermission(permission, pid, uid, message);
     }
 
-    public final void enforceUriPermission(Uri uri, int pid, int uid, int modeFlags, String message) {
+    public final void enforceUriPermission(Uri uri, int pid, int uid,
+            int modeFlags, String message) {
         mActivity.enforceUriPermission(uri, pid, uid, modeFlags, message);
     }
 
-    public final void enforceUriPermission(Uri uri, String readPermission, String writePermission, int pid, int uid, int modeFlags, String message) {
-        mActivity.enforceUriPermission(uri, readPermission, writePermission, pid, uid, modeFlags, message);
+    public final void enforceUriPermission(Uri uri, String readPermission,
+            String writePermission, int pid, int uid, int modeFlags,
+            String message) {
+        mActivity.enforceUriPermission(uri, readPermission, writePermission,
+                pid, uid, modeFlags, message);
     }
 
     public final String[] fileList() {
@@ -199,7 +213,8 @@ public abstract class AbstractComponent {
         mActivity.finishActivity(requestCode);
     }
 
-    public final void finishActivityFromChild(android.app.Activity child, int requestCode) {
+    public final void finishActivityFromChild(android.app.Activity child,
+            int requestCode) {
         mActivity.finishActivityFromChild(child, requestCode);
     }
 
@@ -399,7 +414,8 @@ public abstract class AbstractComponent {
         return mActivity.getWindowManager();
     }
 
-    public final void grantUriPermission(String toPackage, Uri uri, int modeFlags) {
+    public final void grantUriPermission(String toPackage, Uri uri,
+            int modeFlags) {
         mActivity.grantUriPermission(toPackage, uri, modeFlags);
     }
 
@@ -423,23 +439,28 @@ public abstract class AbstractComponent {
         return mActivity.isTaskRoot();
     }
 
-    public final Cursor managedQuery(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        return mActivity.managedQuery(uri, projection, selection, selectionArgs, sortOrder);
+    public final Cursor managedQuery(Uri uri, String[] projection,
+            String selection, String[] selectionArgs, String sortOrder) {
+        return mActivity.managedQuery(uri, projection, selection,
+                selectionArgs, sortOrder);
     }
 
     public final boolean moveTaskToBack(boolean nonRoot) {
         return mActivity.moveTaskToBack(nonRoot);
     }
 
-    public final TypedArray obtainStyledAttributes(AttributeSet set, int[] attrs, int defStyleAttr, int defStyleRes) {
-        return mActivity.obtainStyledAttributes(set, attrs, defStyleAttr, defStyleRes);
+    public final TypedArray obtainStyledAttributes(AttributeSet set,
+            int[] attrs, int defStyleAttr, int defStyleRes) {
+        return mActivity.obtainStyledAttributes(set, attrs, defStyleAttr,
+                defStyleRes);
     }
 
     public final TypedArray obtainStyledAttributes(AttributeSet set, int[] attrs) {
         return mActivity.obtainStyledAttributes(set, attrs);
     }
 
-    public final TypedArray obtainStyledAttributes(int resid, int[] attrs) throws NotFoundException {
+    public final TypedArray obtainStyledAttributes(int resid, int[] attrs)
+            throws NotFoundException {
         return mActivity.obtainStyledAttributes(resid, attrs);
     }
 
@@ -466,7 +487,8 @@ public abstract class AbstractComponent {
     public void onContextMenuClosed(Menu menu) {
     }
 
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(ContextMenu menu, View v,
+            ContextMenuInfo menuInfo) {
     }
 
     public CharSequence onCreateDescription() {
@@ -560,16 +582,14 @@ public abstract class AbstractComponent {
     public void onUserInteraction() {
     }
 
-    public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams params) {
+    public void onWindowAttributesChanged(
+            android.view.WindowManager.LayoutParams params) {
     }
 
     public void onWindowFocusChanged(boolean hasFocus) {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    }
-
-    public void onApplyThemeResource(Theme theme, int resid, boolean first) {
     }
 
     public void onCreate(Bundle savedInstanceState) {
@@ -625,11 +645,13 @@ public abstract class AbstractComponent {
         mActivity.openContextMenu(view);
     }
 
-    public final FileInputStream openFileInput(String name) throws FileNotFoundException {
+    public final FileInputStream openFileInput(String name)
+            throws FileNotFoundException {
         return mActivity.openFileInput(name);
     }
 
-    public final FileOutputStream openFileOutput(String name, int mode) throws FileNotFoundException {
+    public final FileOutputStream openFileOutput(String name, int mode)
+            throws FileNotFoundException {
         return mActivity.openFileOutput(name, mode);
     }
 
@@ -637,7 +659,8 @@ public abstract class AbstractComponent {
         mActivity.openOptionsMenu();
     }
 
-    public final SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory) {
+    public final SQLiteDatabase openOrCreateDatabase(String name, int mode,
+            CursorFactory factory) {
         return mActivity.openOrCreateDatabase(name, mode, factory);
     }
 
@@ -653,11 +676,14 @@ public abstract class AbstractComponent {
         mActivity.registerForContextMenu(view);
     }
 
-    public final Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter, String broadcastPermission, Handler scheduler) {
-        return mActivity.registerReceiver(receiver, filter, broadcastPermission, scheduler);
+    public final Intent registerReceiver(BroadcastReceiver receiver,
+            IntentFilter filter, String broadcastPermission, Handler scheduler) {
+        return mActivity.registerReceiver(receiver, filter,
+                broadcastPermission, scheduler);
     }
 
-    public final Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+    public final Intent registerReceiver(BroadcastReceiver receiver,
+            IntentFilter filter) {
         return mActivity.registerReceiver(receiver, filter);
     }
 
@@ -689,12 +715,17 @@ public abstract class AbstractComponent {
         mActivity.sendBroadcast(intent);
     }
 
-    public final void sendOrderedBroadcast(Intent intent, String receiverPermission, BroadcastReceiver resultReceiver, Handler scheduler, int initialCode, String initialData,
+    public final void sendOrderedBroadcast(Intent intent,
+            String receiverPermission, BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData,
             Bundle initialExtras) {
-        mActivity.sendOrderedBroadcast(intent, receiverPermission, resultReceiver, scheduler, initialCode, initialData, initialExtras);
+        mActivity.sendOrderedBroadcast(intent, receiverPermission,
+                resultReceiver, scheduler, initialCode, initialData,
+                initialExtras);
     }
 
-    public final void sendOrderedBroadcast(Intent intent, String receiverPermission) {
+    public final void sendOrderedBroadcast(Intent intent,
+            String receiverPermission) {
         mActivity.sendOrderedBroadcast(intent, receiverPermission);
     }
 
@@ -702,8 +733,11 @@ public abstract class AbstractComponent {
         mActivity.sendStickyBroadcast(intent);
     }
 
-    public final void sendStickyOrderedBroadcast(Intent intent, BroadcastReceiver resultReceiver, Handler scheduler, int initialCode, String initialData, Bundle initialExtras) {
-        mActivity.sendStickyOrderedBroadcast(intent, resultReceiver, scheduler, initialCode, initialData, initialExtras);
+    public final void sendStickyOrderedBroadcast(Intent intent,
+            BroadcastReceiver resultReceiver, Handler scheduler,
+            int initialCode, String initialData, Bundle initialExtras) {
+        mActivity.sendStickyOrderedBroadcast(intent, resultReceiver, scheduler,
+                initialCode, initialData, initialExtras);
     }
 
     public final void setContentView(int layoutResID) {
@@ -853,25 +887,35 @@ public abstract class AbstractComponent {
         return newIntent;
     }
 
-    public final boolean startInstrumentation(ComponentName className, String profileFile, Bundle arguments) {
-        return mActivity.startInstrumentation(className, profileFile, arguments);
+    public final boolean startInstrumentation(ComponentName className,
+            String profileFile, Bundle arguments) {
+        return mActivity
+                .startInstrumentation(className, profileFile, arguments);
     }
 
-    public final void startIntentSender(IntentSender intent, Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags) throws SendIntentException {
-        mActivity.startIntentSender(intent, fillInIntent, flagsMask, flagsValues, extraFlags);
-    }
-
-    public final void startIntentSenderForResult(IntentSender intent, int requestCode, Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+    public final void startIntentSender(IntentSender intent,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
             throws SendIntentException {
-        mActivity.startIntentSenderForResult(intent, requestCode, fillInIntent, flagsMask, flagsValues, extraFlags);
+        mActivity.startIntentSender(intent, fillInIntent, flagsMask,
+                flagsValues, extraFlags);
+    }
+
+    public final void startIntentSenderForResult(IntentSender intent,
+            int requestCode, Intent fillInIntent, int flagsMask,
+            int flagsValues, int extraFlags) throws SendIntentException {
+        mActivity.startIntentSenderForResult(intent, requestCode, fillInIntent,
+                flagsMask, flagsValues, extraFlags);
     }
 
     public final void startManagingCursor(Cursor c) {
         mActivity.startManagingCursor(c);
     }
 
-    public final void startSearch(String initialQuery, boolean selectInitialQuery, Bundle appSearchData, boolean globalSearch) {
-        mActivity.startSearch(initialQuery, selectInitialQuery, appSearchData, globalSearch);
+    public final void startSearch(String initialQuery,
+            boolean selectInitialQuery, Bundle appSearchData,
+            boolean globalSearch) {
+        mActivity.startSearch(initialQuery, selectInitialQuery, appSearchData,
+                globalSearch);
     }
 
     public final ComponentName startService(Intent service) {
