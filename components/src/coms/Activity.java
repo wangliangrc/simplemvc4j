@@ -3,6 +3,8 @@ package coms;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
@@ -29,8 +31,14 @@ public final class Activity extends android.app.Activity {
     private void handleIntent() {
         final Intent intent = getIntent();
         if (mShell == null) {
-            final String className = intent.getStringExtra(KEY_BUNDLE_SHELL);
             try {
+                final String className;
+                if (intent.getAction().equals(Intent.ACTION_MAIN) && intent.getCategories().contains(Intent.CATEGORY_LAUNCHER) && !intent.getExtras().containsKey(KEY_BUNDLE_SHELL)) {
+                    final ActivityInfo activityInfo = getPackageManager().getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
+                    className = activityInfo.metaData.getString("main");
+                } else {
+                    className = intent.getStringExtra(KEY_BUNDLE_SHELL);
+                }
                 mShell = (AbstractComponent) Class.forName(className).newInstance();
             } catch (Exception e) {
                 Log.e(TAG, "", e);

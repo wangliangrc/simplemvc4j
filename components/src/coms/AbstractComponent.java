@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
+import java.util.Set;
 
 import android.app.Application;
 import android.app.Dialog;
@@ -55,9 +55,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 
-public abstract class AbstractComponent implements Serializable {
-
-    private static final long serialVersionUID = 3332730882002909898L;
+public abstract class AbstractComponent {
 
     private Activity mActivity;
 
@@ -828,6 +826,33 @@ public abstract class AbstractComponent implements Serializable {
         mActivity.startActivityForResult(intent, requestCode);
     }
 
+    public final void startComponent(Intent intent) {
+        final Intent newIntent = fixIntent(intent);
+        startActivity(newIntent);
+    }
+
+    public final void startComponentForResult(Intent intent, int requestCode) {
+        final Intent newIntent = fixIntent(intent);
+        startActivityForResult(newIntent, requestCode);
+    }
+
+    private Intent fixIntent(Intent intent) {
+        final ComponentName component = intent.getComponent();
+        final Intent newIntent = new Intent();
+        newIntent.setClassName(getApplication(), component.getClassName());
+        newIntent.setAction(intent.getAction());
+        newIntent.setFlags(intent.getFlags());
+        newIntent.setDataAndType(intent.getData(), intent.getType());
+        final Set<String> categories = intent.getCategories();
+        if (categories != null) {
+            for (String string : categories) {
+                newIntent.addCategory(string);
+            }
+        }
+        newIntent.putExtras(intent.getExtras());
+        return newIntent;
+    }
+
     public final boolean startInstrumentation(ComponentName className, String profileFile, Bundle arguments) {
         return mActivity.startInstrumentation(className, profileFile, arguments);
     }
@@ -836,7 +861,8 @@ public abstract class AbstractComponent implements Serializable {
         mActivity.startIntentSender(intent, fillInIntent, flagsMask, flagsValues, extraFlags);
     }
 
-    public final void startIntentSenderForResult(IntentSender intent, int requestCode, Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags) throws SendIntentException {
+    public final void startIntentSenderForResult(IntentSender intent, int requestCode, Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            throws SendIntentException {
         mActivity.startIntentSenderForResult(intent, requestCode, fillInIntent, flagsMask, flagsValues, extraFlags);
     }
 
