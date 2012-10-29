@@ -55,7 +55,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 
-public abstract class AbstractComponent {
+public abstract class Shell {
 
     private Activity mActivity;
 

@@ -27,8 +27,11 @@ public final class Activity extends android.app.Activity {
     static final String KEY_BUNDLE_SHELL = "KEY.COMS.SHELL";
 
     private Application mApplication;
-    private AbstractComponent mShell;
+    private Shell mShell;
 
+    /**
+     * 处理 Intent
+     */
     private void handleIntent() {
         final Intent intent = getIntent();
         if (mShell == null) {
@@ -38,11 +41,10 @@ public final class Activity extends android.app.Activity {
                 final String action = intent.getAction();
                 final Set<String> categories = intent.getCategories();
 
-                if (action != null 
+                if (action != null
                         && action.equals(Intent.ACTION_MAIN)
                         && categories != null
-                        && categories.contains(
-                                Intent.CATEGORY_LAUNCHER)
+                        && categories.contains(Intent.CATEGORY_LAUNCHER)
                         && (extras == null || !extras
                                 .containsKey(KEY_BUNDLE_SHELL))) {
                     final ActivityInfo activityInfo = getPackageManager()
@@ -52,8 +54,7 @@ public final class Activity extends android.app.Activity {
                 } else {
                     className = intent.getStringExtra(KEY_BUNDLE_SHELL);
                 }
-                mShell = (AbstractComponent) Class.forName(className)
-                        .newInstance();
+                mShell = (Shell) Class.forName(className).newInstance();
             } catch (Exception e) {
                 Log.e(TAG, "", e);
             }
@@ -102,8 +103,11 @@ public final class Activity extends android.app.Activity {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        final boolean onContextItemSelected = super.onContextItemSelected(item);
-        return !onContextItemSelected ? mShell.onContextItemSelected(item)
+        boolean onContextItemSelected = false;
+        if (mShell != null) {
+            onContextItemSelected = mShell.onContextItemSelected(item);
+        }
+        return !onContextItemSelected ? super.onContextItemSelected(item)
                 : onContextItemSelected;
     }
 
@@ -140,18 +144,29 @@ public final class Activity extends android.app.Activity {
 
     @Override
     public CharSequence onCreateDescription() {
-        return mShell.onCreateDescription();
+        CharSequence res = null;
+        if (mShell != null) {
+            res = mShell.onCreateDescription();
+        }
+        return res == null ? super.onCreateDescription() : res;
     }
 
     @Override
     protected Dialog onCreateDialog(int id, Bundle args) {
-        return mShell.onCreateDialog(id, args);
+        Dialog res = null;
+        if (mShell != null) {
+            res = mShell.onCreateDialog(id, args);
+        }
+        return res == null ? super.onCreateDialog(id, args) : res;
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        final boolean onCreateOptionsMenu = super.onCreateOptionsMenu(menu);
-        return onCreateOptionsMenu ? onCreateOptionsMenu : mShell
+        boolean onCreateOptionsMenu = false;
+        if (mShell != null) {
+            onCreateOptionsMenu = mShell.onCreateOptionsMenu(menu);
+        }
+        return onCreateOptionsMenu ? onCreateOptionsMenu : super
                 .onCreateOptionsMenu(menu);
     }
 
@@ -165,17 +180,29 @@ public final class Activity extends android.app.Activity {
 
     @Override
     public View onCreatePanelView(int featureId) {
-        return mShell.onCreatePanelView(featureId);
+        View res = null;
+        if (mShell != null) {
+            res = mShell.onCreatePanelView(featureId);
+        }
+        return res == null ? super.onCreatePanelView(featureId) : res;
     }
 
     @Override
     public boolean onCreateThumbnail(Bitmap outBitmap, Canvas canvas) {
-        return mShell.onCreateThumbnail(outBitmap, canvas);
+        boolean res = false;
+        if (mShell != null) {
+            res = mShell.onCreateThumbnail(outBitmap, canvas);
+        }
+        return res ? res : super.onCreateThumbnail(outBitmap, canvas);
     }
 
     @Override
     public View onCreateView(String name, Context context, AttributeSet attrs) {
-        return mShell.onCreateView(name, context, attrs);
+        View res = null;
+        if (mShell != null) {
+            res = mShell.onCreateView(name, context, attrs);
+        }
+        return res == null ? super.onCreateView(name, context, attrs) : res;
     }
 
     @Override
@@ -199,24 +226,38 @@ public final class Activity extends android.app.Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        final boolean onKeyDown = super.onKeyDown(keyCode, event);
-        return onKeyDown ? onKeyDown : mShell.onKeyDown(keyCode, event);
+        boolean onKeyDown = false;
+        if (mShell != null) {
+            onKeyDown = mShell.onKeyDown(keyCode, event);
+        }
+        return onKeyDown ? onKeyDown : super.onKeyDown(keyCode, event);
     }
 
     @Override
     public boolean onKeyLongPress(int keyCode, KeyEvent event) {
-        return mShell.onKeyLongPress(keyCode, event);
+        boolean res = false;
+        if (mShell != null) {
+            res = mShell.onKeyLongPress(keyCode, event);
+        }
+        return res ? res : super.onKeyLongPress(keyCode, event);
     }
 
     @Override
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
-        return mShell.onKeyMultiple(keyCode, repeatCount, event);
+        boolean res = false;
+        if (mShell != null) {
+            res = mShell.onKeyMultiple(keyCode, repeatCount, event);
+        }
+        return res ? res : super.onKeyMultiple(keyCode, repeatCount, event);
     }
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        final boolean onKeyUp = super.onKeyUp(keyCode, event);
-        return onKeyUp ? onKeyUp : mShell.onKeyUp(keyCode, event);
+        boolean onKeyUp = false;
+        if (mShell != null) {
+            onKeyUp = mShell.onKeyUp(keyCode, event);
+        }
+        return onKeyUp ? onKeyUp : super.onKeyUp(keyCode, event);
     }
 
     @Override
@@ -229,17 +270,22 @@ public final class Activity extends android.app.Activity {
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        final boolean onMenuItemSelected = super.onMenuItemSelected(featureId,
-                item);
-        return onMenuItemSelected ? onMenuItemSelected : mShell
+        boolean onMenuItemSelected = false;
+        if (mShell != null) {
+            onMenuItemSelected = mShell.onMenuItemSelected(featureId, item);
+        }
+        return onMenuItemSelected ? onMenuItemSelected : super
                 .onMenuItemSelected(featureId, item);
     }
 
     @Override
     public boolean onMenuOpened(int featureId, Menu menu) {
-        final boolean onMenuOpened = super.onMenuOpened(featureId, menu);
-        return onMenuOpened ? onMenuOpened : mShell.onMenuOpened(featureId,
-                menu);
+        boolean onMenuOpened = false;
+        if (mShell != null) {
+            onMenuOpened = mShell.onMenuOpened(featureId, menu);
+        }
+        return onMenuOpened ? onMenuOpened : super
+                .onMenuOpened(featureId, menu);
     }
 
     @Override
@@ -251,8 +297,11 @@ public final class Activity extends android.app.Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        final boolean onOptionsItemSelected = super.onOptionsItemSelected(item);
-        return onOptionsItemSelected ? onOptionsItemSelected : mShell
+        boolean onOptionsItemSelected = false;
+        if (mShell != null) {
+            onOptionsItemSelected = mShell.onOptionsItemSelected(item);
+        }
+        return onOptionsItemSelected ? onOptionsItemSelected : super
                 .onOptionsItemSelected(item);
     }
 
@@ -306,16 +355,21 @@ public final class Activity extends android.app.Activity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        final boolean onPrepareOptionsMenu = super.onPrepareOptionsMenu(menu);
-        return onPrepareOptionsMenu ? onPrepareOptionsMenu : mShell
+        boolean onPrepareOptionsMenu = false;
+        if (mShell != null) {
+            onPrepareOptionsMenu = mShell.onPrepareOptionsMenu(menu);
+        }
+        return onPrepareOptionsMenu ? onPrepareOptionsMenu : super
                 .onPrepareOptionsMenu(menu);
     }
 
     @Override
     public boolean onPreparePanel(int featureId, View view, Menu menu) {
-        final boolean onPreparePanel = super.onPreparePanel(featureId, view,
-                menu);
-        return onPreparePanel ? onPreparePanel : mShell.onPreparePanel(
+        boolean onPreparePanel = false;
+        if (mShell != null) {
+            onPreparePanel = mShell.onPreparePanel(featureId, view, menu);
+        }
+        return onPreparePanel ? onPreparePanel : super.onPreparePanel(
                 featureId, view, menu);
     }
 
@@ -345,7 +399,11 @@ public final class Activity extends android.app.Activity {
 
     @Override
     public Object onRetainNonConfigurationInstance() {
-        return mShell.onRetainNonConfigurationInstance();
+        Object res = null;
+        if (mShell != null) {
+            res = mShell.onRetainNonConfigurationInstance();
+        }
+        return res == null ? super.onRetainNonConfigurationInstance() : res;
     }
 
     @Override
@@ -358,7 +416,10 @@ public final class Activity extends android.app.Activity {
 
     @Override
     public boolean onSearchRequested() {
-        final boolean onSearchRequested = mShell.onSearchRequested();
+        boolean onSearchRequested = false;
+        if (mShell != null) {
+            onSearchRequested = mShell.onSearchRequested();
+        }
         return onSearchRequested ? onSearchRequested : super
                 .onSearchRequested();
     }
@@ -389,13 +450,20 @@ public final class Activity extends android.app.Activity {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        final boolean onTouchEvent = super.onTouchEvent(event);
-        return onTouchEvent ? onTouchEvent : mShell.onTouchEvent(event);
+        boolean onTouchEvent = false;
+        if (mShell != null) {
+            onTouchEvent = mShell.onTouchEvent(event);
+        }
+        return onTouchEvent ? onTouchEvent : super.onTouchEvent(event);
     }
 
     @Override
     public boolean onTrackballEvent(MotionEvent event) {
-        return mShell.onTrackballEvent(event);
+        boolean res = false;
+        if (mShell != null) {
+            res = mShell.onTrackballEvent(event);
+        }
+        return res ? res : super.onTrackballEvent(event);
     }
 
     @Override
@@ -427,6 +495,9 @@ public final class Activity extends android.app.Activity {
         }
     }
 
+    /**
+     * 退出整个进程
+     */
     public void exit() {
         mApplication.exit();
     }

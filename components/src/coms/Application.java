@@ -9,6 +9,9 @@ import android.os.Process;
 public class Application extends android.app.Application {
     private Set<Activity> mActivities = new HashSet<Activity>();
 
+    /**
+     * 进程退出回调
+     */
     public void onExit() {
         Process.killProcess(Process.myPid());
     }
