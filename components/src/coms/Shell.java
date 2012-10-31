@@ -59,6 +59,10 @@ public abstract class Shell {
 
     private Activity mActivity;
 
+    protected Activity getSelf() {
+        return mActivity;
+    }
+
     void bind(Activity activity) {
         mActivity = activity;
     }
