@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,7 +41,6 @@ import android.widget.Toast;
 
 import com.clark.logger.R;
 import com.clark.tools.GC;
-import com.clark.tools.IO;
 import coms.Shell;
 
 public class MainShell extends Shell implements OnClickListener, Callback {
@@ -312,28 +313,62 @@ public class MainShell extends Shell implements OnClickListener, Callback {
 
         private int catchLogError(File file, String... tags) {
             try {
-                ArrayList<String> commandLine = new ArrayList<String>();
-                commandLine.add("logcat");
-                commandLine.add("-d");
+                Process process = null;
+                final Runtime runtime = Runtime.getRuntime();
+                process = runtime.exec("sh");
+                InputStream inputStream = process.getInputStream();
+                new Thread(new TotalReader(inputStream)).start();
+                InputStream errorStream = process.getErrorStream();
+                new Thread(new TotalReader(errorStream)).start();
+                OutputStream outputStream = process.getOutputStream();
+
+                StringBuilder cmd = new StringBuilder();
+                cmd.append("logcat -d -f ");
+                cmd.append("\"").append(file.getAbsolutePath()).append("\" ");
                 if (tags != null && tags.length > 0) {
-                    commandLine.add("-s");
+                    cmd.append("-s ");
+                    boolean start = true;
                     for (String tag : tags) {
-                        commandLine.add(tag.trim());
+                        if (start) {
+                            start = false;
+                        } else {
+                            cmd.append(" ");
+                        }
+                        cmd.append(tag.trim());
                     }
                 }
-                Process process = Runtime.getRuntime().exec(
-                        (String[]) commandLine.toArray(new String[commandLine
-                                .size()]));
-                IO.copyAndClose(process.getInputStream(), new FileOutputStream(
-                        file));
-                IO.copyAndClose(process.getErrorStream(), new FileOutputStream(
-                        file, true));
+                cmd.append("\n");
+
+                outputStream.write(cmd.toString().getBytes());
+                outputStream.flush();
+                Log.d(TAG, "执行命令：" + cmd);
+                outputStream.write("exit\n".getBytes());
+                outputStream.flush();
+
                 return process.waitFor();
             } catch (Exception e) {
                 Log.e(TAG, "Failed to catch log");
             }
-            return 1;
+            return Integer.MAX_VALUE;
         }
+    }
+
+    private static class TotalReader implements Runnable {
+        private InputStream inputStream;
+
+        public TotalReader(InputStream inputStream) {
+            this.inputStream = inputStream;
+        }
+
+        @Override
+        public void run() {
+            try {
+                while (inputStream.read() != -1) {
+                }
+            } catch (Exception e) {
+            }
+        }
+
     }
 
     private class SpinnerAdapter extends BaseAdapter {
