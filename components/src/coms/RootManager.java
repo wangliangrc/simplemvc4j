@@ -1,44 +1,58 @@
 package coms;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import smvc.Subject;
 
 public class RootManager extends Subject {
     private Process mRootProcess;
     private OutputStream mRootOutputStream;
-    private boolean rooted;
+    private volatile boolean rooted;
+    private volatile boolean rooting;
 
-    public static final String ROOT_SUCCESS = "ROOT_SUCCESS";
-    public static final String ROOT_FAIL = "ROOT_FAIL";
+    public static final String ROOT_SUCCESS = RootManager.class
+            .getCanonicalName() + ".action.ROOT_SUCCESS";
+    public static final String ROOT_FAIL = RootManager.class.getCanonicalName()
+            + ".action.ROOT_FAIL";
 
     public static RootManager getInstance() {
         return Holder.sRootTask;
     }
 
     public void root() {
-        if (!rooted) {
+        if (!rooted && !rooting) {
             new Thread(new RootRunnable()).start();
         }
     }
 
-    public Process getRootProcess() {
-        return mRootProcess;
+    public boolean isRooted() {
+        return rooted;
     }
 
-    public int exec(String cmd) throws IOException {
-        if (mRootOutputStream != null) {
+    public void exec(String cmd) throws IOException, InterruptedException {
+        if (rooted) {
+            final CountDownLatch countDownLatch = new CountDownLatch(2);
+            new InputStreamReaderThread(mRootProcess.getInputStream(),
+                    countDownLatch).start();
+            new InputStreamReaderThread(mRootProcess.getErrorStream(),
+                    countDownLatch).start();
+
             mRootOutputStream.write((cmd + "\n").getBytes());
             mRootOutputStream.flush();
-            return 0;
+
+            countDownLatch.await();
+        } else {
+            throw new IllegalStateException(
+                    "You should root first before calling exec()!");
         }
 
-        return -1;
     }
 
-    public int exec(String... cmd) throws IOException {
+    public void exec(String... cmd) throws IOException, InterruptedException {
         if (cmd != null && cmd.length > 0) {
             StringBuilder builder = new StringBuilder();
             for (int i = 0, len = cmd.length; i < len; ++i) {
@@ -47,13 +61,15 @@ public class RootManager extends Subject {
                 }
                 builder.append(cmd[i]);
             }
-            return exec(builder.toString());
+            exec(builder.toString());
+        } else {
+            throw new IllegalArgumentException("cmd can't be null!");
         }
-        return -1;
+
     }
 
-    public int exec(List<String> cmd) throws IOException {
-        return exec(cmd.toArray(new String[0]));
+    public void exec(List<String> cmd) throws IOException, InterruptedException {
+        exec(cmd.toArray(new String[0]));
     }
 
     private RootManager() {
@@ -63,21 +79,50 @@ public class RootManager extends Subject {
 
         @Override
         public void run() {
+            rooting = true;
+
             final Runtime runtime = Runtime.getRuntime();
-            if (runtime == null) {
-                return;
+            if (runtime != null) {
+                try {
+                    mRootProcess = runtime.exec("su");
+                    mRootOutputStream = mRootProcess.getOutputStream();
+                    rooted = true;
+                    success();
+                } catch (Exception e) {
+                    mRootProcess = null;
+                    fail(e);
+                }
             }
-            try {
-                mRootProcess = runtime.exec("su");
-                mRootOutputStream = mRootProcess.getOutputStream();
-                rooted = true;
-                success();
-            } catch (Exception e) {
-                mRootProcess = null;
-                fail(e);
-            }
+
+            rooting = false;
         }
 
+    }
+
+    private static class InputStreamReaderThread extends Thread {
+        private InputStream mInputStream;
+        private CountDownLatch mCountDownLatch;
+
+        public InputStreamReaderThread(InputStream mInputStream,
+                CountDownLatch mCountDownLatch) {
+            this.mInputStream = mInputStream;
+            this.mCountDownLatch = mCountDownLatch;
+        }
+
+        @Override
+        public void run() {
+            byte[] buf = new byte[512];
+            int res = -1;
+            try {
+                while ((res = mInputStream.read(buf)) != -1) {
+                    System.out.write(buf, 0, res);
+                }
+                System.out.flush();
+            } catch (IOException e) {
+            }
+
+            mCountDownLatch.countDown();
+        }
     }
 
     private static class Holder {
