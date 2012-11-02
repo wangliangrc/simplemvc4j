@@ -4,20 +4,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import smvc.Subject;
+import android.util.Log;
 
 public class RootManager extends Subject {
+    static final String TAG = RootManager.class.getSimpleName();
+
     private Process mRootProcess;
     private OutputStream mRootOutputStream;
     private volatile boolean rooted;
     private volatile boolean rooting;
 
-    public static final String ROOT_SUCCESS = RootManager.class
-            .getCanonicalName() + ".action.ROOT_SUCCESS";
-    public static final String ROOT_FAIL = RootManager.class.getCanonicalName()
-            + ".action.ROOT_FAIL";
+    public static final String ROOT_SUCCESS = "coms.RootManager.action.ROOT_SUCCESS";
+    public static final String ROOT_FAIL = "coms.RootManager.action.ROOT_FAIL";
 
     public static RootManager getInstance() {
         return Holder.sRootTask;
@@ -33,18 +33,17 @@ public class RootManager extends Subject {
         return rooted;
     }
 
-    public void exec(String cmd) throws IOException, InterruptedException {
+    public synchronized void exec(String cmd) throws IOException,
+            InterruptedException {
         if (rooted) {
-            final CountDownLatch countDownLatch = new CountDownLatch(2);
-            new InputStreamReaderThread(mRootProcess.getInputStream(),
-                    countDownLatch).start();
-            new InputStreamReaderThread(mRootProcess.getErrorStream(),
-                    countDownLatch).start();
+            if (!cmd.endsWith("\n")) {
+                cmd += "\n";
+            }
 
-            mRootOutputStream.write((cmd + "\n").getBytes());
+            Log.i(TAG, "[shell]" + cmd);
+
+            mRootOutputStream.write(cmd.getBytes());
             mRootOutputStream.flush();
-
-            countDownLatch.await();
         } else {
             throw new IllegalStateException(
                     "You should root first before calling exec()!");
@@ -86,6 +85,10 @@ public class RootManager extends Subject {
                 try {
                     mRootProcess = runtime.exec("su");
                     mRootOutputStream = mRootProcess.getOutputStream();
+                    new InputStreamReaderThread(mRootProcess.getInputStream())
+                            .start();
+                    new InputStreamReaderThread(mRootProcess.getErrorStream())
+                            .start();
                     rooted = true;
                     success();
                 } catch (Exception e) {
@@ -101,27 +104,32 @@ public class RootManager extends Subject {
 
     private static class InputStreamReaderThread extends Thread {
         private InputStream mInputStream;
-        private CountDownLatch mCountDownLatch;
 
-        public InputStreamReaderThread(InputStream mInputStream,
-                CountDownLatch mCountDownLatch) {
+        public InputStreamReaderThread(InputStream mInputStream) {
             this.mInputStream = mInputStream;
-            this.mCountDownLatch = mCountDownLatch;
         }
 
         @Override
         public void run() {
+            Log.i(TAG, "InputStreamReaderThread(" + getId() + ") started!");
+
             byte[] buf = new byte[512];
             int res = -1;
             try {
-                while ((res = mInputStream.read(buf)) != -1) {
-                    System.out.write(buf, 0, res);
+                while (true) {
+                    res = mInputStream.read(buf);
+                    if (res == -1) {
+                        break;
+                    } else {
+                        System.out.write(buf, 0, res);
+                        System.out.flush();
+                    }
                 }
-                System.out.flush();
             } catch (IOException e) {
+                Log.e(TAG, "", e);
             }
 
-            mCountDownLatch.countDown();
+            Log.i(TAG, "InputStreamReaderThread(" + getId() + ") finished!");
         }
     }
 
