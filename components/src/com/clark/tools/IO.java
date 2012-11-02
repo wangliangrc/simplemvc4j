@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
+import android.text.TextUtils;
+
 /**
  * 输入输出的相关工具方法。
  * 
@@ -259,4 +261,47 @@ public class IO {
         return aFile;
     }
 
+    /**
+     * 判断指定路径文件是否存在
+     * 
+     * @param path
+     * @return
+     */
+    public static boolean exist(String path) {
+        return !TextUtils.isEmpty(path) && new File(path).exists();
+    }
+
+    /**
+     * 判断指定路径文件是否存在
+     * 
+     * @param file
+     * @return
+     */
+    public static boolean exist(File file) {
+        return file != null && file.exists();
+    }
+
+    /**
+     * 判断指定路径文件是否存在
+     * 
+     * @param parent
+     * @param name
+     * @return
+     */
+    public static boolean exist(File parent, String name) {
+        return parent != null && !TextUtils.isEmpty(name)
+                && exist(new File(parent, name));
+    }
+
+    /**
+     * 判断指定路径文件是否存在
+     * 
+     * @param parent
+     * @param name
+     * @return
+     */
+    public static boolean exist(String parent, String name) {
+        return !TextUtils.isEmpty(name) && !TextUtils.isEmpty(parent)
+                && exist(new File(parent, name));
+    }
 }
