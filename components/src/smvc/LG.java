@@ -1,4 +1,4 @@
-package com.clark.tools;
+package smvc;
 
 import android.util.Log;
 

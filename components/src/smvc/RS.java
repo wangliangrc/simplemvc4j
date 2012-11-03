@@ -1,4 +1,4 @@
-package com.clark.tools;
+package smvc;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

@@ -1,4 +1,4 @@
-package com.clark.tools;
+package smvc;
 
 import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;

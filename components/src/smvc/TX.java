@@ -1,4 +1,4 @@
-package com.clark.tools;
+package smvc;
 
 /**
  * 字符串的工具方法。

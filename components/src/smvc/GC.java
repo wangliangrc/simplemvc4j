@@ -1,4 +1,4 @@
-package com.clark.tools;
+package smvc;
 
 import java.io.Closeable;
 import java.io.IOException;
