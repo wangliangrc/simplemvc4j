@@ -18,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import smvc.GC;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -41,7 +42,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.clark.logger.R;
-import com.clark.tools.GC;
 import coms.Shell;
 
 public class MainShell extends Shell implements OnClickListener, Callback {
