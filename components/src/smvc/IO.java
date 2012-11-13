@@ -17,7 +17,7 @@ import android.text.TextUtils;
  * 输入输出的相关工具方法。
  * 
  * @author guangongbo
- *
+ * 
  */
 public class IO {
 
@@ -184,7 +184,8 @@ public class IO {
      * @param inputStream
      * @return
      * @throws IOException
-     * @throws RuntimeException 如果系统不支持UTF-8字符集
+     * @throws RuntimeException
+     *             如果系统不支持UTF-8字符集
      */
     public static String toUTF8String(InputStream inputStream)
             throws IOException {
@@ -202,7 +203,8 @@ public class IO {
      * @param inputStream
      * @return
      * @throws IOException
-     * @throws RuntimeException 如果系统不支持UTF-8字符集
+     * @throws RuntimeException
+     *             如果系统不支持UTF-8字符集
      */
     public static String toUTF8String(File file) throws IOException {
         return toUTF8String(new FileInputStream(file));
@@ -215,7 +217,8 @@ public class IO {
      * @param inputStream
      * @return
      * @throws IOException
-     * @throws RuntimeException 如果系统不支持UTF-8字符集
+     * @throws RuntimeException
+     *             如果系统不支持UTF-8字符集
      */
     public static String toUTF8String(String path) throws IOException {
         return toUTF8String(new File(path));
@@ -225,7 +228,8 @@ public class IO {
      * 将输入流转为 File 对象。如果文件已经存在会被覆盖。
      * 
      * @param inputStream
-     * @param destFilePath 指定输出文件的位置
+     * @param destFilePath
+     *            指定输出文件的位置
      * @return
      * @throws IOException
      */
@@ -303,5 +307,78 @@ public class IO {
     public static boolean exist(String parent, String name) {
         return !TextUtils.isEmpty(name) && !TextUtils.isEmpty(parent)
                 && exist(new File(parent, name));
+    }
+
+    /**
+     * 删除一个文件或者一个文件夹
+     * 
+     * @param file
+     */
+    public static void deleteAll(File file) {
+        if (file == null) {
+            throw new NullPointerException("param is null");
+        }
+
+        if (!file.exists()) {
+            // 根本不存在就不用删除了
+            return;
+        }
+
+        if (file.isDirectory()) {
+            final File[] files = file.listFiles();
+            if (files == null) {
+                return;
+            }
+
+            for (File f : files) {
+                deleteAll(f);
+            }
+
+        }
+        file.delete();
+    }
+
+    /**
+     * 拷贝文件或者文件夹
+     * 
+     * @param in
+     * @param out
+     * @throws IOException
+     */
+    public static void copyFile(File in, File out) throws IOException {
+        if (in == null || out == null) {
+            throw new NullPointerException("param is null");
+        }
+
+        if (!in.exists()) {
+            throw new IllegalArgumentException("File in["
+                    + in.getAbsolutePath() + "] doesn't exist");
+        }
+
+        if (out.exists()) {
+            // 如果目标已经存在就会删除
+            deleteAll(out);
+        }
+
+        if (out.exists()) {
+            throw new IOException("File out[" + out.getAbsolutePath()
+                    + "] delete failed");
+        }
+
+        if (in.isFile()) {
+            try {
+                copyAndClose(new FileInputStream(in), new FileOutputStream(out));
+            } catch (IOException e) {
+            }
+        } else if (in.isDirectory()) {
+            final File[] files = in.listFiles();
+            out.mkdirs();
+            if (files != null && out.isDirectory()) {
+                for (final File f : files) {
+                    copyFile(f, new File(out, f.getName()));
+                }
+            }
+        }
+
     }
 }
