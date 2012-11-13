@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 
@@ -416,15 +417,15 @@ public abstract class AT<Params, Progress, Result> {
             Params... params) {
         if (mStatus != Status.PENDING) {
             switch (mStatus) {
-            case RUNNING:
-                throw new IllegalStateException("Cannot execute task:"
-                        + " the task is already running.");
-            case FINISHED:
-                throw new IllegalStateException("Cannot execute task:"
-                        + " the task has already been executed "
-                        + "(a task can be executed only once)");
-            default:
-                break;
+                case RUNNING:
+                    throw new IllegalStateException("Cannot execute task:"
+                            + " the task is already running.");
+                case FINISHED:
+                    throw new IllegalStateException("Cannot execute task:"
+                            + " the task has already been executed "
+                            + "(a task can be executed only once)");
+                default:
+                    break;
             }
         }
 
@@ -481,18 +482,22 @@ public abstract class AT<Params, Progress, Result> {
     }
 
     private static class InternalHandler extends Handler {
+        public InternalHandler() {
+            super(Looper.getMainLooper());
+        }
+
         @SuppressWarnings({ "unchecked", "rawtypes" })
         @Override
         public void handleMessage(Message msg) {
             AsyncTaskResult result = (AsyncTaskResult) msg.obj;
             switch (msg.what) {
-            case MESSAGE_POST_RESULT:
-                // There is only one result
-                result.mTask.finish(result.mData[0]);
-                break;
-            case MESSAGE_POST_PROGRESS:
-                result.mTask.onProgressUpdate(result.mData);
-                break;
+                case MESSAGE_POST_RESULT:
+                    // There is only one result
+                    result.mTask.finish(result.mData[0]);
+                    break;
+                case MESSAGE_POST_PROGRESS:
+                    result.mTask.onProgressUpdate(result.mData);
+                    break;
             }
         }
     }
