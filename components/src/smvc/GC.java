@@ -14,7 +14,7 @@ import android.graphics.Bitmap;
  * 关闭资源的工具方法集合。
  * 
  * @author guangongbo
- *
+ * 
  */
 public class GC {
 
@@ -66,6 +66,13 @@ public class GC {
     public static void dismiss(Dialog dialog) {
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
+        }
+    }
+
+    public static void cancel(AT<?, ?, ?> task) {
+        if (task != null
+                && task.getStatus().compareTo(AT.Status.PRE_FINISHED) < 0) {
+            task.cancel(true);
         }
     }
 }
