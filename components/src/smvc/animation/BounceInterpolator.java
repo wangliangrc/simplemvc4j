@@ -27,7 +27,6 @@ public class BounceInterpolator implements Interpolator, TimeInterpolator {
     public BounceInterpolator() {
     }
 
-    @SuppressWarnings({"UnusedDeclaration"})
     public BounceInterpolator(Context context, AttributeSet attrs) {
     }
 
