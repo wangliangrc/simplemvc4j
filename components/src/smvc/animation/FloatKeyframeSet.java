@@ -81,7 +81,7 @@ class FloatKeyframeSet extends KeyframeSet {
             float nextValue = nextKeyframe.getFloatValue();
             float prevFraction = prevKeyframe.getFraction();
             float nextFraction = nextKeyframe.getFraction();
-            final TimeInterpolator interpolator = nextKeyframe.getInterpolator();
+            final android.view.animation.Interpolator interpolator = nextKeyframe.getInterpolator();
             if (interpolator != null) {
                 fraction = interpolator.getInterpolation(fraction);
             }
@@ -97,7 +97,7 @@ class FloatKeyframeSet extends KeyframeSet {
             float nextValue = nextKeyframe.getFloatValue();
             float prevFraction = prevKeyframe.getFraction();
             float nextFraction = nextKeyframe.getFraction();
-            final TimeInterpolator interpolator = nextKeyframe.getInterpolator();
+            final android.view.animation.Interpolator interpolator = nextKeyframe.getInterpolator();
             if (interpolator != null) {
                 fraction = interpolator.getInterpolation(fraction);
             }
@@ -111,7 +111,7 @@ class FloatKeyframeSet extends KeyframeSet {
         for (int i = 1; i < mNumKeyframes; ++i) {
             FloatKeyframe nextKeyframe = (FloatKeyframe) mKeyframes.get(i);
             if (fraction < nextKeyframe.getFraction()) {
-                final TimeInterpolator interpolator = nextKeyframe.getInterpolator();
+                final android.view.animation.Interpolator interpolator = nextKeyframe.getInterpolator();
                 if (interpolator != null) {
                     fraction = interpolator.getInterpolation(fraction);
                 }

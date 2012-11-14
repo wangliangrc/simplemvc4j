@@ -35,7 +35,7 @@ class KeyframeSet {
 
     Keyframe mFirstKeyframe;
     Keyframe mLastKeyframe;
-    TimeInterpolator mInterpolator; // only used in the 2-keyframe case
+    android.view.animation.Interpolator mInterpolator; // only used in the 2-keyframe case
     ArrayList<Keyframe> mKeyframes; // only used when there are not 2 keyframes
     TypeEvaluator mEvaluator;
 
@@ -182,7 +182,7 @@ class KeyframeSet {
         }
         if (fraction <= 0f) {
             final Keyframe nextKeyframe = mKeyframes.get(1);
-            final TimeInterpolator interpolator = nextKeyframe
+            final android.view.animation.Interpolator interpolator = nextKeyframe
                     .getInterpolator();
             if (interpolator != null) {
                 fraction = interpolator.getInterpolation(fraction);
@@ -194,7 +194,7 @@ class KeyframeSet {
                     mFirstKeyframe.getValue(), nextKeyframe.getValue());
         } else if (fraction >= 1f) {
             final Keyframe prevKeyframe = mKeyframes.get(mNumKeyframes - 2);
-            final TimeInterpolator interpolator = mLastKeyframe
+            final android.view.animation.Interpolator interpolator = mLastKeyframe
                     .getInterpolator();
             if (interpolator != null) {
                 fraction = interpolator.getInterpolation(fraction);
@@ -209,7 +209,7 @@ class KeyframeSet {
         for (int i = 1; i < mNumKeyframes; ++i) {
             Keyframe nextKeyframe = mKeyframes.get(i);
             if (fraction < nextKeyframe.getFraction()) {
-                final TimeInterpolator interpolator = nextKeyframe
+                final android.view.animation.Interpolator interpolator = nextKeyframe
                         .getInterpolator();
                 if (interpolator != null) {
                     fraction = interpolator.getInterpolation(fraction);

@@ -16,8 +16,6 @@
 
 package smvc.animation;
 
-import android.animation.ValueAnimator;
-
 /**
  * Interface for use with the {@link ValueAnimator#setEvaluator(TypeEvaluator)} function. Evaluators
  * allow developers to create animations on arbitrary property types, by allowing them to supply

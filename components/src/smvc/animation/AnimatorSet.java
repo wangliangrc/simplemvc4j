@@ -257,7 +257,7 @@ public final class AnimatorSet extends Animator {
      *            AnimatorSet
      */
     @Override
-    public void setInterpolator(TimeInterpolator interpolator) {
+    public void setInterpolator(android.view.animation.Interpolator interpolator) {
         for (Node node : mNodes) {
             node.animation.setInterpolator(interpolator);
         }

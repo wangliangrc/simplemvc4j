@@ -49,7 +49,7 @@ public abstract class Keyframe implements Cloneable {
      * The optional time interpolator for the interval preceding this keyframe. A null interpolator
      * (the default) results in linear interpolation over the interval.
      */
-    private TimeInterpolator mInterpolator = null;
+    private android.view.animation.Interpolator mInterpolator = null;
 
     /**
      * Flag to indicate whether this keyframe has a valid value. This flag is used when an
@@ -205,7 +205,7 @@ public abstract class Keyframe implements Cloneable {
      *
      * @return The optional interpolator for this Keyframe.
      */
-    public TimeInterpolator getInterpolator() {
+    public android.view.animation.Interpolator getInterpolator() {
         return mInterpolator;
     }
 
@@ -215,7 +215,7 @@ public abstract class Keyframe implements Cloneable {
      *
      * @return The optional interpolator for this Keyframe.
      */
-    public void setInterpolator(TimeInterpolator interpolator) {
+    public void setInterpolator(android.view.animation.Interpolator interpolator) {
         mInterpolator = interpolator;
     }
 

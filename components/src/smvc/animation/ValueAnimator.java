@@ -22,6 +22,8 @@ import java.util.HashMap;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.AndroidRuntimeException;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 
 /**
  * This class provides a simple timing engine for running animations
@@ -81,7 +83,7 @@ public class ValueAnimator extends Animator {
             new ThreadLocal<AnimationHandler>();
 
     // The time interpolator to be used if none is set on the animation
-    private static final TimeInterpolator sDefaultInterpolator = new AccelerateDecelerateInterpolator();
+    private static final android.view.animation.Interpolator sDefaultInterpolator = new AccelerateDecelerateInterpolator();
 
     /**
      * Used to indicate whether the animation is currently playing in reverse. This causes the
@@ -178,7 +180,7 @@ public class ValueAnimator extends Animator {
      * through this interpolator to calculate the interpolated fraction, which is then used to
      * calculate the animated values.
      */
-    private TimeInterpolator mInterpolator = sDefaultInterpolator;
+    private android.view.animation.Interpolator mInterpolator = sDefaultInterpolator;
 
     /**
      * The set of listeners to be sent events through the life of an animation.
@@ -826,7 +828,7 @@ public class ValueAnimator extends Animator {
      * will result in linear interpolation.
      */
     @Override
-    public void setInterpolator(TimeInterpolator value) {
+    public void setInterpolator(android.view.animation.Interpolator value) {
         if (value != null) {
             mInterpolator = value;
         } else {
@@ -839,7 +841,7 @@ public class ValueAnimator extends Animator {
      *
      * @return The timing interpolator for this ValueAnimator.
      */
-    public TimeInterpolator getInterpolator() {
+    public android.view.animation.Interpolator getInterpolator() {
         return mInterpolator;
     }
 

@@ -108,7 +108,7 @@ public abstract class Animator implements Cloneable {
      *
      * @param value the interpolator to be used by this animation
      */
-    public abstract void setInterpolator(TimeInterpolator value);
+    public abstract void setInterpolator(android.view.animation.Interpolator value);
 
     /**
      * Returns whether this Animator is currently running (having been started and gone past any
