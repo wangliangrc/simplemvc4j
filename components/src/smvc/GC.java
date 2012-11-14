@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 
+import smvc.animation.Animator;
 import android.app.Dialog;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -73,6 +74,12 @@ public class GC {
         if (task != null
                 && task.getStatus().compareTo(AT.Status.PRE_FINISHED) < 0) {
             task.cancel(true);
+        }
+    }
+
+    public static void cancel(Animator animator) {
+        if (animator != null && animator.isStarted()) {
+            animator.cancel();
         }
     }
 }
