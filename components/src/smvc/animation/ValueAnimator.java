@@ -59,16 +59,15 @@ public class ValueAnimator extends Animator {
     static final int RUNNING = 1; // Playing normally
     static final int SEEKED = 2; // Seeked to some time value
 
+    // The first time that the animation's animateFrame() method is called. This time is used to
+    // determine elapsed time (and therefore the elapsed fraction) in subsequent calls
+    // to animateFrame()
     /**
      * Internal variables
      * NOTE: This object implements the clone() method, making a deep copy of any referenced
      * objects. As other non-trivial fields are added to this class, make sure to add logic
      * to clone() to make deep copies of them.
      */
-
-    // The first time that the animation's animateFrame() method is called. This time is used to
-    // determine elapsed time (and therefore the elapsed fraction) in subsequent calls
-    // to animateFrame()
     long mStartTime;
 
     /**
@@ -217,9 +216,6 @@ public class ValueAnimator extends Animator {
      */
     public static final int INFINITE = -1;
 
-    /**
-     * @hide
-     */
     public static void setDurationScale(float durationScale) {
         sDurationScale = durationScale;
     }
