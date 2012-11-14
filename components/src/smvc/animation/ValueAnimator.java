@@ -35,7 +35,7 @@ import android.view.animation.LinearInterpolator;
  * <p>By default, ValueAnimator uses non-linear time interpolation, via the
  * {@link AccelerateDecelerateInterpolator} class, which accelerates into and decelerates
  * out of an animation. This behavior can be changed by calling
- * {@link ValueAnimator#setInterpolator(TimeInterpolator)}.</p>
+ * {@link ValueAnimator#setInterpolator(android.view.animation.Interpolator)}.</p>
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
