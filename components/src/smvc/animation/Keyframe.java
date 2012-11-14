@@ -43,7 +43,7 @@ public abstract class Keyframe implements Cloneable {
      * The type of the value in this Keyframe. This type is determined at construction time,
      * based on the type of the <code>value</code> object passed into the constructor.
      */
-    Class mValueType;
+    Class<?> mValueType;
 
     /**
      * The optional time interpolator for the interval preceding this keyframe. A null interpolator
@@ -226,7 +226,7 @@ public abstract class Keyframe implements Cloneable {
      *
      * @return The type of the value stored in the Keyframe.
      */
-    public Class getType() {
+    public Class<?> getType() {
         return mValueType;
     }
 
@@ -299,7 +299,7 @@ public abstract class Keyframe implements Cloneable {
 
         public void setValue(Object value) {
             if (value != null && value.getClass() == Integer.class) {
-                mValue = ((Integer)value).intValue();
+                mValue = ((Integer) value).intValue();
                 mHasValue = true;
             }
         }
@@ -343,7 +343,7 @@ public abstract class Keyframe implements Cloneable {
 
         public void setValue(Object value) {
             if (value != null && value.getClass() == Float.class) {
-                mValue = ((Float)value).floatValue();
+                mValue = ((Float) value).floatValue();
                 mHasValue = true;
             }
         }

@@ -66,7 +66,7 @@ class ReflectiveProperty<T, V> extends Property<T, V> {
                 // Try public field instead
                 try {
                     mField = propertyHolder.getField(name);
-                    Class fieldType = mField.getType();
+                    Class<?> fieldType = mField.getType();
                     if (!typesMatch(valueType, fieldType)) {
                         throw new NoSuchPropertyException("Underlying type ("
                                 + fieldType + ") "
@@ -82,7 +82,7 @@ class ReflectiveProperty<T, V> extends Property<T, V> {
                 }
             }
         }
-        Class getterType = mGetter.getReturnType();
+        Class<?> getterType = mGetter.getReturnType();
         // Check to make sure our getter type matches our valueType
         if (!typesMatch(valueType, getterType)) {
             throw new NoSuchPropertyException("Underlying type (" + getterType
@@ -103,7 +103,7 @@ class ReflectiveProperty<T, V> extends Property<T, V> {
      * be a class, whereas the type of the underlying method/field will probably
      * be a primitive type instead. Accept float as matching Float, etc.
      */
-    private boolean typesMatch(Class<V> valueType, Class getterType) {
+    private boolean typesMatch(Class<V> valueType, Class<?> getterType) {
         if (getterType != valueType) {
             if (getterType.isPrimitive()) {
                 return (getterType == float.class && valueType == Float.class)
@@ -142,6 +142,7 @@ class ReflectiveProperty<T, V> extends Property<T, V> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public V get(T object) {
         if (mGetter != null) {

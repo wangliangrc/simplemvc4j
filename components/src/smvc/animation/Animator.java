@@ -24,7 +24,6 @@ import java.util.ArrayList;
  */
 public abstract class Animator implements Cloneable {
 
-
     /**
      * The set of listeners to be sent events through the life of an animation.
      */
@@ -85,7 +84,6 @@ public abstract class Animator implements Cloneable {
      */
     public abstract void setStartDelay(long startDelay);
 
-
     /**
      * Sets the length of the animation.
      *
@@ -108,7 +106,8 @@ public abstract class Animator implements Cloneable {
      *
      * @param value the interpolator to be used by this animation
      */
-    public abstract void setInterpolator(android.view.animation.Interpolator value);
+    public abstract void setInterpolator(
+            android.view.animation.Interpolator value);
 
     /**
      * Returns whether this Animator is currently running (having been started and gone past any
@@ -198,7 +197,7 @@ public abstract class Animator implements Cloneable {
             }
             return anim;
         } catch (CloneNotSupportedException e) {
-           throw new AssertionError();
+            throw new AssertionError();
         }
     }
 

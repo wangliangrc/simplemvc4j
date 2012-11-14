@@ -30,7 +30,7 @@ public class RootManager extends Subject {
     }
 
     public void destroy() {
-        if(mRootProcess != null) {
+        if (mRootProcess != null) {
             mRootProcess.destroy();
         }
         mRootOutputStream = null;

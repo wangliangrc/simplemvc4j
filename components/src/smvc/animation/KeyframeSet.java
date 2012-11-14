@@ -29,6 +29,7 @@ import smvc.animation.Keyframe.ObjectKeyframe;
  * animation. The class internal to the animation package because it is an
  * implementation detail of how Keyframes are stored and used.
  */
+@SuppressWarnings("rawtypes")
 class KeyframeSet {
 
     int mNumKeyframes;
@@ -170,6 +171,7 @@ class KeyframeSet {
      *            The elapsed fraction of the animation
      * @return The animated value.
      */
+    @SuppressWarnings("unchecked")
     public Object getValue(float fraction) {
 
         // Special-case optimization for the common case of only two keyframes

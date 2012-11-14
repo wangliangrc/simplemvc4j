@@ -55,9 +55,9 @@ public class ValueAnimator extends Animator {
      * Values used with internal variable mPlayingState to indicate the current state of an
      * animation.
      */
-    static final int STOPPED    = 0; // Not yet playing
-    static final int RUNNING    = 1; // Playing normally
-    static final int SEEKED     = 2; // Seeked to some time value
+    static final int STOPPED = 0; // Not yet playing
+    static final int RUNNING = 1; // Playing normally
+    static final int SEEKED = 2; // Seeked to some time value
 
     /**
      * Internal variables
@@ -79,8 +79,7 @@ public class ValueAnimator extends Animator {
 
     // The static sAnimationHandler processes the internal timing loop on which all animations
     // are based
-    private static ThreadLocal<AnimationHandler> sAnimationHandler =
-            new ThreadLocal<AnimationHandler>();
+    private static ThreadLocal<AnimationHandler> sAnimationHandler = new ThreadLocal<AnimationHandler>();
 
     // The time interpolator to be used if none is set on the animation
     private static final android.view.animation.Interpolator sDefaultInterpolator = new AccelerateDecelerateInterpolator();
@@ -157,7 +156,7 @@ public class ValueAnimator extends Animator {
     //
 
     // How long the animation should last in ms
-    private long mDuration = (long)(300 * sDurationScale);
+    private long mDuration = (long) (300 * sDurationScale);
     private long mUnscaledDuration = 300;
 
     // The amount of time in ms to delay starting the animation after start() is called
@@ -218,7 +217,6 @@ public class ValueAnimator extends Animator {
      */
     public static final int INFINITE = -1;
 
-
     /**
      * @hide
      */
@@ -276,11 +274,13 @@ public class ValueAnimator extends Animator {
      * between over time.
      * @return A ValueAnimator object that is set up to animate between the given values.
      */
-    public static ValueAnimator ofPropertyValuesHolder(PropertyValuesHolder... values) {
+    public static ValueAnimator ofPropertyValuesHolder(
+            PropertyValuesHolder... values) {
         ValueAnimator anim = new ValueAnimator();
         anim.setValues(values);
         return anim;
     }
+
     /**
      * Constructs and returns a ValueAnimator that animates between Object values. A single
      * value implies that that value is the one being animated to. However, this is not typically
@@ -299,7 +299,8 @@ public class ValueAnimator extends Animator {
      * @param values A set of values that the animation will animate between over time.
      * @return A ValueAnimator object that is set up to animate between the given values.
      */
-    public static ValueAnimator ofObject(TypeEvaluator evaluator, Object... values) {
+    public static ValueAnimator ofObject(TypeEvaluator<?> evaluator,
+            Object... values) {
         ValueAnimator anim = new ValueAnimator();
         anim.setObjectValues(values);
         anim.setEvaluator(evaluator);
@@ -325,7 +326,8 @@ public class ValueAnimator extends Animator {
             return;
         }
         if (mValues == null || mValues.length == 0) {
-            setValues(new PropertyValuesHolder[]{PropertyValuesHolder.ofInt("", values)});
+            setValues(new PropertyValuesHolder[] { PropertyValuesHolder.ofInt(
+                    "", values) });
         } else {
             PropertyValuesHolder valuesHolder = mValues[0];
             valuesHolder.setIntValues(values);
@@ -353,7 +355,8 @@ public class ValueAnimator extends Animator {
             return;
         }
         if (mValues == null || mValues.length == 0) {
-            setValues(new PropertyValuesHolder[]{PropertyValuesHolder.ofFloat("", values)});
+            setValues(new PropertyValuesHolder[] { PropertyValuesHolder
+                    .ofFloat("", values) });
         } else {
             PropertyValuesHolder valuesHolder = mValues[0];
             valuesHolder.setFloatValues(values);
@@ -385,8 +388,8 @@ public class ValueAnimator extends Animator {
             return;
         }
         if (mValues == null || mValues.length == 0) {
-            setValues(new PropertyValuesHolder[]{PropertyValuesHolder.ofObject("",
-                    (TypeEvaluator)null, values)});
+            setValues(new PropertyValuesHolder[] { PropertyValuesHolder
+                    .ofObject("", (TypeEvaluator<?>) null, values) });
         } else {
             PropertyValuesHolder valuesHolder = mValues[0];
             valuesHolder.setObjectValues(values);
@@ -447,7 +450,6 @@ public class ValueAnimator extends Animator {
         }
     }
 
-
     /**
      * Sets the length of the animation. The default duration is 300 milliseconds.
      *
@@ -459,11 +461,11 @@ public class ValueAnimator extends Animator {
      */
     public ValueAnimator setDuration(long duration) {
         if (duration < 0) {
-            throw new IllegalArgumentException("Animators cannot have negative duration: " +
-                    duration);
+            throw new IllegalArgumentException(
+                    "Animators cannot have negative duration: " + duration);
         }
         mUnscaledDuration = duration;
-        mDuration = (long)(duration * sDurationScale);
+        mDuration = (long) (duration * sDurationScale);
         return this;
     }
 
@@ -549,6 +551,7 @@ public class ValueAnimator extends Animator {
             scheduleAnimation();
         }
 
+        @SuppressWarnings("unchecked")
         private void doAnimationFrame(long frameTime) {
             // mPendingAnimations holds any animations that have requested to be started
             // We're going to clear mPendingAnimations, but starting animation may
@@ -556,8 +559,8 @@ public class ValueAnimator extends Animator {
             // starting triggers another starting). So we loop until mPendingAnimations
             // is empty.
             while (mPendingAnimations.size() > 0) {
-                ArrayList<ValueAnimator> pendingCopy =
-                        (ArrayList<ValueAnimator>) mPendingAnimations.clone();
+                ArrayList<ValueAnimator> pendingCopy = (ArrayList<ValueAnimator>) mPendingAnimations
+                        .clone();
                 mPendingAnimations.clear();
                 int count = pendingCopy.size();
                 for (int i = 0; i < count; ++i) {
@@ -636,7 +639,8 @@ public class ValueAnimator extends Animator {
 
         private void scheduleAnimation() {
             if (!mAnimationScheduled) {
-                mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, this, null);
+                mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION,
+                        this, null);
                 mAnimationScheduled = true;
             }
         }
@@ -659,7 +663,7 @@ public class ValueAnimator extends Animator {
      * @param startDelay The amount of the delay, in milliseconds
      */
     public void setStartDelay(long startDelay) {
-        this.mStartDelay = (long)(startDelay * sDurationScale);
+        this.mStartDelay = (long) (startDelay * sDurationScale);
         mUnscaledStartDelay = startDelay;
     }
 
@@ -746,6 +750,7 @@ public class ValueAnimator extends Animator {
     public void setRepeatCount(int value) {
         mRepeatCount = value;
     }
+
     /**
      * Defines how many times the animation should repeat. The default value
      * is 0.
@@ -817,7 +822,6 @@ public class ValueAnimator extends Animator {
         }
     }
 
-
     /**
      * The time interpolator used in calculating the elapsed fraction of this animation. The
      * interpolator determines whether the animation runs with linear or non-linear motion,
@@ -861,16 +865,17 @@ public class ValueAnimator extends Animator {
      *
      * @param value the evaluator to be used this animation
      */
-    public void setEvaluator(TypeEvaluator value) {
+    public void setEvaluator(TypeEvaluator<?> value) {
         if (value != null && mValues != null && mValues.length > 0) {
             mValues[0].setEvaluator(value);
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void notifyStartListeners() {
         if (mListeners != null && !mStartListenersCalled) {
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
+            ArrayList<AnimatorListener> tmpListeners = (ArrayList<AnimatorListener>) mListeners
+                    .clone();
             int numListeners = tmpListeners.size();
             for (int i = 0; i < numListeners; ++i) {
                 tmpListeners.get(i).onAnimationStart(this);
@@ -894,7 +899,8 @@ public class ValueAnimator extends Animator {
      */
     private void start(boolean playBackwards) {
         if (Looper.myLooper() == null) {
-            throw new AndroidRuntimeException("Animators may only be run on Looper threads");
+            throw new AndroidRuntimeException(
+                    "Animators may only be run on Looper threads");
         }
         mPlayingBackwards = playBackwards;
         mCurrentIteration = 0;
@@ -918,6 +924,7 @@ public class ValueAnimator extends Animator {
         start(false);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void cancel() {
         // Only cancel if the animation is actually running or has been started and is about
@@ -932,8 +939,8 @@ public class ValueAnimator extends Animator {
                     // If it's not yet running, then start listeners weren't called. Call them now.
                     notifyStartListeners();
                 }
-                ArrayList<AnimatorListener> tmpListeners =
-                        (ArrayList<AnimatorListener>) mListeners.clone();
+                ArrayList<AnimatorListener> tmpListeners = (ArrayList<AnimatorListener>) mListeners
+                        .clone();
                 for (AnimatorListener listener : tmpListeners) {
                     listener.onAnimationCancel(this);
                 }
@@ -945,7 +952,8 @@ public class ValueAnimator extends Animator {
     @Override
     public void end() {
         AnimationHandler handler = getOrCreateAnimationHandler();
-        if (!handler.mAnimations.contains(this) && !handler.mPendingAnimations.contains(this)) {
+        if (!handler.mAnimations.contains(this)
+                && !handler.mPendingAnimations.contains(this)) {
             // Special case if the animation has not yet started; get it ready for ending
             mStartedDelay = false;
             startAnimation(handler);
@@ -996,6 +1004,7 @@ public class ValueAnimator extends Animator {
      * Called internally to end an animation by removing it from the animations list. Must be
      * called on the UI thread.
      */
+    @SuppressWarnings("unchecked")
     private void endAnimation(AnimationHandler handler) {
         handler.mAnimations.remove(this);
         handler.mPendingAnimations.remove(this);
@@ -1005,9 +1014,9 @@ public class ValueAnimator extends Animator {
             if (!mRunning) {
                 // If it's not yet running, then start listeners weren't called. Call them now.
                 notifyStartListeners();
-             }
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
+            }
+            ArrayList<AnimatorListener> tmpListeners = (ArrayList<AnimatorListener>) mListeners
+                    .clone();
             int numListeners = tmpListeners.size();
             for (int i = 0; i < numListeners; ++i) {
                 tmpListeners.get(i).onAnimationEnd(this);
@@ -1074,34 +1083,38 @@ public class ValueAnimator extends Animator {
     boolean animationFrame(long currentTime) {
         boolean done = false;
         switch (mPlayingState) {
-        case RUNNING:
-        case SEEKED:
-            float fraction = mDuration > 0 ? (float)(currentTime - mStartTime) / mDuration : 1f;
-            if (fraction >= 1f) {
-                if (mCurrentIteration < mRepeatCount || mRepeatCount == INFINITE) {
-                    // Time to repeat
-                    if (mListeners != null) {
-                        int numListeners = mListeners.size();
-                        for (int i = 0; i < numListeners; ++i) {
-                            mListeners.get(i).onAnimationRepeat(this);
+            case RUNNING:
+            case SEEKED:
+                float fraction = mDuration > 0 ? (float) (currentTime - mStartTime)
+                        / mDuration
+                        : 1f;
+                if (fraction >= 1f) {
+                    if (mCurrentIteration < mRepeatCount
+                            || mRepeatCount == INFINITE) {
+                        // Time to repeat
+                        if (mListeners != null) {
+                            int numListeners = mListeners.size();
+                            for (int i = 0; i < numListeners; ++i) {
+                                mListeners.get(i).onAnimationRepeat(this);
+                            }
                         }
+                        if (mRepeatMode == REVERSE) {
+                            mPlayingBackwards = mPlayingBackwards ? false
+                                    : true;
+                        }
+                        mCurrentIteration += (int) fraction;
+                        fraction = fraction % 1f;
+                        mStartTime += mDuration;
+                    } else {
+                        done = true;
+                        fraction = Math.min(fraction, 1.0f);
                     }
-                    if (mRepeatMode == REVERSE) {
-                        mPlayingBackwards = mPlayingBackwards ? false : true;
-                    }
-                    mCurrentIteration += (int)fraction;
-                    fraction = fraction % 1f;
-                    mStartTime += mDuration;
-                } else {
-                    done = true;
-                    fraction = Math.min(fraction, 1.0f);
                 }
-            }
-            if (mPlayingBackwards) {
-                fraction = 1f - fraction;
-            }
-            animateValue(fraction);
-            break;
+                if (mPlayingBackwards) {
+                    fraction = 1f - fraction;
+                }
+                animateValue(fraction);
+                break;
         }
 
         return done;
@@ -1190,11 +1203,13 @@ public class ValueAnimator extends Animator {
         if (oldValues != null) {
             int numValues = oldValues.length;
             anim.mValues = new PropertyValuesHolder[numValues];
-            anim.mValuesMap = new HashMap<String, PropertyValuesHolder>(numValues);
+            anim.mValuesMap = new HashMap<String, PropertyValuesHolder>(
+                    numValues);
             for (int i = 0; i < numValues; ++i) {
                 PropertyValuesHolder newValuesHolder = oldValues[i].clone();
                 anim.mValues[i] = newValuesHolder;
-                anim.mValuesMap.put(newValuesHolder.getPropertyName(), newValuesHolder);
+                anim.mValuesMap.put(newValuesHolder.getPropertyName(),
+                        newValuesHolder);
             }
         }
         return anim;

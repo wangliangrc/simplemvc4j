@@ -50,7 +50,8 @@ public abstract class Property<T, V> {
      * <p>If neither the methods nor the field are found on the class a
      * {@link NoSuchPropertyException} exception will be thrown.</p>
      */
-    public static <T, V> Property<T, V> of(Class<T> hostType, Class<V> valueType, String name) {
+    public static <T, V> Property<T, V> of(Class<T> hostType,
+            Class<V> valueType, String name) {
         return new ReflectiveProperty<T, V>(hostType, valueType, name);
     }
 
@@ -81,7 +82,8 @@ public abstract class Property<T, V> {
      * exception.
      */
     public void set(T object, V value) {
-        throw new UnsupportedOperationException("Property " + getName() +" is read-only");
+        throw new UnsupportedOperationException("Property " + getName()
+                + " is read-only");
     }
 
     /**

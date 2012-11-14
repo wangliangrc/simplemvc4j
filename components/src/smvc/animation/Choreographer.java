@@ -20,9 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.util.Log;
-import android.view.DisplayEventReceiver;
 import android.view.View;
 
 /**
@@ -85,30 +83,27 @@ public final class Choreographer {
     private static volatile long sFrameDelay = DEFAULT_FRAME_DELAY;
 
     // Thread local storage for the choreographer.
-    private static final ThreadLocal<Choreographer> sThreadInstance =
-            new ThreadLocal<Choreographer>() {
+    private static final ThreadLocal<Choreographer> sThreadInstance = new ThreadLocal<Choreographer>() {
         @Override
         protected Choreographer initialValue() {
             Looper looper = Looper.myLooper();
             if (looper == null) {
-                throw new IllegalStateException("The current thread must have a looper!");
+                throw new IllegalStateException(
+                        "The current thread must have a looper!");
             }
             return new Choreographer(looper);
         }
     };
 
     // Enable/disable vsync for animations and drawing.
-    private static final boolean USE_VSYNC = SystemProperties.getBoolean(
-            "debug.choreographer.vsync", true);
+    //    private static final boolean USE_VSYNC = true;
 
     // Enable/disable using the frame time instead of returning now.
-    private static final boolean USE_FRAME_TIME = SystemProperties.getBoolean(
-            "debug.choreographer.frametime", true);
+    private static final boolean USE_FRAME_TIME = true;
 
     // Set a limit to warn about skipped frames.
     // Skipped frames imply jank.
-    private static final int SKIPPED_FRAME_WARNING_LIMIT = SystemProperties.getInt(
-            "debug.choreographer.skipwarning", 30);
+    private static final int SKIPPED_FRAME_WARNING_LIMIT = 30;
 
     private static final long NANOS_PER_MS = 1000000;
 
@@ -118,7 +113,9 @@ public final class Choreographer {
 
     // All frame callbacks posted by applications have this token.
     private static final Object FRAME_CALLBACK_TOKEN = new Object() {
-        public String toString() { return "FRAME_CALLBACK_TOKEN"; }
+        public String toString() {
+            return "FRAME_CALLBACK_TOKEN";
+        }
     };
 
     private final Object mLock = new Object();
@@ -129,7 +126,7 @@ public final class Choreographer {
     // The display event receiver can only be accessed by the looper thread to which
     // it is attached.  We take care to ensure that we post message to the looper
     // if appropriate when interacting with the display event receiver.
-    private final FrameDisplayEventReceiver mDisplayEventReceiver;
+    //    private final FrameDisplayEventReceiver mDisplayEventReceiver;
 
     private CallbackRecord mCallbackPool;
 
@@ -164,10 +161,10 @@ public final class Choreographer {
     private Choreographer(Looper looper) {
         mLooper = looper;
         mHandler = new FrameHandler(looper);
-        mDisplayEventReceiver = USE_VSYNC ? new FrameDisplayEventReceiver(looper) : null;
+        //        mDisplayEventReceiver = USE_VSYNC ? new FrameDisplayEventReceiver(
+        //                looper) : null;
         mLastFrameTimeNanos = Long.MIN_VALUE;
-        mFrameIntervalNanos = (long)(1000000000 /
-                new Display(Display.DEFAULT_DISPLAY, null).getRefreshRate());
+        mFrameIntervalNanos = (long) (1000000000 / 60. + .5);
 
         mCallbackQueues = new CallbackQueue[CALLBACK_LAST + 1];
         for (int i = 0; i <= CALLBACK_LAST; i++) {
@@ -282,8 +279,8 @@ public final class Choreographer {
      * @see #removeCallback
      * @hide
      */
-    public void postCallbackDelayed(int callbackType,
-            Runnable action, Object token, long delayMillis) {
+    public void postCallbackDelayed(int callbackType, Runnable action,
+            Object token, long delayMillis) {
         if (action == null) {
             throw new IllegalArgumentException("action must not be null");
         }
@@ -294,25 +291,27 @@ public final class Choreographer {
         postCallbackDelayedInternal(callbackType, action, token, delayMillis);
     }
 
-    private void postCallbackDelayedInternal(int callbackType,
-            Object action, Object token, long delayMillis) {
+    private void postCallbackDelayedInternal(int callbackType, Object action,
+            Object token, long delayMillis) {
         if (DEBUG) {
-            Log.d(TAG, "PostCallback: type=" + callbackType
-                    + ", action=" + action + ", token=" + token
-                    + ", delayMillis=" + delayMillis);
+            Log.d(TAG, "PostCallback: type=" + callbackType + ", action="
+                    + action + ", token=" + token + ", delayMillis="
+                    + delayMillis);
         }
 
         synchronized (mLock) {
             final long now = SystemClock.uptimeMillis();
             final long dueTime = now + delayMillis;
-            mCallbackQueues[callbackType].addCallbackLocked(dueTime, action, token);
+            mCallbackQueues[callbackType].addCallbackLocked(dueTime, action,
+                    token);
 
             if (dueTime <= now) {
                 scheduleFrameLocked(now);
             } else {
-                Message msg = mHandler.obtainMessage(MSG_DO_SCHEDULE_CALLBACK, action);
+                Message msg = mHandler.obtainMessage(MSG_DO_SCHEDULE_CALLBACK,
+                        action);
                 msg.arg1 = callbackType;
-                msg.setAsynchronous(true);
+                //                msg.setAsynchronous(true);
                 mHandler.sendMessageAtTime(msg, dueTime);
             }
         }
@@ -339,10 +338,11 @@ public final class Choreographer {
         removeCallbacksInternal(callbackType, action, token);
     }
 
-    private void removeCallbacksInternal(int callbackType, Object action, Object token) {
+    private void removeCallbacksInternal(int callbackType, Object action,
+            Object token) {
         if (DEBUG) {
-            Log.d(TAG, "RemoveCallbacks: type=" + callbackType
-                    + ", action=" + action + ", token=" + token);
+            Log.d(TAG, "RemoveCallbacks: type=" + callbackType + ", action="
+                    + action + ", token=" + token);
         }
 
         synchronized (mLock) {
@@ -380,13 +380,14 @@ public final class Choreographer {
      * @see #postFrameCallback
      * @see #removeFrameCallback
      */
-    public void postFrameCallbackDelayed(FrameCallback callback, long delayMillis) {
+    public void postFrameCallbackDelayed(FrameCallback callback,
+            long delayMillis) {
         if (callback == null) {
             throw new IllegalArgumentException("callback must not be null");
         }
 
-        postCallbackDelayedInternal(CALLBACK_ANIMATION,
-                callback, FRAME_CALLBACK_TOKEN, delayMillis);
+        postCallbackDelayedInternal(CALLBACK_ANIMATION, callback,
+                FRAME_CALLBACK_TOKEN, delayMillis);
     }
 
     /**
@@ -402,7 +403,8 @@ public final class Choreographer {
             throw new IllegalArgumentException("callback must not be null");
         }
 
-        removeCallbacksInternal(CALLBACK_ANIMATION, callback, FRAME_CALLBACK_TOKEN);
+        removeCallbacksInternal(CALLBACK_ANIMATION, callback,
+                FRAME_CALLBACK_TOKEN);
     }
 
     /**
@@ -445,8 +447,9 @@ public final class Choreographer {
     public long getFrameTimeNanos() {
         synchronized (mLock) {
             if (!mCallbacksRunning) {
-                throw new IllegalStateException("This method must only be called as "
-                        + "part of a callback while a frame is in progress.");
+                throw new IllegalStateException(
+                        "This method must only be called as "
+                                + "part of a callback while a frame is in progress.");
             }
             return USE_FRAME_TIME ? mLastFrameTimeNanos : System.nanoTime();
         }
@@ -455,31 +458,32 @@ public final class Choreographer {
     private void scheduleFrameLocked(long now) {
         if (!mFrameScheduled) {
             mFrameScheduled = true;
-            if (USE_VSYNC) {
-                if (DEBUG) {
-                    Log.d(TAG, "Scheduling next frame on vsync.");
-                }
-
-                // If running on the Looper thread, then schedule the vsync immediately,
-                // otherwise post a message to schedule the vsync from the UI thread
-                // as soon as possible.
-                if (isRunningOnLooperThreadLocked()) {
-                    scheduleVsyncLocked();
-                } else {
-                    Message msg = mHandler.obtainMessage(MSG_DO_SCHEDULE_VSYNC);
-                    msg.setAsynchronous(true);
-                    mHandler.sendMessageAtFrontOfQueue(msg);
-                }
-            } else {
-                final long nextFrameTime = Math.max(
-                        mLastFrameTimeNanos / NANOS_PER_MS + sFrameDelay, now);
-                if (DEBUG) {
-                    Log.d(TAG, "Scheduling next frame in " + (nextFrameTime - now) + " ms.");
-                }
-                Message msg = mHandler.obtainMessage(MSG_DO_FRAME);
-                msg.setAsynchronous(true);
-                mHandler.sendMessageAtTime(msg, nextFrameTime);
+            //            if (USE_VSYNC) {
+            //                if (DEBUG) {
+            //                    Log.d(TAG, "Scheduling next frame on vsync.");
+            //                }
+            //
+            //                // If running on the Looper thread, then schedule the vsync immediately,
+            //                // otherwise post a message to schedule the vsync from the UI thread
+            //                // as soon as possible.
+            //                if (isRunningOnLooperThreadLocked()) {
+            //                    scheduleVsyncLocked();
+            //                } else {
+            //                    Message msg = mHandler.obtainMessage(MSG_DO_SCHEDULE_VSYNC);
+            //                    //                    msg.setAsynchronous(true);
+            //                    mHandler.sendMessageAtFrontOfQueue(msg);
+            //                }
+            //            } else {
+            final long nextFrameTime = Math.max(mLastFrameTimeNanos
+                    / NANOS_PER_MS + sFrameDelay, now);
+            if (DEBUG) {
+                Log.d(TAG, "Scheduling next frame in " + (nextFrameTime - now)
+                        + " ms.");
             }
+            Message msg = mHandler.obtainMessage(MSG_DO_FRAME);
+            //                msg.setAsynchronous(true);
+            mHandler.sendMessageAtTime(msg, nextFrameTime);
+            //            }
         }
     }
 
@@ -495,24 +499,31 @@ public final class Choreographer {
             if (jitterNanos >= mFrameIntervalNanos) {
                 final long skippedFrames = jitterNanos / mFrameIntervalNanos;
                 if (skippedFrames >= SKIPPED_FRAME_WARNING_LIMIT) {
-                    Log.i(TAG, "Skipped " + skippedFrames + " frames!  "
-                            + "The application may be doing too much work on its main thread.");
+                    Log.i(TAG,
+                            "Skipped "
+                                    + skippedFrames
+                                    + " frames!  "
+                                    + "The application may be doing too much work on its main thread.");
                 }
                 final long lastFrameOffset = jitterNanos % mFrameIntervalNanos;
                 if (DEBUG) {
-                    Log.d(TAG, "Missed vsync by " + (jitterNanos * 0.000001f) + " ms "
+                    Log.d(TAG, "Missed vsync by " + (jitterNanos * 0.000001f)
+                            + " ms "
                             + "which is more than the frame interval of "
                             + (mFrameIntervalNanos * 0.000001f) + " ms!  "
-                            + "Skipping " + skippedFrames + " frames and setting frame "
-                            + "time to " + (lastFrameOffset * 0.000001f) + " ms in the past.");
+                            + "Skipping " + skippedFrames
+                            + " frames and setting frame " + "time to "
+                            + (lastFrameOffset * 0.000001f)
+                            + " ms in the past.");
                 }
                 frameTimeNanos = startNanos - lastFrameOffset;
             }
 
             if (frameTimeNanos < mLastFrameTimeNanos) {
                 if (DEBUG) {
-                    Log.d(TAG, "Frame time appears to be going backwards.  May be due to a "
-                            + "previously skipped frame.  Waiting for next vsync.");
+                    Log.d(TAG,
+                            "Frame time appears to be going backwards.  May be due to a "
+                                    + "previously skipped frame.  Waiting for next vsync.");
                 }
                 scheduleVsyncLocked();
                 return;
@@ -541,7 +552,8 @@ public final class Choreographer {
             // for earlier processing phases in a frame to post callbacks that should run
             // in a following phase, such as an input event that causes an animation to start.
             final long now = SystemClock.uptimeMillis();
-            callbacks = mCallbackQueues[callbackType].extractDueCallbacksLocked(now);
+            callbacks = mCallbackQueues[callbackType]
+                    .extractDueCallbacksLocked(now);
             if (callbacks == null) {
                 return;
             }
@@ -552,7 +564,8 @@ public final class Choreographer {
                 if (DEBUG) {
                     Log.d(TAG, "RunCallback: type=" + callbackType
                             + ", action=" + c.action + ", token=" + c.token
-                            + ", latencyMillis=" + (SystemClock.uptimeMillis() - c.dueTime));
+                            + ", latencyMillis="
+                            + (SystemClock.uptimeMillis() - c.dueTime));
                 }
                 c.run(frameTimeNanos);
             }
@@ -588,14 +601,16 @@ public final class Choreographer {
     }
 
     private void scheduleVsyncLocked() {
-        mDisplayEventReceiver.scheduleVsync();
+        //        mDisplayEventReceiver.scheduleVsync();
     }
 
+    @SuppressWarnings("unused")
     private boolean isRunningOnLooperThreadLocked() {
         return Looper.myLooper() == mLooper;
     }
 
-    private CallbackRecord obtainCallbackLocked(long dueTime, Object action, Object token) {
+    private CallbackRecord obtainCallbackLocked(long dueTime, Object action,
+            Object token) {
         CallbackRecord callback = mCallbackPool;
         if (callback == null) {
             callback = new CallbackRecord();
@@ -668,51 +683,54 @@ public final class Choreographer {
         }
     }
 
-    private final class FrameDisplayEventReceiver extends DisplayEventReceiver
-            implements Runnable {
-        private boolean mHavePendingVsync;
-        private long mTimestampNanos;
-        private int mFrame;
-
-        public FrameDisplayEventReceiver(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void onVsync(long timestampNanos, int frame) {
-            // Post the vsync event to the Handler.
-            // The idea is to prevent incoming vsync events from completely starving
-            // the message queue.  If there are no messages in the queue with timestamps
-            // earlier than the frame time, then the vsync event will be processed immediately.
-            // Otherwise, messages that predate the vsync event will be handled first.
-            long now = System.nanoTime();
-            if (timestampNanos > now) {
-                Log.w(TAG, "Frame time is " + ((timestampNanos - now) * 0.000001f)
-                        + " ms in the future!  Check that graphics HAL is generating vsync "
-                        + "timestamps using the correct timebase.");
-                timestampNanos = now;
-            }
-
-            if (mHavePendingVsync) {
-                Log.w(TAG, "Already have a pending vsync event.  There should only be "
-                        + "one at a time.");
-            } else {
-                mHavePendingVsync = true;
-            }
-
-            mTimestampNanos = timestampNanos;
-            mFrame = frame;
-            Message msg = Message.obtain(mHandler, this);
-            msg.setAsynchronous(true);
-            mHandler.sendMessageAtTime(msg, timestampNanos / NANOS_PER_MS);
-        }
-
-        @Override
-        public void run() {
-            mHavePendingVsync = false;
-            doFrame(mTimestampNanos, mFrame);
-        }
-    }
+    //    private final class FrameDisplayEventReceiver extends DisplayEventReceiver
+    //            implements Runnable {
+    //        private boolean mHavePendingVsync;
+    //        private long mTimestampNanos;
+    //        private int mFrame;
+    //
+    //        public FrameDisplayEventReceiver(Looper looper) {
+    //            super(looper);
+    //        }
+    //
+    //        @Override
+    //        public void onVsync(long timestampNanos, int frame) {
+    //            // Post the vsync event to the Handler.
+    //            // The idea is to prevent incoming vsync events from completely starving
+    //            // the message queue.  If there are no messages in the queue with timestamps
+    //            // earlier than the frame time, then the vsync event will be processed immediately.
+    //            // Otherwise, messages that predate the vsync event will be handled first.
+    //            long now = System.nanoTime();
+    //            if (timestampNanos > now) {
+    //                Log.w(TAG,
+    //                        "Frame time is "
+    //                                + ((timestampNanos - now) * 0.000001f)
+    //                                + " ms in the future!  Check that graphics HAL is generating vsync "
+    //                                + "timestamps using the correct timebase.");
+    //                timestampNanos = now;
+    //            }
+    //
+    //            if (mHavePendingVsync) {
+    //                Log.w(TAG,
+    //                        "Already have a pending vsync event.  There should only be "
+    //                                + "one at a time.");
+    //            } else {
+    //                mHavePendingVsync = true;
+    //            }
+    //
+    //            mTimestampNanos = timestampNanos;
+    //            mFrame = frame;
+    //            Message msg = Message.obtain(mHandler, this);
+    //            //            msg.setAsynchronous(true);
+    //            mHandler.sendMessageAtTime(msg, timestampNanos / NANOS_PER_MS);
+    //        }
+    //
+    //        @Override
+    //        public void run() {
+    //            mHavePendingVsync = false;
+    //            doFrame(mTimestampNanos, mFrame);
+    //        }
+    //    }
 
     private static final class CallbackRecord {
         public CallbackRecord next;
@@ -722,9 +740,9 @@ public final class Choreographer {
 
         public void run(long frameTimeNanos) {
             if (token == FRAME_CALLBACK_TOKEN) {
-                ((FrameCallback)action).doFrame(frameTimeNanos);
+                ((FrameCallback) action).doFrame(frameTimeNanos);
             } else {
-                ((Runnable)action).run();
+                ((Runnable) action).run();
             }
         }
     }
@@ -757,7 +775,8 @@ public final class Choreographer {
         }
 
         public void addCallbackLocked(long dueTime, Object action, Object token) {
-            CallbackRecord callback = obtainCallbackLocked(dueTime, action, token);
+            CallbackRecord callback = obtainCallbackLocked(dueTime, action,
+                    token);
             CallbackRecord entry = mHead;
             if (entry == null) {
                 mHead = callback;

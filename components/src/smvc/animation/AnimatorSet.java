@@ -350,6 +350,7 @@ public final class AnimatorSet extends Animator {
      * animations that it is responsible for.
      * </p>
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void end() {
         mTerminated = true;

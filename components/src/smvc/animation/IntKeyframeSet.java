@@ -57,6 +57,7 @@ class IntKeyframeSet extends KeyframeSet {
         return newSet;
     }
 
+    @SuppressWarnings("unchecked")
     public int getIntValue(float fraction) {
         if (mNumKeyframes == 2) {
             if (firstTime) {
@@ -69,9 +70,10 @@ class IntKeyframeSet extends KeyframeSet {
                 fraction = mInterpolator.getInterpolation(fraction);
             }
             if (mEvaluator == null) {
-                return firstValue + (int)(fraction * deltaValue);
+                return firstValue + (int) (fraction * deltaValue);
             } else {
-                return ((Number)mEvaluator.evaluate(fraction, firstValue, lastValue)).intValue();
+                return ((Number) mEvaluator.evaluate(fraction, firstValue,
+                        lastValue)).intValue();
             }
         }
         if (fraction <= 0f) {
@@ -81,53 +83,62 @@ class IntKeyframeSet extends KeyframeSet {
             int nextValue = nextKeyframe.getIntValue();
             float prevFraction = prevKeyframe.getFraction();
             float nextFraction = nextKeyframe.getFraction();
-            final android.view.animation.Interpolator interpolator = nextKeyframe.getInterpolator();
+            final android.view.animation.Interpolator interpolator = nextKeyframe
+                    .getInterpolator();
             if (interpolator != null) {
                 fraction = interpolator.getInterpolation(fraction);
             }
-            float intervalFraction = (fraction - prevFraction) / (nextFraction - prevFraction);
-            return mEvaluator == null ?
-                    prevValue + (int)(intervalFraction * (nextValue - prevValue)) :
-                    ((Number)mEvaluator.evaluate(intervalFraction, prevValue, nextValue)).
-                            intValue();
+            float intervalFraction = (fraction - prevFraction)
+                    / (nextFraction - prevFraction);
+            return mEvaluator == null ? prevValue
+                    + (int) (intervalFraction * (nextValue - prevValue))
+                    : ((Number) mEvaluator.evaluate(intervalFraction,
+                            prevValue, nextValue)).intValue();
         } else if (fraction >= 1f) {
-            final IntKeyframe prevKeyframe = (IntKeyframe) mKeyframes.get(mNumKeyframes - 2);
-            final IntKeyframe nextKeyframe = (IntKeyframe) mKeyframes.get(mNumKeyframes - 1);
+            final IntKeyframe prevKeyframe = (IntKeyframe) mKeyframes
+                    .get(mNumKeyframes - 2);
+            final IntKeyframe nextKeyframe = (IntKeyframe) mKeyframes
+                    .get(mNumKeyframes - 1);
             int prevValue = prevKeyframe.getIntValue();
             int nextValue = nextKeyframe.getIntValue();
             float prevFraction = prevKeyframe.getFraction();
             float nextFraction = nextKeyframe.getFraction();
-            final android.view.animation.Interpolator interpolator = nextKeyframe.getInterpolator();
+            final android.view.animation.Interpolator interpolator = nextKeyframe
+                    .getInterpolator();
             if (interpolator != null) {
                 fraction = interpolator.getInterpolation(fraction);
             }
-            float intervalFraction = (fraction - prevFraction) / (nextFraction - prevFraction);
-            return mEvaluator == null ?
-                    prevValue + (int)(intervalFraction * (nextValue - prevValue)) :
-                    ((Number)mEvaluator.evaluate(intervalFraction, prevValue, nextValue)).intValue();
+            float intervalFraction = (fraction - prevFraction)
+                    / (nextFraction - prevFraction);
+            return mEvaluator == null ? prevValue
+                    + (int) (intervalFraction * (nextValue - prevValue))
+                    : ((Number) mEvaluator.evaluate(intervalFraction,
+                            prevValue, nextValue)).intValue();
         }
         IntKeyframe prevKeyframe = (IntKeyframe) mKeyframes.get(0);
         for (int i = 1; i < mNumKeyframes; ++i) {
             IntKeyframe nextKeyframe = (IntKeyframe) mKeyframes.get(i);
             if (fraction < nextKeyframe.getFraction()) {
-                final android.view.animation.Interpolator interpolator = nextKeyframe.getInterpolator();
+                final android.view.animation.Interpolator interpolator = nextKeyframe
+                        .getInterpolator();
                 if (interpolator != null) {
                     fraction = interpolator.getInterpolation(fraction);
                 }
-                float intervalFraction = (fraction - prevKeyframe.getFraction()) /
-                    (nextKeyframe.getFraction() - prevKeyframe.getFraction());
+                float intervalFraction = (fraction - prevKeyframe.getFraction())
+                        / (nextKeyframe.getFraction() - prevKeyframe
+                                .getFraction());
                 int prevValue = prevKeyframe.getIntValue();
                 int nextValue = nextKeyframe.getIntValue();
-                return mEvaluator == null ?
-                        prevValue + (int)(intervalFraction * (nextValue - prevValue)) :
-                        ((Number)mEvaluator.evaluate(intervalFraction, prevValue, nextValue)).
-                                intValue();
+                return mEvaluator == null ? prevValue
+                        + (int) (intervalFraction * (nextValue - prevValue))
+                        : ((Number) mEvaluator.evaluate(intervalFraction,
+                                prevValue, nextValue)).intValue();
             }
             prevKeyframe = nextKeyframe;
         }
         // shouldn't get here
-        return ((Number)mKeyframes.get(mNumKeyframes - 1).getValue()).intValue();
+        return ((Number) mKeyframes.get(mNumKeyframes - 1).getValue())
+                .intValue();
     }
 
 }
-

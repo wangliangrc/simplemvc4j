@@ -23,6 +23,8 @@ package smvc.animation;
  */
 public class NoSuchPropertyException extends RuntimeException {
 
+    private static final long serialVersionUID = 2559488658178978609L;
+
     public NoSuchPropertyException(String s) {
         super(s);
     }

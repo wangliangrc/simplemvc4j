@@ -202,7 +202,7 @@ public abstract class AT<Params, Progress, Result> {
         mStatus = Status.PRE_FINISHED;
         return result;
     }
-    
+
     /**
      * Override this method to perform a computation on a background thread. The
      * specified parameters are the parameters passed to {@link #execute} by the
