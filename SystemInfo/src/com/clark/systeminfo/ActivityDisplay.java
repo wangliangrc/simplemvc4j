@@ -4,6 +4,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.Display;
 
 public class ActivityDisplay extends AbstractTextActivity {
 
@@ -48,8 +49,13 @@ public class ActivityDisplay extends AbstractTextActivity {
         lBuilder.append("1px = ")
                 .append(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX,
                         1.f, displayMetrics)).append("px   (value)\n");
-
+        
         lBuilder.append("\n-----------------------------------------\n");
+        Display display = getWindowManager().getDefaultDisplay();
+        lBuilder.append("PixelFormat: ").append(display.getPixelFormat()).append("\n");
+        lBuilder.append("RefreshRate: ").append(display.getRefreshRate()).append("\n");
+        lBuilder.append("\n-----------------------------------------\n");
+        
         Configuration configuration = getResources().getConfiguration();
 
         lBuilder.append("mcc: ").append(configuration.mcc).append("\n");
