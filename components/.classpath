@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="smvc/animation/TimeInterpolator.java|smvc/animation/AccelerateDecelerateInterpolator.java|smvc/animation/BounceInterpolator.java|smvc/animation/LinearInterpolator.java" kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="lib" path="D:/源码/android4.1.jar" sourcepath="D:/源码/android4.1_src.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
