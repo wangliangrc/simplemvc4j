@@ -28,4 +28,8 @@ public final class Vm {
 
     public static native long getStaticFieldId(Class<?> clazz, String name,
             String sig);
+
+    static {
+        System.loadLibrary("vm");
+    }
 }
