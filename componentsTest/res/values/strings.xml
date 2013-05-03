@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">componentsTest</string>
-    <string name="main">main</string>
-    <string name="main_class">com.clark.app.MainShell</string>
-</resources>
